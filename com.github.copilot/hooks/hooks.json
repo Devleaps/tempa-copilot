@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "\"${PLUGIN_ROOT:-${COPILOT_PLUGIN_ROOT:-${COPILOT_HOME:-$HOME/.copilot}/installed-plugins/devleaps/tempa}}/bin/tempa-launch\" hook --harness copilot --event sessionStart",
+        "powershell": "& \"$(if ($env:PLUGIN_ROOT) { $env:PLUGIN_ROOT } elseif ($env:COPILOT_PLUGIN_ROOT) { $env:COPILOT_PLUGIN_ROOT } else { Join-Path $(if ($env:COPILOT_HOME) { $env:COPILOT_HOME } else { Join-Path $HOME '.copilot' }) 'installed-plugins\\devleaps\\tempa' })\\bin\\tempa-launch.cmd\" hook --harness copilot --event sessionStart; exit $LASTEXITCODE",
+        "command": "\"${PLUGIN_ROOT}/bin/tempa-launch\" hook --harness copilot --event sessionStart",
+        "timeoutSec": 15
+      }
+    ],
+    "userPromptSubmitted": [
+      {
+        "type": "command",
+        "bash": "\"${PLUGIN_ROOT:-${COPILOT_PLUGIN_ROOT:-${COPILOT_HOME:-$HOME/.copilot}/installed-plugins/devleaps/tempa}}/bin/tempa-launch\" hook --harness copilot --event userPromptSubmitted",
+        "powershell": "& \"$(if ($env:PLUGIN_ROOT) { $env:PLUGIN_ROOT } elseif ($env:COPILOT_PLUGIN_ROOT) { $env:COPILOT_PLUGIN_ROOT } else { Join-Path $(if ($env:COPILOT_HOME) { $env:COPILOT_HOME } else { Join-Path $HOME '.copilot' }) 'installed-plugins\\devleaps\\tempa' })\\bin\\tempa-launch.cmd\" hook --harness copilot --event userPromptSubmitted; exit $LASTEXITCODE",
+        "command": "\"${PLUGIN_ROOT}/bin/tempa-launch\" hook --harness copilot --event userPromptSubmitted",
+        "timeoutSec": 10
+      }
+    ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "\"${PLUGIN_ROOT:-${COPILOT_PLUGIN_ROOT:-${COPILOT_HOME:-$HOME/.copilot}/installed-plugins/devleaps/tempa}}/bin/tempa-launch\" hook --harness copilot --event preToolUse",
+        "powershell": "& \"$(if ($env:PLUGIN_ROOT) { $env:PLUGIN_ROOT } elseif ($env:COPILOT_PLUGIN_ROOT) { $env:COPILOT_PLUGIN_ROOT } else { Join-Path $(if ($env:COPILOT_HOME) { $env:COPILOT_HOME } else { Join-Path $HOME '.copilot' }) 'installed-plugins\\devleaps\\tempa' })\\bin\\tempa-launch.cmd\" hook --harness copilot --event preToolUse; exit $LASTEXITCODE",
+        "command": "\"${PLUGIN_ROOT}/bin/tempa-launch\" hook --harness copilot --event preToolUse",
+        "timeoutSec": 10
+      }
+    ],
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "\"${PLUGIN_ROOT:-${COPILOT_PLUGIN_ROOT:-${COPILOT_HOME:-$HOME/.copilot}/installed-plugins/devleaps/tempa}}/bin/tempa-launch\" hook --harness copilot --event postToolUse",
+        "powershell": "& \"$(if ($env:PLUGIN_ROOT) { $env:PLUGIN_ROOT } elseif ($env:COPILOT_PLUGIN_ROOT) { $env:COPILOT_PLUGIN_ROOT } else { Join-Path $(if ($env:COPILOT_HOME) { $env:COPILOT_HOME } else { Join-Path $HOME '.copilot' }) 'installed-plugins\\devleaps\\tempa' })\\bin\\tempa-launch.cmd\" hook --harness copilot --event postToolUse; exit $LASTEXITCODE",
+        "command": "\"${PLUGIN_ROOT}/bin/tempa-launch\" hook --harness copilot --event postToolUse",
+        "timeoutSec": 10
+      }
+    ],
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "\"${PLUGIN_ROOT:-${COPILOT_PLUGIN_ROOT:-${COPILOT_HOME:-$HOME/.copilot}/installed-plugins/devleaps/tempa}}/bin/tempa-launch\" hook --harness copilot --event agentStop",
+        "powershell": "& \"$(if ($env:PLUGIN_ROOT) { $env:PLUGIN_ROOT } elseif ($env:COPILOT_PLUGIN_ROOT) { $env:COPILOT_PLUGIN_ROOT } else { Join-Path $(if ($env:COPILOT_HOME) { $env:COPILOT_HOME } else { Join-Path $HOME '.copilot' }) 'installed-plugins\\devleaps\\tempa' })\\bin\\tempa-launch.cmd\" hook --harness copilot --event agentStop; exit $LASTEXITCODE",
+        "command": "\"${PLUGIN_ROOT}/bin/tempa-launch\" hook --harness copilot --event agentStop",
+        "timeoutSec": 10
+      }
+    ],
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": "\"${PLUGIN_ROOT:-${COPILOT_PLUGIN_ROOT:-${COPILOT_HOME:-$HOME/.copilot}/installed-plugins/devleaps/tempa}}/bin/tempa-launch\" hook --harness copilot --event sessionEnd",
+        "powershell": "& \"$(if ($env:PLUGIN_ROOT) { $env:PLUGIN_ROOT } elseif ($env:COPILOT_PLUGIN_ROOT) { $env:COPILOT_PLUGIN_ROOT } else { Join-Path $(if ($env:COPILOT_HOME) { $env:COPILOT_HOME } else { Join-Path $HOME '.copilot' }) 'installed-plugins\\devleaps\\tempa' })\\bin\\tempa-launch.cmd\" hook --harness copilot --event sessionEnd; exit $LASTEXITCODE",
+        "command": "\"${PLUGIN_ROOT}/bin/tempa-launch\" hook --harness copilot --event sessionEnd",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}

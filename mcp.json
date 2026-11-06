@@ -1,0 +1,11 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "tempa": {
+      "type": "stdio",
+      "command": "./bin/tempa-launch",
+      "args": ["mcp", "--harness", "copilot"],
+      "env": { "TEMPA_PROJECT_DIR": "${PWD}" }
+    }
+  }
+}

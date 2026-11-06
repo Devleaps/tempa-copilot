@@ -1,0 +1,233 @@
+#!/bin/sh
+# Tempa launcher for every harness's plugin (TEMPA-003 spike: never call `node` directly from a hook).
+#
+# A standalone tempa binary for this machine comes first (TEMPA-112, docs/binaries.md): bin/tempa-<os>-<arch>
+# next to this script, or TEMPA_BINARY. It has Node inside, so it needs none. When it cannot be executed (exit
+# 126 or 127: the wrong architecture, a quarantine block), the launcher falls back to Node as below.
+#
+# Finds Node 20+ and the tempa CLI, then runs `node <tempa> "$@"`. The released plugin carries its own CLI
+# (bin/tempa.mjs, added by the release-cli workflow), which always matches these hooks, so that comes first.
+# Claude Code started from an IDE or the desktop app often has a minimal PATH without nvm or Homebrew, so the
+# launcher also looks in the usual places and in the paths `tempa login` / `tempa doctor` remember in
+# ~/.tempa/node-path and ~/.tempa/cli-path. Running the bundled CLI, it records its own path in
+# ~/.tempa/launcher-path, for the `tempa` command that /tempa:install-cli puts on your PATH.
+#
+# When it cannot start tempa, a hook call still gets a proper answer that explains the fix: in Claude Code
+# PreToolUse is denied and prompts are blocked (fail closed), SessionStart gets a warning; any other harness
+# gets exit 2 with the fix on stderr. Anything else exits 127.
+#
+# Overrides: TEMPA_BINARY (a standalone tempa), TEMPA_NODE (a node binary), TEMPA_CLI (tempa's JS entry point;
+# it also skips the binary), TEMPA_HOME (default ~/.tempa).
+
+tempa_home=${TEMPA_HOME:-${HOME:-}/.tempa}
+
+node_major() {
+  "$1" -v 2>/dev/null | sed -n 's/^v\([0-9][0-9]*\)\..*/\1/p'
+}
+
+usable_node() {
+  [ -n "$1" ] && [ -f "$1" ] && [ -x "$1" ] || return 1
+  major=$(node_major "$1")
+  [ -n "$major" ] && [ "$major" -ge 20 ]
+}
+
+read_file() {
+  [ -r "$1" ] && head -n 1 "$1"
+}
+
+find_node() {
+  for candidate in "${TEMPA_NODE:-}" "$(read_file "$tempa_home/node-path")" "$(command -v node 2>/dev/null)"; do
+    if usable_node "$candidate"; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  # TEMPA_LAUNCH_PATH_ONLY=1 (tests): no well-known locations.
+  [ -z "${TEMPA_LAUNCH_PATH_ONLY:-}" ] || return 0
+  for candidate in "${HOME:-}/.volta/bin/node" /opt/homebrew/bin/node /usr/local/bin/node /usr/bin/node \
+    "${HOME:-}/.local/share/mise/shims/node" "${HOME:-}/.asdf/shims/node"; do
+    if usable_node "$candidate"; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  # nvm and fnm installs, newest names first.
+  # shellcheck disable=SC2012 # the globs are fixed paths; ls only sorts and drops non-matches
+  ls -1d "${HOME:-}"/.nvm/versions/node/v*/bin/node \
+    "${HOME:-}"/.local/share/fnm/node-versions/v*/installation/bin/node \
+    "${HOME:-}/Library/Application Support/fnm/node-versions"/v*/installation/bin/node 2>/dev/null |
+    sort -r | while IFS= read -r candidate; do
+    if usable_node "$candidate"; then
+      printf '%s\n' "$candidate"
+      break
+    fi
+  done
+}
+
+# A JavaScript CLI, not the ~/.local/bin/tempa shell wrapper that /tempa:install-cli writes (it runs this).
+usable_cli() {
+  [ -n "$1" ] && [ -f "$1" ] || return 1
+  case $(head -c 200 "$1" 2>/dev/null | sed -n '2p') in
+    "# Installed by /tempa:install-cli"*) return 1 ;;
+  esac
+}
+
+find_cli() {
+  node_dir=$(dirname "$1")
+  for candidate in "${TEMPA_CLI:-}" "$bundled" "$(read_file "$tempa_home/cli-path")" \
+    "$(command -v tempa 2>/dev/null)" "$node_dir/tempa"; do
+    if usable_cli "$candidate"; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  [ -z "${TEMPA_LAUNCH_PATH_ONLY:-}" ] || return 1
+  for candidate in "${HOME:-}/.npm-global/bin/tempa" "${HOME:-}/.local/bin/tempa" /opt/homebrew/bin/tempa \
+    /usr/local/bin/tempa; do
+    if usable_cli "$candidate"; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+# This machine as the binaries name it (client/sea/build.ts): darwin-arm64, linux-x64, win-x64, ...
+host_target() {
+  case $(uname -s 2>/dev/null) in
+    Darwin) os=darwin ;;
+    Linux) os=linux ;;
+    MINGW* | MSYS* | CYGWIN*) os=win ;;
+    *) return 1 ;;
+  esac
+  case $(uname -m 2>/dev/null) in
+    x86_64 | amd64) arch=x64 ;;
+    arm64 | aarch64) arch=arm64 ;;
+    *) return 1 ;;
+  esac
+  printf '%s-%s\n' "$os" "$arch"
+}
+
+# The standalone binary to run: TEMPA_BINARY, else the plugin's own for this machine. None with TEMPA_CLI.
+find_binary() {
+  [ -z "${TEMPA_CLI:-}" ] || return 1
+  if [ -n "${TEMPA_BINARY:-}" ]; then
+    [ -f "$TEMPA_BINARY" ] && [ -x "$TEMPA_BINARY" ] && printf '%s\n' "$TEMPA_BINARY"
+    return
+  fi
+  target=$(host_target) || return 1
+  for candidate in "$(dirname "$0")/tempa-$target" "$(dirname "$0")/tempa-$target.exe"; do
+    if [ -f "$candidate" ] && [ -x "$candidate" ]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+# Remember this launcher for ~/.local/bin/tempa (/tempa:install-cli). Best effort, and a write only when the
+# path changed (a plugin update): the launcher runs on every hook.
+remember_launcher() {
+  self=$(cd "$(dirname "$0")" 2>/dev/null && pwd)/$(basename "$0")
+  [ "$(read_file "$tempa_home/launcher-path")" = "$self" ] && return 0
+  (umask 077 && mkdir -p "$tempa_home" && printf '%s\n' "$self" >"$tempa_home/launcher-path.$$" &&
+    mv -f "$tempa_home/launcher-path.$$" "$tempa_home/launcher-path") 2>/dev/null
+  return 0
+}
+
+# The harness a hook call is for (`hook --harness <id>`); Claude Code when none is named.
+hook_harness() {
+  while [ $# -gt 0 ]; do
+    case $1 in
+      --harness) printf '%s\n' "${2:-}" && return 0 ;;
+      --harness=*) printf '%s\n' "${1#--harness=}" && return 0 ;;
+    esac
+    shift
+  done
+  printf 'claude-code\n'
+}
+
+# Explain the problem and fail closed. Claude Code gets an answer for the hook event on stdin and exit 0. Every
+# other harness reads hook output in its own format, so it gets the explanation on stderr and exit 2, which
+# blocks a tool call in Copilot and Codex (TEMPA-159). Outside a hook: exit 127.
+explain() {
+  problem=$1
+  case "${harness:-claude-code}" in
+    claude-code) install="claude plugin install tempa@devleaps" ;;
+    copilot) install="copilot plugin install tempa@devleaps" ;;
+    codex) install="codex plugin marketplace add Devleaps/tempa, then Tempa from /plugins in Codex" ;;
+    gemini-cli) install="gemini extensions update tempa" ;; # TEMPA-151
+    antigravity) install="agy plugin install https://github.com/Devleaps/tempa/tree/plugin-release-antigravity" ;; # TEMPA-177
+    *) install="reinstall the Tempa plugin" ;;
+  esac
+  fix="Install Node.js 20 or newer, and install or update the plugin ($install), which carries the CLI. Guide: https://github.com/Devleaps/tempa/blob/main/docs/install.md"
+  if [ "${2:-}" != "hook" ]; then
+    echo "tempa-launch: $problem. $fix" >&2
+    exit 127
+  fi
+  input=$(cat)
+  if [ "$harness" != "claude-code" ]; then
+    echo "tempa-launch: Tempa is not running: $problem. $fix; blocking (fail closed)" >&2
+    exit 2
+  fi
+  event=$(printf '%s' "$input" | sed -n 's/.*"hook_event_name" *: *"\([A-Za-z]*\)".*/\1/p' | head -n 1)
+  text="Tempa is not running: $problem. $fix"
+  case "$event" in
+    PreToolUse)
+      printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"%s"}}\n' "$text"
+      ;;
+    UserPromptSubmit)
+      printf '{"decision":"block","reason":"%s"}\n' "$text"
+      ;;
+    SessionStart)
+      printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s Tool calls and prompts are blocked until it is fixed; tell the developer how to fix it."},"systemMessage":"%s"}\n' "$text" "$text"
+      ;;
+    *) ;;
+  esac
+  exit 0
+}
+
+bundled=$(dirname "$0")/tempa.mjs
+[ -f "$bundled" ] || bundled=
+harness=claude-code
+[ "${1:-}" != "hook" ] || harness=$(hook_harness "$@")
+
+# Not exec: when the binary cannot start, nothing has read stdin yet and Node can take over.
+binary=$(find_binary) || binary=
+if [ -n "$binary" ]; then
+  "$binary" "$@"
+  status=$?
+  if [ "$status" -ne 126 ] && [ "$status" -ne 127 ]; then
+    [ -n "${TEMPA_BINARY:-}" ] || remember_launcher
+    if [ "${1:-}" = "hook" ] && [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
+      echo "tempa-launch: tempa exited with status $status; blocking (fail closed)" >&2
+      exit 2
+    fi
+    exit "$status"
+  fi
+  echo "tempa-launch: $binary cannot run on this machine (exit $status); trying Node" >&2
+fi
+
+node=$(find_node)
+if [ -z "$node" ]; then
+  path_node=$(command -v node 2>/dev/null)
+  if [ -n "$path_node" ]; then
+    explain "it needs Node.js 20 or newer, and node on PATH is $("$path_node" -v 2>/dev/null)" "${1:-}"
+  fi
+  explain "it needs Node.js 20 or newer and none was found" "${1:-}"
+fi
+cli=$(find_cli "$node") || explain "the tempa CLI was not found" "${1:-}"
+[ "$cli" != "$bundled" ] || remember_launcher
+
+if [ "${1:-}" = "hook" ]; then
+  # Claude Code treats any exit code other than 0 and 2 as a non-blocking error. If node itself fails (a
+  # broken install, a crash before tempa's own handler), turn that into 2 so the hook still fails closed.
+  "$node" "$cli" "$@"
+  status=$?
+  if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
+    echo "tempa-launch: tempa exited with status $status; blocking (fail closed)" >&2
+    exit 2
+  fi
+  exit "$status"
+fi
+exec "$node" "$cli" "$@"

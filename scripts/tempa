@@ -1,0 +1,9 @@
+#!/bin/sh
+# Installed by /tempa:install-cli: runs the tempa CLI of the newest Tempa plugin Claude Code started.
+# The plugin's launcher records its path in ~/.tempa/launcher-path whenever it runs its bundled CLI.
+launcher=$(head -n 1 "${TEMPA_HOME:-${HOME:-}/.tempa}/launcher-path" 2>/dev/null)
+if [ -z "$launcher" ] || [ ! -x "$launcher" ]; then
+  echo "tempa: the Tempa plugin's CLI was not found; start Claude Code once, or run /tempa:install-cli again" >&2
+  exit 127
+fi
+exec "$launcher" "$@"
