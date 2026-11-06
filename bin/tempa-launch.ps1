@@ -101,7 +101,7 @@ function Exit-Explained([string]$problem, [string]$harness) {
     'antigravity' { 'agy plugin install https://github.com/Devleaps/tempa/tree/plugin-release-antigravity' }
     default { 'reinstall the Tempa plugin' }
   }
-  $fix = "Install Node.js 20 or newer, and install or update the plugin ($install), which carries the CLI. Guide: https://github.com/Devleaps/tempa/blob/main/docs/install.md"
+  $fix = "Install Node.js 20 or newer, and install or update the plugin ($install), which carries the CLI. Guide: https://tempa.devleaps.nl/docs/install"
   if (-not $isHook) {
     [Console]::Error.WriteLine("tempa-launch: $problem. $fix")
     exit 127

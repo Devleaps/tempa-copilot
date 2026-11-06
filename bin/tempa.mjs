@@ -13514,6 +13514,10 @@ function ensurePrivateDir(path) {
 
 // src/config.ts
 var DEFAULT_ENDPOINT = "https://tempa.devleaps.nl";
+var DOCS_URL = `${DEFAULT_ENDPOINT}/docs`;
+function docsLink(page, anchor2) {
+  return `${DOCS_URL}/${page}${anchor2 ? `#${anchor2}` : ""}`;
+}
 function userConfigPath(ctx) {
   return join2(ctx.tempaHome, "config.json");
 }
@@ -14280,7 +14284,7 @@ var DEFAULT_ACCOUNT_POLICY = {
   on_violation: "inform",
   require_training_attestation: false
 };
-var ACCOUNTS_GUIDE = "https://github.com/Devleaps/tempa/blob/main/docs/accounts.md";
+var ACCOUNTS_GUIDE = docsLink("accounts");
 var PRIVACY_CONTROLS = "https://claude.ai/settings/data-privacy-controls";
 var MAYBE_CONSUMER = ["personal", "unknown"];
 function accountPolicy(profile) {
@@ -26236,6 +26240,8 @@ var HarnessNotSupported = class extends Error {
 
 // src/setup.ts
 var PLUGIN_ID = "tempa@devleaps";
+var CLAUDE_CODE_PLUGIN_REPO = "Devleaps/tempa-claude-code";
+var COPILOT_PLUGIN_REPO = "Devleaps/tempa-copilot";
 var home = (ctx, envVar, folder) => ctx.env[envVar] || join29(ctx.home, folder);
 var copilotHome = (ctx) => home(ctx, "COPILOT_HOME", ".copilot");
 var copilotPluginDir = (ctx) => join29(copilotHome(ctx), "installed-plugins", "devleaps", "tempa");
@@ -26293,7 +26299,7 @@ var INSTALLS = {
     binary: "claude",
     configDir: (ctx) => home(ctx, "CLAUDE_CONFIG_DIR", ".claude"),
     install: [
-      ["claude", "plugin", "marketplace", "add", "Devleaps/tempa"],
+      ["claude", "plugin", "marketplace", "add", CLAUDE_CODE_PLUGIN_REPO],
       ["claude", "plugin", "install", PLUGIN_ID]
     ],
     pluginInstalled: claudePluginInstalled
@@ -26302,7 +26308,7 @@ var INSTALLS = {
     binary: "copilot",
     configDir: copilotHome,
     install: [
-      ["copilot", "plugin", "marketplace", "add", "Devleaps/tempa"],
+      ["copilot", "plugin", "marketplace", "add", COPILOT_PLUGIN_REPO],
       ["copilot", "plugin", "install", PLUGIN_ID]
     ],
     pluginInstalled: async (ctx) => existsSync9(join29(copilotPluginDir(ctx), "bin", "tempa-launch"))
@@ -27130,7 +27136,7 @@ async function claudeChecks(ctx, deps, claudeVersion, enabledPlugins) {
       name: "Plugin",
       status: "fail",
       detail: `${PLUGIN_ID} is not installed`,
-      fix: `claude plugin marketplace add Devleaps/tempa && claude plugin install ${PLUGIN_ID}`
+      fix: `claude plugin marketplace add ${CLAUDE_CODE_PLUGIN_REPO} && claude plugin install ${PLUGIN_ID}`
     });
   }
   const launcher = plugin?.installPath ? join33(plugin.installPath, "bin", "tempa-launch") : void 0;
@@ -27257,7 +27263,7 @@ async function localEvaluationCheck(ctx, profile) {
       name: name2,
       status: "fail",
       detail: `the bash grammar does not load: ${err2.message}`,
-      fix: "Reinstall the CLI or the plugin (docs/install.md)"
+      fix: `Reinstall the plugin, which carries the CLI (${docsLink("install")})`
     };
   }
   const wasm = profile.policies.wasm;
@@ -27301,7 +27307,7 @@ function cliVersionCheck(discovery, remembered, version2) {
   const status2 = remembered?.status === "unsupported" ? "unsupported" : fromServer;
   const range = [minimum ? `minimum ${minimum}` : "", latest ? `latest ${latest}` : ""].filter(Boolean);
   const detail = `${version2}${range.length ? ` (${range.join(", ")})` : ""}`;
-  const fix = `Update the plugin, which carries the CLI: ${updateCommand("claude-code")} (Copilot and Codex: docs/install.md); for an npm install, npm i -g @devleaps/tempa`;
+  const fix = `Update the plugin, which carries the CLI: ${updateCommand("claude-code")} (other harnesses: ${docsLink("install", "updates")})`;
   if (status2 === "unsupported")
     return {
       name: name2,
@@ -27336,7 +27342,7 @@ async function runChecks(ctx, deps) {
       name: "tempa on PATH",
       status: "warn",
       detail: "not found (the Claude Code plugin does not need it)",
-      fix: "/tempa:install-cli in Claude Code, or npm i -g @devleaps/tempa (docs/install.md)"
+      fix: `/tempa:install-cli in Claude Code, or copy the plugin's scripts/tempa to ~/.local/bin (${docsLink("install", "the-cli-in-your-terminal-optional")})`
     }
   );
   const harnesses = await detectHarnesses(ctx, deps.exec);
@@ -28314,7 +28320,7 @@ async function lockdown(ctx, args2) {
     tempaPath,
     ...windows ? { tempaPathWindows: windows } : {},
     ...endpoint ? { otelEndpoint: endpoint } : {},
-    marketplaceRepo: "Devleaps/tempa",
+    marketplaceRepo: COPILOT_PLUGIN_REPO,
     marketplace: "devleaps",
     plugin: "tempa",
     strictMarketplaces: args2.options["strict-marketplaces"] === true,
@@ -28336,7 +28342,9 @@ async function lockdown(ctx, args2) {
   ctx.io.stdout(
     `And the policy hooks: policy.d/50-tempa.json into ${POLICY_HOOK_DIRS.posix} (owned by root) or ${POLICY_HOOK_DIRS.win32}.`
   );
-  ctx.io.stdout("Tempa wrote nothing outside this folder. See docs/install.md#locking-copilot-down.");
+  ctx.io.stdout(
+    `Tempa wrote nothing outside this folder. See ${docsLink("install", "locking-copilot-down")}.`
+  );
   return 0;
 }
 function writePack(out2, files) {
@@ -41766,7 +41774,7 @@ Commands:
                                Show or set the issue you work on in this repo
   attest [--no-training | --withdraw]
                                Record that model training is off for your Claude account, or show the
-                               account Tempa saw last (docs/accounts.md)
+                               account Tempa saw last (tempa.devleaps.nl/docs/accounts)
   audit verify FILE [--strict] [--head HASH]
                                Check an audit log export (JSONL or CSV) offline: every row's hash and
                                the chain between rows (--strict: complete from the start)

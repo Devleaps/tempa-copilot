@@ -1,0 +1,25 @@
+Tempa plugin licence
+
+Copyright (c) Devleaps B.V. All rights reserved.
+
+This repository holds a Tempa plugin and the tempa command-line interface it carries (together, "the
+Software"). The Software is proprietary to Devleaps B.V. It is licensed to you, not sold.
+
+1. Use. Devleaps B.V. grants you a non-exclusive, non-transferable, revocable licence to install and use the
+   Software, as published in this repository, only to connect to and use a Tempa tenant that you or your
+   organisation hold under a current Tempa subscription, or that Devleaps B.V. has provided to you or your
+   organisation.
+
+2. Restrictions. Unless the law allows it despite this clause, you may not modify, translate, adapt or create
+   derivative works of the Software; redistribute, publish, sublicense, sell, rent or lend it, or make it
+   available to others in any other way; copy it beyond what installing and using it under clause 1 needs; or
+   remove or change this notice.
+
+3. Tempa terms. Your use of Tempa is also governed by the terms that apply to your subscription or tenant
+   (https://tempa.devleaps.nl/legal). Where they conflict with this licence, those terms prevail.
+
+4. No warranty. To the extent the law allows, the Software is provided "as is", without warranty of any kind,
+   and Devleaps B.V. is not liable for any damage arising from its use.
+
+5. End. This licence ends automatically when the subscription or tenant ends, or when you breach it. You must
+   then stop using the Software and delete it.

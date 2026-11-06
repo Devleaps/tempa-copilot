@@ -2,12 +2,12 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "tempa",
   "version": "0.1.4",
-  "description": "Devleaps standards, skills, guardrails and shared context in every coding session. Carries the tempa CLI.",
+  "description": "Your company's standards, skills, guardrails and shared context from Tempa in every coding session. Carries the tempa CLI.",
   "author": {
     "name": "Devleaps"
   },
-  "homepage": "https://github.com/Devleaps/tempa/blob/main/docs/install.md",
-  "repository": "https://github.com/Devleaps/tempa",
+  "homepage": "https://tempa.devleaps.nl/docs/install",
+  "repository": "https://github.com/Devleaps/tempa-copilot",
   "license": "UNLICENSED",
   "keywords": [
     "devleaps",
