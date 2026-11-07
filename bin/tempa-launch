@@ -1,7 +1,7 @@
 #!/bin/sh
-# Tempa launcher for every harness's plugin (TEMPA-003 spike: never call `node` directly from a hook).
+# Tempa launcher for every harness's plugin (spike: never call `node` directly from a hook).
 #
-# A standalone tempa binary for this machine comes first (TEMPA-112, docs/binaries.md): bin/tempa-<os>-<arch>
+# A standalone tempa binary for this machine comes first (https://tempa.devleaps.nl/docs): bin/tempa-<os>-<arch>
 # next to this script, or TEMPA_BINARY. It has Node inside, so it needs none. When it cannot be executed (exit
 # 126 or 127: the wrong architecture, a quarantine block), the launcher falls back to Node as below.
 #
@@ -149,15 +149,15 @@ hook_harness() {
 
 # Explain the problem and fail closed. Claude Code gets an answer for the hook event on stdin and exit 0. Every
 # other harness reads hook output in its own format, so it gets the explanation on stderr and exit 2, which
-# blocks a tool call in Copilot and Codex (TEMPA-159). Outside a hook: exit 127.
+# blocks a tool call in Copilot and Codex. Outside a hook: exit 127.
 explain() {
   problem=$1
   case "${harness:-claude-code}" in
     claude-code) install="claude plugin install tempa@devleaps" ;;
     copilot) install="copilot plugin install tempa@devleaps" ;;
     codex) install="codex plugin marketplace add Devleaps/tempa, then Tempa from /plugins in Codex" ;;
-    gemini-cli) install="gemini extensions update tempa" ;; # TEMPA-151
-    antigravity) install="agy plugin install https://github.com/Devleaps/tempa/tree/plugin-release-antigravity" ;; # TEMPA-177
+    gemini-cli) install="gemini extensions update tempa" ;; # 
+    antigravity) install="agy plugin install https://github.com/Devleaps/tempa/tree/plugin-release-antigravity" ;; # 
     *) install="reinstall the Tempa plugin" ;;
   esac
   fix="Install Node.js 20 or newer, and install or update the plugin ($install), which carries the CLI. Guide: https://tempa.devleaps.nl/docs/install"

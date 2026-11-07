@@ -1,4 +1,4 @@
-# Tempa launcher for Windows (TEMPA-115): the PowerShell twin of bin/tempa-launch, run through tempa-launch.cmd
+# Tempa launcher for Windows: the PowerShell twin of bin/tempa-launch, run through tempa-launch.cmd
 # (which passes -ExecutionPolicy Bypass, so the default Restricted policy does not stop it).
 #
 # Order: a standalone tempa binary (TEMPA_BINARY, or tempa-win-<arch>.exe next to this script, Node inside it),

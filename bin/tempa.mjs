@@ -460,13 +460,13 @@ ${offset}${err2}${errEnd}`;
         return next >= src.length || src[next] === "\n" ? str5 + "\n" : str5;
       }
       // ^(---|...)
-      static atDocumentBoundary(src, offset, sep3) {
+      static atDocumentBoundary(src, offset, sep5) {
         const ch0 = src[offset];
         if (!ch0) return true;
         const prev = src[offset - 1];
         if (prev && prev !== "\n") return false;
-        if (sep3) {
-          if (ch0 !== sep3) return false;
+        if (sep5) {
+          if (ch0 !== sep5) return false;
         } else {
           if (ch0 !== Char.DIRECTIVES_END && ch0 !== Char.DOCUMENT_END) return false;
         }
@@ -1642,7 +1642,7 @@ var require_parse_cst = __commonJS({
         const folded = this.type === PlainValue.Type.BLOCK_FOLDED;
         let atStart = true;
         let str5 = "";
-        let sep3 = "";
+        let sep5 = "";
         let prevMoreIndented = false;
         for (let i2 = start2; i2 < end; ++i2) {
           for (let j = 0; j < bi; ++j) {
@@ -1651,21 +1651,21 @@ var require_parse_cst = __commonJS({
           }
           const ch2 = src[i2];
           if (ch2 === "\n") {
-            if (sep3 === "\n") str5 += "\n";
-            else sep3 = "\n";
+            if (sep5 === "\n") str5 += "\n";
+            else sep5 = "\n";
           } else {
             const lineEnd = PlainValue.Node.endOfLine(src, i2);
             const line = src.slice(i2, lineEnd);
             i2 = lineEnd;
             if (folded && (ch2 === " " || ch2 === "	") && i2 < keepStart) {
-              if (sep3 === " ") sep3 = "\n";
-              else if (!prevMoreIndented && !atStart && sep3 === "\n") sep3 = "\n\n";
-              str5 += sep3 + line;
-              sep3 = lineEnd < end && src[lineEnd] || "";
+              if (sep5 === " ") sep5 = "\n";
+              else if (!prevMoreIndented && !atStart && sep5 === "\n") sep5 = "\n\n";
+              str5 += sep5 + line;
+              sep5 = lineEnd < end && src[lineEnd] || "";
               prevMoreIndented = true;
             } else {
-              str5 += sep3 + line;
-              sep3 = folded && i2 < keepStart ? " " : "\n";
+              str5 += sep5 + line;
+              sep5 = folded && i2 < keepStart ? " " : "\n";
               prevMoreIndented = false;
             }
             if (atStart && line !== "") atStart = false;
@@ -2375,7 +2375,7 @@ var require_parse_cst = __commonJS({
         };
       }
     };
-    function parse5(src) {
+    function parse6(src) {
       const cr = [];
       if (src.indexOf("\r") !== -1) {
         src = src.replace(/\r\n?/g, (match, offset2) => {
@@ -2406,7 +2406,7 @@ var require_parse_cst = __commonJS({
       documents.toString = () => documents.join("...\n");
       return documents;
     }
-    exports.parse = parse5;
+    exports.parse = parse6;
   }
 });
 
@@ -2814,12 +2814,12 @@ ${ctx.indent}`;
         const anchor2 = anchors.get(node2.source);
         return anchor2.count * anchor2.aliasCount;
       } else if (node2 instanceof Collection) {
-        let count = 0;
+        let count2 = 0;
         for (const item of node2.items) {
           const c = getAliasCount(item, anchors);
-          if (c > count) count = c;
+          if (c > count2) count2 = c;
         }
-        return count;
+        return count2;
       } else if (node2 instanceof Pair) {
         const kc = getAliasCount(node2.key, anchors);
         const vc = getAliasCount(node2.value, anchors);
@@ -3038,12 +3038,12 @@ ${ctx.indent}`;
       for (const {
         format,
         test,
-        resolve: resolve12
+        resolve: resolve14
       } of tags) {
         if (test) {
           const match = str5.match(test);
           if (match) {
-            let res = resolve12.apply(null, match);
+            let res = resolve14.apply(null, match);
             if (!(res instanceof Scalar)) res = new Scalar(res);
             if (format) res.format = format;
             return res;
@@ -5565,9 +5565,9 @@ ${cbNode.commentBefore}` : cb;
         }]));
         const res = resolveSeq.toJSON(this.contents, arg, ctx);
         if (typeof onAnchor === "function" && ctx.anchors) for (const {
-          count,
+          count: count2,
           res: res2
-        } of ctx.anchors.values()) onAnchor(res2, count);
+        } of ctx.anchors.values()) onAnchor(res2, count2);
         return res;
       }
       toString() {
@@ -5685,7 +5685,7 @@ var require_dist = __commonJS({
       }
       return doc;
     }
-    function parse5(src, options) {
+    function parse6(src, options) {
       const doc = parseDocument(src, options);
       doc.warnings.forEach((warning) => warnings.warn(warning));
       if (doc.errors.length > 0) throw doc.errors[0];
@@ -5700,7 +5700,7 @@ var require_dist = __commonJS({
       createNode,
       defaultOptions: Document$1.defaultOptions,
       Document,
-      parse: parse5,
+      parse: parse6,
       parseAllDocuments,
       parseCST: parseCst.parse,
       parseDocument,
@@ -5728,7 +5728,7 @@ var require_yaml2 = __commonJS({
       "YAMLSyntaxError",
       "YAMLWarning"
     ]);
-    function parse5(str5) {
+    function parse6(str5) {
       if (typeof str5 !== "string") {
         return { ok: false, result: void 0 };
       }
@@ -5748,9 +5748,9 @@ var require_yaml2 = __commonJS({
     module2.exports = {
       // is_valid is expected to return nothing if input is invalid otherwise
       // true/false for it being valid YAML.
-      "yaml.is_valid": (str5) => typeof str5 === "string" ? parse5(str5).ok : void 0,
+      "yaml.is_valid": (str5) => typeof str5 === "string" ? parse6(str5).ok : void 0,
       "yaml.marshal": (data) => yaml.stringify(data),
-      "yaml.unmarshal": (str5) => parse5(str5).result
+      "yaml.unmarshal": (str5) => parse6(str5).result
     };
   }
 });
@@ -8313,20 +8313,20 @@ var require_resolve = __commonJS({
       return false;
     }
     function countKeys(schema) {
-      let count = 0;
+      let count2 = 0;
       for (const key in schema) {
         if (key === "$ref")
           return Infinity;
-        count++;
+        count2++;
         if (SIMPLE_INLINED.has(key))
           continue;
         if (typeof schema[key] == "object") {
-          (0, util_1.eachItem)(schema[key], (sch) => count += countKeys(sch));
+          (0, util_1.eachItem)(schema[key], (sch) => count2 += countKeys(sch));
         }
-        if (count === Infinity)
+        if (count2 === Infinity)
           return Infinity;
       }
-      return count;
+      return count2;
     }
     function getFullPath(resolver, id = "", normalize) {
       if (normalize !== false)
@@ -9077,7 +9077,7 @@ var require_compile = __commonJS({
       const schOrFunc = root.refs[ref];
       if (schOrFunc)
         return schOrFunc;
-      let _sch = resolve12.call(this, root, ref);
+      let _sch = resolve14.call(this, root, ref);
       if (_sch === void 0) {
         const schema = (_a3 = root.localRefs) === null || _a3 === void 0 ? void 0 : _a3[ref];
         const { schemaId } = this.opts;
@@ -9104,7 +9104,7 @@ var require_compile = __commonJS({
     function sameSchemaEnv(s1, s2) {
       return s1.schema === s2.schema && s1.root === s2.root && s1.baseId === s2.baseId;
     }
-    function resolve12(root, ref) {
+    function resolve14(root, ref) {
       let sch;
       while (typeof (sch = this.refs[ref]) == "string")
         ref = sch;
@@ -9930,11 +9930,11 @@ var require_fast_uri = __commonJS({
         normalizeString(uri, options);
       } else if (typeof uri === "object") {
         uri = /** @type {T} */
-        parse5(serialize(uri, options), options);
+        parse6(serialize(uri, options), options);
       }
       return uri;
     }
-    function resolve12(baseURI, relativeURI, options) {
+    function resolve14(baseURI, relativeURI, options) {
       const schemelessOptions = options ? Object.assign({ scheme: "null" }, options) : { scheme: "null" };
       const {
         parsed: baseParsed,
@@ -9967,49 +9967,49 @@ var require_fast_uri = __commonJS({
       schemelessOptions.skipEscape = true;
       return serialize(resolved, schemelessOptions);
     }
-    function resolveComponent(base, relative4, options, skipNormalization) {
+    function resolveComponent(base, relative6, options, skipNormalization) {
       const target = {};
       if (!skipNormalization) {
-        base = parse5(serialize(base, options), options);
-        relative4 = parse5(serialize(relative4, options), options);
+        base = parse6(serialize(base, options), options);
+        relative6 = parse6(serialize(relative6, options), options);
       }
       options = options || {};
-      if (!options.tolerant && relative4.scheme) {
-        target.scheme = relative4.scheme;
-        target.userinfo = relative4.userinfo;
-        target.host = relative4.host;
-        target.port = relative4.port;
-        target.path = removeDotSegments(relative4.path || "");
-        target.query = relative4.query;
+      if (!options.tolerant && relative6.scheme) {
+        target.scheme = relative6.scheme;
+        target.userinfo = relative6.userinfo;
+        target.host = relative6.host;
+        target.port = relative6.port;
+        target.path = removeDotSegments(relative6.path || "");
+        target.query = relative6.query;
       } else {
-        if (relative4.userinfo !== void 0 || relative4.host !== void 0 || relative4.port !== void 0) {
-          target.userinfo = relative4.userinfo;
-          target.host = relative4.host;
-          target.port = relative4.port;
-          target.path = removeDotSegments(relative4.path || "");
-          target.query = relative4.query;
+        if (relative6.userinfo !== void 0 || relative6.host !== void 0 || relative6.port !== void 0) {
+          target.userinfo = relative6.userinfo;
+          target.host = relative6.host;
+          target.port = relative6.port;
+          target.path = removeDotSegments(relative6.path || "");
+          target.query = relative6.query;
         } else {
-          if (!relative4.path) {
+          if (!relative6.path) {
             target.path = base.path;
-            if (relative4.query !== void 0) {
-              target.query = relative4.query;
+            if (relative6.query !== void 0) {
+              target.query = relative6.query;
             } else {
               target.query = base.query;
             }
           } else {
-            if (relative4.path[0] === "/") {
-              target.path = removeDotSegments(relative4.path);
+            if (relative6.path[0] === "/") {
+              target.path = removeDotSegments(relative6.path);
             } else {
               if ((base.userinfo !== void 0 || base.host !== void 0 || base.port !== void 0) && !base.path) {
-                target.path = "/" + relative4.path;
+                target.path = "/" + relative6.path;
               } else if (!base.path) {
-                target.path = relative4.path;
+                target.path = relative6.path;
               } else {
-                target.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative4.path;
+                target.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative6.path;
               }
               target.path = removeDotSegments(target.path);
             }
-            target.query = relative4.query;
+            target.query = relative6.query;
           }
           target.userinfo = base.userinfo;
           target.host = base.host;
@@ -10017,7 +10017,7 @@ var require_fast_uri = __commonJS({
         }
         target.scheme = base.scheme;
       }
-      target.fragment = relative4.fragment;
+      target.fragment = relative6.fragment;
       return target;
     }
     function equal(uriA, uriB, options) {
@@ -10270,7 +10270,7 @@ var require_fast_uri = __commonJS({
       }
       return { parsed, malformedAuthorityOrPort, malformedPercentEncoding, malformedSchemeSpecific, malformedHost, malformedScheme };
     }
-    function parse5(uri, opts) {
+    function parse6(uri, opts) {
       return parseWithStatus(uri, opts).parsed;
     }
     function normalizeString(uri, opts) {
@@ -10303,11 +10303,11 @@ var require_fast_uri = __commonJS({
     var fastUri = {
       SCHEMES,
       normalize,
-      resolve: resolve12,
+      resolve: resolve14,
       resolveComponent,
       equal,
       serialize,
-      parse: parse5
+      parse: parse6
     };
     module2.exports = fastUri;
     module2.exports.default = fastUri;
@@ -11808,8 +11808,8 @@ var require_contains = __commonJS({
         cxt.result(valid5, () => cxt.reset());
         function validateItemsWithCount() {
           const schValid = gen.name("_valid");
-          const count = gen.let("count", 0);
-          validateItems(schValid, () => gen.if(schValid, () => checkLimits(count)));
+          const count2 = gen.let("count", 0);
+          validateItems(schValid, () => gen.if(schValid, () => checkLimits(count2)));
         }
         function validateItems(_valid, block) {
           gen.forRange("i", 0, len, (i2) => {
@@ -11822,16 +11822,16 @@ var require_contains = __commonJS({
             block();
           });
         }
-        function checkLimits(count) {
-          gen.code((0, codegen_1._)`${count}++`);
+        function checkLimits(count2) {
+          gen.code((0, codegen_1._)`${count2}++`);
           if (max === void 0) {
-            gen.if((0, codegen_1._)`${count} >= ${min}`, () => gen.assign(valid5, true).break());
+            gen.if((0, codegen_1._)`${count2} >= ${min}`, () => gen.assign(valid5, true).break());
           } else {
-            gen.if((0, codegen_1._)`${count} > ${max}`, () => gen.assign(valid5, false).break());
+            gen.if((0, codegen_1._)`${count2} > ${max}`, () => gen.assign(valid5, false).break());
             if (min === 1)
               gen.assign(valid5, true);
             else
-              gen.if((0, codegen_1._)`${count} >= ${min}`, () => gen.assign(valid5, true));
+              gen.if((0, codegen_1._)`${count2} >= ${min}`, () => gen.assign(valid5, true));
           }
         }
       }
@@ -13303,7 +13303,7 @@ var require_content_type = __commonJS({
     var QUOTE_REGEXP = /([\\"])/g;
     var TYPE_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+\/[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
     exports.format = format;
-    exports.parse = parse5;
+    exports.parse = parse6;
     function format(obj) {
       if (!obj || typeof obj !== "object") {
         throw new TypeError("argument obj is required");
@@ -13327,7 +13327,7 @@ var require_content_type = __commonJS({
       }
       return string4;
     }
-    function parse5(string4) {
+    function parse6(string4) {
       if (!string4) {
         throw new TypeError("argument string is required");
       }
@@ -13496,11 +13496,19 @@ function readJsonLenient(path) {
     return void 0;
   }
 }
+function existingMode(path) {
+  try {
+    return statSync(path).mode & 4095;
+  } catch {
+    return void 0;
+  }
+}
 function writeFileAtomic(path, content, options = {}) {
   mkdirSync(dirname(path), { recursive: true, ...options.dirMode ? { mode: options.dirMode } : {} });
   const tmp = `${path}.${process.pid}.${Math.random().toString(36).slice(2)}.tmp`;
-  writeFileSync(tmp, content, { mode: options.mode ?? 420 });
-  if (options.mode !== void 0) chmodSync(tmp, options.mode);
+  const keep = options.mode ?? existingMode(path);
+  writeFileSync(tmp, content, { mode: keep ?? options.newMode ?? 384 });
+  if (keep !== void 0) chmodSync(tmp, keep);
   renameSync(tmp, path);
 }
 function writeJsonAtomic(path, value, options = {}) {
@@ -13744,7 +13752,7 @@ function credentialsFromTokens(ctx, tokens, base) {
 import { join as join4 } from "node:path";
 
 // src/version.ts
-var VERSION = true ? "0.1.4" : "0.0.0-dev";
+var VERSION = true ? "0.1.5" : "0.0.0-dev";
 
 // src/cli-version.ts
 var CLI_VERSION_HEADER = "x-tempa-cli-version";
@@ -13866,7 +13874,7 @@ async function send(fetchFn, url2, options, accept) {
   try {
     return await fetchFn(url2, {
       method: options.method ?? "GET",
-      // Every request says which CLI sends it, so the control plane can tell an old one to update (TEMPA-114).
+      // Every request says which CLI sends it, so the control plane can tell an old one to update.
       headers: { accept, [CLI_VERSION_HEADER]: VERSION, ...options.headers },
       ...options.body !== void 0 ? { body: options.body } : {},
       signal: AbortSignal.timeout(timeoutMs)
@@ -14019,7 +14027,7 @@ async function withRefreshLock(ctx, fn) {
         continue;
       }
       if (ctx.now() - start2 > LOCK_WAIT_MS) throw new Error("Timed out waiting for another tempa to refresh");
-      await new Promise((resolve12) => setTimeout(resolve12, 50));
+      await new Promise((resolve14) => setTimeout(resolve14, 50));
     }
   }
   try {
@@ -14200,16 +14208,16 @@ function accountEnv(env) {
   return out2;
 }
 function runAuthStatus() {
-  return new Promise((resolve12) => {
+  return new Promise((resolve14) => {
     try {
       execFile(
         "claude",
         ["auth", "status"],
         { timeout: AUTH_STATUS_TIMEOUT_MS },
-        (_err, stdout) => resolve12(typeof stdout === "string" && stdout.trim() ? stdout : null)
+        (_err, stdout) => resolve14(typeof stdout === "string" && stdout.trim() ? stdout : null)
       );
     } catch {
-      resolve12(null);
+      resolve14(null);
     }
   });
 }
@@ -14716,9 +14724,9 @@ async function check(call, archive) {
   return (await call("/config/uploads/check", { ...UPLOAD, body: archive })).body;
 }
 function summaryLine(result) {
-  const { added, removed, changed } = result.summary;
+  const { added: added2, removed, changed } = result.summary;
   const against = result.against?.ref ? `live ${result.against.ref.slice(0, 12)}` : "an empty config";
-  return `${changed} changed, ${added} added, ${removed} removed against ${against}`;
+  return `${changed} changed, ${added2} added, ${removed} removed against ${against}`;
 }
 async function validate(ctx, call, archive) {
   const result = await check(call, archive);
@@ -14855,6 +14863,49 @@ function failure(ctx, err2) {
 // src/commands/copilot.ts
 import { resolve as resolve5 } from "node:path";
 
+// src/signature.ts
+import { createPublicKey, verify } from "node:crypto";
+function sortDeep(value) {
+  if (Array.isArray(value)) return value.map(sortDeep);
+  if (value && typeof value === "object") {
+    const out2 = {};
+    for (const key of Object.keys(value).sort()) out2[key] = sortDeep(value[key]);
+    return out2;
+  }
+  return value;
+}
+function canonicalJson2(value) {
+  return JSON.stringify(sortDeep(value));
+}
+var SignatureError = class extends Error {
+};
+function signedBytes(doc) {
+  const unsigned = { ...doc };
+  delete unsigned.signature;
+  return Buffer.from(canonicalJson2(unsigned), "utf8");
+}
+function verifyProfile(profile, keys) {
+  verifySigned(profile, keys, "profile");
+}
+function verifySigned(doc, keys, what) {
+  const sig = doc.signature;
+  if (!sig) throw new SignatureError(`The ${what} is not signed`);
+  if (sig.alg !== "Ed25519") throw new SignatureError(`Unsupported signature algorithm ${sig.alg}`);
+  const key = keys.find((k) => k.key_id === sig.key_id);
+  if (!key) throw new SignatureError(`The ${what} is signed with unknown key ${sig.key_id}`);
+  let ok2 = false;
+  try {
+    const publicKey = createPublicKey({
+      key: { kty: "OKP", crv: "Ed25519", x: key.public_key },
+      format: "jwk"
+    });
+    ok2 = verify(null, signedBytes(doc), publicKey, Buffer.from(sig.value, "base64url"));
+  } catch (err2) {
+    throw new SignatureError(`Cannot check the ${what} signature: ${err2.message}`);
+  }
+  if (!ok2) throw new SignatureError(`The ${what} signature does not verify (key ${sig.key_id})`);
+}
+
 // src/cloud-agent/bundle.ts
 var BUNDLE_DIR = ".github/tempa";
 var HOOKS_FILE = ".github/hooks/tempa.json";
@@ -14863,31 +14914,33 @@ var MODULE_FILE = `${BUNDLE_DIR}/policy.wasm`;
 var BUNDLE_FILE = `${BUNDLE_DIR}/bundle.json`;
 var README_FILE = `${BUNDLE_DIR}/README.md`;
 var PRE_TOOL_USE_TIMEOUT_SEC = 10;
+var BUNDLE_KIND = "tempa-cloud-agent-bundle";
 var BundleError = class extends Error {
 };
-function bundleFromProfile(profile, cliVersion, now) {
-  const wasm = profile.policies.wasm;
-  if (!wasm) {
+var KEY_ID = /^[A-Za-z0-9._-]{1,64}$/;
+var PUBLIC_KEY = /^[A-Za-z0-9_-]{43}$/;
+function bundleKeyArg(key) {
+  if (!KEY_ID.test(key.key_id) || !PUBLIC_KEY.test(key.public_key))
+    throw new BundleError(`The control plane's signing key ${key.key_id} cannot be pinned`);
+  return `${key.key_id}:${key.public_key}`;
+}
+function parseBundleKey(value) {
+  const [key_id = "", public_key = ""] = value.split(":");
+  if (!KEY_ID.test(key_id) || !PUBLIC_KEY.test(public_key))
+    throw new BundleError("--bundle-key is not <key id>:<base64url Ed25519 public key>");
+  return { key_id, alg: "Ed25519", public_key };
+}
+function verifyBundle(bundle, pinned) {
+  if (bundle.signature?.key_id !== pinned.key_id)
     throw new BundleError(
-      "This repo's profile has no compiled policy module (policies.wasm is null), so the cloud agent would have no policies to run. Check the config's policies with tempa config validate."
+      `${BUNDLE_FILE} is signed with key ${bundle.signature?.key_id ?? "(none)"}, not the pinned key ${pinned.key_id}`
     );
+  try {
+    verifySigned(bundle, [pinned], "cloud agent bundle");
+  } catch (err2) {
+    if (err2 instanceof SignatureError) throw new BundleError(`${BUNDLE_FILE}: ${err2.message}`);
+    throw err2;
   }
-  return {
-    format: 1,
-    generated_at: new Date(now).toISOString(),
-    cli_version: cliVersion,
-    tenant: { id: profile.tenant.id, name: profile.tenant.name },
-    node: profile.node.path,
-    repo: profile.repo ?? null,
-    profile_version: profile.version,
-    policies: {
-      bundles: profile.policies.bundles.map((b) => b.name),
-      default_decision: profile.policies.default_decision,
-      allow_external_mcp: profile.policies.allow_external_mcp ?? true,
-      wasm
-    },
-    offline: profile.offline
-  };
 }
 var SHA256 = /^[0-9a-f]{64}$/;
 var DECISIONS = /* @__PURE__ */ new Set(["allow", "deny", "ask"]);
@@ -14900,13 +14953,13 @@ function parseBundle(text) {
   }
   const b = raw;
   const p = b?.policies;
-  const valid5 = !!b && b.format === 1 && typeof b.profile_version === "string" && !!p && Array.isArray(p.bundles) && p.bundles.every((n) => typeof n === "string") && DECISIONS.has(p.default_decision) && typeof p.allow_external_mcp === "boolean" && !!p.wasm && SHA256.test(p.wasm.sha256) && typeof p.wasm.abi === "string" && !!b.offline && Array.isArray(b.offline.allow_tools) && DECISIONS.has(b.offline.default_decision);
-  if (!valid5) throw new BundleError(`${BUNDLE_FILE} is not a Tempa cloud agent bundle (format 1)`);
+  const valid5 = !!b && b.kind === BUNDLE_KIND && b.format === 1 && !!b.signature && typeof b.signature.key_id === "string" && typeof b.signature.value === "string" && typeof b.profile_version === "string" && !!p && Array.isArray(p.bundles) && p.bundles.every((n) => typeof n === "string") && DECISIONS.has(p.default_decision) && typeof p.allow_external_mcp === "boolean" && !!p.wasm && SHA256.test(p.wasm.sha256) && typeof p.wasm.abi === "string" && !!b.offline && Array.isArray(b.offline.allow_tools) && DECISIONS.has(b.offline.default_decision);
+  if (!valid5) throw new BundleError(`${BUNDLE_FILE} is not a signed Tempa cloud agent bundle (format 1)`);
   return b;
 }
-function hooksFile() {
+function hooksFile(key) {
   const top = '"$(git rev-parse --show-toplevel)"';
-  const bash = `node ${top}/${CLI_FILE} hook --harness copilot --event preToolUse --bundle ${top}/${BUNDLE_DIR}`;
+  const bash = `node ${top}/${CLI_FILE} hook --harness copilot --event preToolUse --bundle ${top}/${BUNDLE_DIR} --bundle-key ${bundleKeyArg(key)}`;
   const hooks = {
     version: 1,
     hooks: { preToolUse: [{ type: "command", bash, timeoutSec: PRE_TOOL_USE_TIMEOUT_SEC }] }
@@ -14924,10 +14977,13 @@ ${bundle.profile_version}), the same way they are checked on developers' laptops
 
 | File | What |
 |------|------|
-| \`.github/hooks/tempa.json\` | The cloud agent's preToolUse hook: runs the CLI below for each tool call |
+| \`.github/hooks/tempa.json\` | The cloud agent's preToolUse hook: runs the CLI below for each tool call, with Tempa's signing key (\`--bundle-key\`) pinned |
 | \`tempa.mjs\` | The Tempa CLI ${bundle.cli_version}, one file, no dependencies (Node 20 or newer) |
 | \`policy.wasm\` | The policies compiled by Tempa; its sha256 is in \`bundle.json\` and checked before use |
-| \`bundle.json\` | The policies' settings: bundles, default decision, offline rules. Nothing personal |
+| \`bundle.json\` | The policies' settings: bundles, default decision, offline rules. Nothing personal. Signed by Tempa: an edited bundle fails the check and the hook then blocks every tool call |
+
+The cloud agent may not change these files: the hook denies its edits to this folder and to the hooks file, and
+shell commands that name them. It reads the bundle once per session, so a bundle switched mid-session is not used.
 
 The hook needs no network: the cloud agent's firewall does not have to allow any Tempa host. Shell commands
 are decided from \`policy.wasm\`; other tools are left to Copilot. A command the policies deny is blocked, and one
@@ -14942,38 +14998,136 @@ delete \`.github/hooks/tempa.json\` and this folder.
 import { execFileSync as execFileSync2, spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync as readFileSync6, rmSync as rmSync6 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join as join13 } from "node:path";
+import { join as join15 } from "node:path";
+
+// src/discovery.ts
+import { createHash as createHash2 } from "node:crypto";
+import { join as join9 } from "node:path";
+
+// src/urls.ts
+var LOOPBACK = /* @__PURE__ */ new Set(["localhost", "127.0.0.1", "[::1]"]);
+function parse(value) {
+  try {
+    return new URL(value);
+  } catch {
+    return void 0;
+  }
+}
+function isSecureUrl(value) {
+  const url2 = parse(value);
+  if (!url2) return false;
+  return url2.protocol === "https:" || url2.protocol === "http:" && LOOPBACK.has(url2.hostname);
+}
+function sameOrigin(a, b) {
+  const x = parse(a);
+  const y = parse(b);
+  return !!x && !!y && x.origin === y.origin && x.origin !== "null";
+}
+
+// src/discovery.ts
+var DiscoveryError = class extends Error {
+};
+var SAME_ORIGIN = [
+  "api_url",
+  "device_authorization_endpoint",
+  "token_endpoint",
+  "mcp_url",
+  "issuer"
+];
+var SECURE = ["web_url", "otel_endpoint"];
+function checkUrls(d, endpoint) {
+  for (const key of SAME_ORIGIN) {
+    const value = d[key];
+    if (value !== void 0 && !(isSecureUrl(value) && sameOrigin(value, endpoint)))
+      throw new DiscoveryError(`${discoveryUrl(endpoint)}: ${key} ${value} is not on ${endpoint}`);
+  }
+  for (const key of SECURE) {
+    const value = d[key];
+    if (value !== void 0 && !isSecureUrl(value))
+      throw new DiscoveryError(`${discoveryUrl(endpoint)}: ${key} ${value} is not an https URL`);
+  }
+}
+function discoveryUrl(endpoint) {
+  return `${endpoint.replace(/\/+$/, "")}/.well-known/tempa.json`;
+}
+function parseDiscovery(value, endpoint) {
+  const d = value;
+  const missing = ["api_url", "device_authorization_endpoint", "token_endpoint"].filter(
+    (k) => typeof d?.[k] !== "string"
+  );
+  if (!d || typeof d !== "object" || missing.length || !Array.isArray(d.signing_keys)) {
+    throw new DiscoveryError(
+      `${discoveryUrl(endpoint)} is not a Tempa discovery document${missing.length ? ` (missing ${missing.join(", ")})` : ""}`
+    );
+  }
+  checkUrls(d, endpoint);
+  return d;
+}
+async function fetchDiscovery(ctx, endpoint, timeoutMs = 1e4) {
+  const { body: body2 } = await requestJson(ctx.fetch, discoveryUrl(endpoint), { timeoutMs });
+  return parseDiscovery(body2, endpoint);
+}
+var DISCOVERY_MAX_AGE_MS = 24 * 3600 * 1e3;
+function discoveryCachePath(ctx, endpoint) {
+  if (endpoint === void 0) return join9(ctx.tempaHome, "cache", "discovery.json");
+  const id = createHash2("sha256").update(endpoint).digest("hex").slice(0, 16);
+  return join9(ctx.tempaHome, "cache", "discovery", `${id}.json`);
+}
+function cachedDiscovery(ctx, endpoint) {
+  for (const path of [discoveryCachePath(ctx, endpoint), discoveryCachePath(ctx)]) {
+    const cached2 = readJsonLenient(path);
+    if (cached2?.endpoint === endpoint && cached2.document) return cached2;
+  }
+  return void 0;
+}
+async function getDiscovery(ctx, endpoint, options = {}) {
+  const cached2 = cachedDiscovery(ctx, endpoint);
+  const age = cached2 ? ctx.now() - Date.parse(cached2.fetched_at) : Infinity;
+  if (cached2 && !options.refresh && age >= 0 && age < DISCOVERY_MAX_AGE_MS) return cached2.document;
+  try {
+    const document = await fetchDiscovery(ctx, endpoint, options.timeoutMs);
+    writeJsonAtomic(
+      discoveryCachePath(ctx, endpoint),
+      { endpoint, fetched_at: new Date(ctx.now()).toISOString(), document },
+      { dirMode: 448 }
+    );
+    return document;
+  } catch (err2) {
+    if (cached2) return cached2.document;
+    throw err2;
+  }
+}
 
 // src/policy/modules.ts
-import { createHash as createHash3 } from "node:crypto";
+import { createHash as createHash4 } from "node:crypto";
 import { readFileSync as readFileSync5, readdirSync as readdirSync3, rmSync as rmSync5 } from "node:fs";
-import { join as join10 } from "node:path";
+import { join as join11 } from "node:path";
 
 // src/cache.ts
-import { createHash as createHash2 } from "node:crypto";
+import { createHash as createHash3 } from "node:crypto";
 import { readdirSync as readdirSync2, rmSync as rmSync4 } from "node:fs";
-import { join as join9 } from "node:path";
+import { join as join10 } from "node:path";
 var DEFAULT_REPO_KEY = "@default";
 function repoKey(normalizedRepo) {
   return normalizedRepo ?? DEFAULT_REPO_KEY;
 }
 function cacheRoot(ctx) {
-  return join9(ctx.tempaHome, "cache");
+  return join10(ctx.tempaHome, "cache");
 }
 function cacheDir(ctx, key) {
-  return join9(cacheRoot(ctx), createHash2("sha256").update(key, "utf8").digest("hex"));
+  return join10(cacheRoot(ctx), createHash3("sha256").update(key, "utf8").digest("hex"));
 }
 function readCachedProfile(ctx, key) {
   const dir = cacheDir(ctx, key);
-  const profile = readJsonLenient(join9(dir, "profile.json"));
-  const meta2 = readJsonLenient(join9(dir, "meta.json"));
+  const profile = readJsonLenient(join10(dir, "profile.json"));
+  const meta2 = readJsonLenient(join10(dir, "meta.json"));
   if (!profile || !meta2 || meta2.repo_key !== key) return void 0;
   return { profile, meta: meta2, dir };
 }
 function writeCachedProfile(ctx, profile, meta2) {
   const dir = cacheDir(ctx, meta2.repo_key);
-  writeJsonAtomic(join9(dir, "profile.json"), profile, { dirMode: 448 });
-  writeJsonAtomic(join9(dir, "meta.json"), meta2, { dirMode: 448 });
+  writeJsonAtomic(join10(dir, "profile.json"), profile, { dirMode: 448 });
+  writeJsonAtomic(join10(dir, "meta.json"), meta2, { dirMode: 448 });
   return { profile, meta: meta2, dir };
 }
 function isExpired(ctx, profile) {
@@ -14992,11 +15146,11 @@ function clearTenantCache(ctx, tenant, endpoint) {
     return 0;
   }
   for (const name2 of entries) {
-    const meta2 = readJsonLenient(join9(cacheRoot(ctx), name2, "meta.json"));
+    const meta2 = readJsonLenient(join10(cacheRoot(ctx), name2, "meta.json"));
     const ofTenant = tenant === void 0 || meta2?.tenant === tenant;
     const ofEndpoint = endpoint === void 0 || meta2?.endpoint === endpoint;
     if (meta2 && ofTenant && ofEndpoint) {
-      rmSync4(join9(cacheRoot(ctx), name2), { recursive: true, force: true });
+      rmSync4(join10(cacheRoot(ctx), name2), { recursive: true, force: true });
       dropped += 1;
     }
   }
@@ -15006,14 +15160,14 @@ function clearTenantCache(ctx, tenant, endpoint) {
 // src/policy/modules.ts
 var SHA2562 = /^[0-9a-f]{64}$/;
 function modulesDir(ctx) {
-  return join10(cacheRoot(ctx), "policies");
+  return join11(cacheRoot(ctx), "policies");
 }
 function modulePath(ctx, sha2562) {
   if (!SHA2562.test(sha2562)) throw new Error(`not a sha256: ${sha2562}`);
-  return join10(modulesDir(ctx), `${sha2562}.wasm`);
+  return join11(modulesDir(ctx), `${sha2562}.wasm`);
 }
 function sha256Hex(bytes3) {
-  return createHash3("sha256").update(bytes3).digest("hex");
+  return createHash4("sha256").update(bytes3).digest("hex");
 }
 function readModule(ctx, wasm) {
   let bytes3;
@@ -15048,7 +15202,7 @@ function referencedModules(ctx) {
     return keep;
   }
   for (const name2 of entries) {
-    const sha = readJsonLenient(join10(cacheRoot(ctx), name2, "profile.json"))?.policies?.wasm?.sha256;
+    const sha = readJsonLenient(join11(cacheRoot(ctx), name2, "profile.json"))?.policies?.wasm?.sha256;
     if (sha) keep.add(sha);
   }
   return keep;
@@ -15066,7 +15220,7 @@ function pruneModules(ctx) {
     const sha = /^([0-9a-f]{64})\.wasm$/.exec(file)?.[1];
     if (!sha || keep.has(sha)) continue;
     try {
-      rmSync5(join10(modulesDir(ctx), file), { force: true });
+      rmSync5(join11(modulesDir(ctx), file), { force: true });
       removed += 1;
     } catch {
     }
@@ -15076,61 +15230,6 @@ function pruneModules(ctx) {
 
 // src/sync.ts
 import { resolve as resolve4 } from "node:path";
-
-// src/discovery.ts
-import { createHash as createHash4 } from "node:crypto";
-import { join as join11 } from "node:path";
-var DiscoveryError = class extends Error {
-};
-function discoveryUrl(endpoint) {
-  return `${endpoint.replace(/\/+$/, "")}/.well-known/tempa.json`;
-}
-function parseDiscovery(value, endpoint) {
-  const d = value;
-  const missing = ["api_url", "device_authorization_endpoint", "token_endpoint"].filter(
-    (k) => typeof d?.[k] !== "string"
-  );
-  if (!d || typeof d !== "object" || missing.length || !Array.isArray(d.signing_keys)) {
-    throw new DiscoveryError(
-      `${discoveryUrl(endpoint)} is not a Tempa discovery document${missing.length ? ` (missing ${missing.join(", ")})` : ""}`
-    );
-  }
-  return d;
-}
-async function fetchDiscovery(ctx, endpoint, timeoutMs = 1e4) {
-  const { body: body2 } = await requestJson(ctx.fetch, discoveryUrl(endpoint), { timeoutMs });
-  return parseDiscovery(body2, endpoint);
-}
-var DISCOVERY_MAX_AGE_MS = 24 * 3600 * 1e3;
-function discoveryCachePath(ctx, endpoint) {
-  if (endpoint === void 0) return join11(ctx.tempaHome, "cache", "discovery.json");
-  const id = createHash4("sha256").update(endpoint).digest("hex").slice(0, 16);
-  return join11(ctx.tempaHome, "cache", "discovery", `${id}.json`);
-}
-function cachedDiscovery(ctx, endpoint) {
-  for (const path of [discoveryCachePath(ctx, endpoint), discoveryCachePath(ctx)]) {
-    const cached2 = readJsonLenient(path);
-    if (cached2?.endpoint === endpoint && cached2.document) return cached2;
-  }
-  return void 0;
-}
-async function getDiscovery(ctx, endpoint, options = {}) {
-  const cached2 = cachedDiscovery(ctx, endpoint);
-  const age = cached2 ? ctx.now() - Date.parse(cached2.fetched_at) : Infinity;
-  if (cached2 && !options.refresh && age >= 0 && age < DISCOVERY_MAX_AGE_MS) return cached2.document;
-  try {
-    const document = await fetchDiscovery(ctx, endpoint, options.timeoutMs);
-    writeJsonAtomic(
-      discoveryCachePath(ctx, endpoint),
-      { endpoint, fetched_at: new Date(ctx.now()).toISOString(), document },
-      { dirMode: 448 }
-    );
-    return document;
-  } catch (err2) {
-    if (cached2) return cached2.document;
-    throw err2;
-  }
-}
 
 // src/git.ts
 import { execFileSync } from "node:child_process";
@@ -15198,6 +15297,79 @@ function trackedPaths(root, paths) {
   return new Set((out2 ?? "").split("\0").filter(Boolean));
 }
 
+// src/hook/no-profile.ts
+import { join as join12 } from "node:path";
+function failModesPath(ctx) {
+  return join12(ctx.tempaHome, "fail-modes.json");
+}
+function rememberFailMode(ctx, login2, profile) {
+  const all = readJsonLenient(failModesPath(ctx)) ?? {};
+  const default_decision = profile.offline?.default_decision ?? "ask";
+  if (all[login2]?.default_decision === default_decision) return;
+  all[login2] = { default_decision, recorded_at: new Date(ctx.now()).toISOString() };
+  try {
+    writeJsonAtomic(failModesPath(ctx), all, { mode: 384, dirMode: 448 });
+  } catch {
+  }
+}
+function rememberedFailMode(ctx, login2) {
+  return readJsonLenient(failModesPath(ctx))?.[login2];
+}
+function noProfileDecision(call) {
+  if (call.failMode?.default_decision === "deny") return "deny";
+  if (call.kind === "shell" && call.loggedIn && !call.failMode) return "deny";
+  return "ask";
+}
+var NO_PROFILE_FIX = "Run 'tempa sync' when the control plane is reachable again ('tempa doctor' says what is wrong).";
+function noProfileMessage(reason, decision, call) {
+  if (decision === "ask")
+    return `${reason}: Tempa asks before every such call until a profile is synced. ${NO_PROFILE_FIX}`;
+  const why = call.failMode ? "your organisation blocks tool calls while Tempa cannot check them" : "this login never had a profile, so shell commands are blocked";
+  return `${reason}: ${why}. ${NO_PROFILE_FIX}`;
+}
+
+// src/key-pins.ts
+import { join as join13 } from "node:path";
+function pinsPath(ctx) {
+  return join13(ctx.tempaHome, "pinned-keys.json");
+}
+function readPins(ctx) {
+  return readJsonLenient(pinsPath(ctx)) ?? {};
+}
+function pinnedKeys(ctx, endpoint) {
+  const pinned = readPins(ctx)[endpoint];
+  if (!pinned || !Object.keys(pinned).length) return void 0;
+  return Object.entries(pinned).map(([key_id, public_key]) => ({ key_id, alg: "Ed25519", public_key }));
+}
+function pinKeys(ctx, endpoint, keys, replace = false) {
+  const all = readPins(ctx);
+  const current3 = replace ? {} : { ...all[endpoint] };
+  for (const k of keys) if (k.alg === "Ed25519") current3[k.key_id] = k.public_key;
+  all[endpoint] = current3;
+  writeJsonAtomic(pinsPath(ctx), all, { mode: 384, dirMode: 448 });
+}
+function endorsedBy(endorsement, pins) {
+  if (endorsement.kind !== "tempa-key-endorsement") return false;
+  try {
+    verifySigned(endorsement, pins, "key endorsement");
+    return true;
+  } catch {
+    return false;
+  }
+}
+function endorsedKey(discovery, pins, keyId) {
+  const key = discovery.signing_keys.find((k) => k.key_id === keyId);
+  if (!key) throw new SignatureError(`The profile is signed with unknown key ${keyId}`);
+  const vouched = (discovery.key_endorsements ?? []).some(
+    (e) => e.key_id === keyId && e.public_key === key.public_key && endorsedBy(e, pins)
+  );
+  if (!vouched)
+    throw new SignatureError(
+      `The profile is signed with key ${keyId}, which no key pinned at login vouches for. If your Tempa administrator rotated the signing key, run 'tempa login' again to trust the new one.`
+    );
+  return key;
+}
+
 // src/repo.ts
 var SCP = /^(?:[\w.-]+@)?(?<host>[\w.-]+):(?<path>[^/].*)$/;
 var URL_FORM = /^[a-z][a-z0-9+.-]*:\/\/(?:[^@/]+@)?(?<host>[^/:]+)(?::\d+)?\/(?<path>.+)$/;
@@ -15221,51 +15393,11 @@ function normalizeRemote(remote) {
   return `${match.groups.host}/${path}`.toLowerCase();
 }
 
-// src/signature.ts
-import { createPublicKey, verify } from "node:crypto";
-function sortDeep(value) {
-  if (Array.isArray(value)) return value.map(sortDeep);
-  if (value && typeof value === "object") {
-    const out2 = {};
-    for (const key of Object.keys(value).sort()) out2[key] = sortDeep(value[key]);
-    return out2;
-  }
-  return value;
-}
-function canonicalJson2(value) {
-  return JSON.stringify(sortDeep(value));
-}
-var SignatureError = class extends Error {
-};
-function signedBytes(profile) {
-  const unsigned = { ...profile };
-  delete unsigned.signature;
-  return Buffer.from(canonicalJson2(unsigned), "utf8");
-}
-function verifyProfile(profile, keys) {
-  const sig = profile.signature;
-  if (!sig) throw new SignatureError("The profile is not signed");
-  if (sig.alg !== "Ed25519") throw new SignatureError(`Unsupported signature algorithm ${sig.alg}`);
-  const key = keys.find((k) => k.key_id === sig.key_id);
-  if (!key) throw new SignatureError(`The profile is signed with unknown key ${sig.key_id}`);
-  let ok2 = false;
-  try {
-    const publicKey = createPublicKey({
-      key: { kty: "OKP", crv: "Ed25519", x: key.public_key },
-      format: "jwk"
-    });
-    ok2 = verify(null, signedBytes(profile), publicKey, Buffer.from(sig.value, "base64url"));
-  } catch (err2) {
-    throw new SignatureError(`Cannot check the profile signature: ${err2.message}`);
-  }
-  if (!ok2) throw new SignatureError(`The profile signature does not verify (key ${sig.key_id})`);
-}
-
 // src/tenants.ts
-import { join as join12 } from "node:path";
+import { join as join14 } from "node:path";
 var RESOLVE_MAX_AGE_MS = 24 * 36e5;
 function mapPath(ctx) {
-  return join12(ctx.tempaHome, "repo-tenants.json");
+  return join14(ctx.tempaHome, "repo-tenants.json");
 }
 function readMap(ctx) {
   const map = readJsonLenient(mapPath(ctx));
@@ -15405,21 +15537,39 @@ function loadVerifiedCache(ctx, endpoint, key, tenant) {
   const cached2 = readCachedProfile(ctx, key);
   if (!cached2 || cached2.meta.endpoint !== endpoint || isExpired(ctx, cached2.profile)) return void 0;
   if (tenant !== void 0 && cached2.meta.tenant && cached2.meta.tenant !== tenant) return void 0;
-  const discovery = cachedDiscovery(ctx, endpoint);
-  if (!discovery) return void 0;
+  const keys = pinnedKeys(ctx, endpoint) ?? cachedDiscovery(ctx, endpoint)?.document.signing_keys;
+  if (!keys) return void 0;
   try {
-    verifyProfile(cached2.profile, discovery.document.signing_keys);
+    verifyProfile(cached2.profile, keys);
   } catch {
     return void 0;
   }
   return cached2;
 }
 async function verifyWithRotation(ctx, endpoint, profile, timeoutMs) {
-  const discovery = await getDiscovery(ctx, endpoint, { timeoutMs });
-  const known = discovery.signing_keys.some((k) => k.key_id === profile.signature?.key_id);
-  if (known) return verifyProfile(profile, discovery.signing_keys);
+  const keyId = profile.signature?.key_id ?? "";
+  const pins = pinnedKeys(ctx, endpoint);
+  if (!pins) {
+    const discovery = await getDiscovery(ctx, endpoint, { timeoutMs });
+    const known = discovery.signing_keys.some((k) => k.key_id === keyId);
+    const keys = known ? discovery.signing_keys : (await getDiscovery(ctx, endpoint, { refresh: true, timeoutMs })).signing_keys;
+    verifyProfile(profile, keys);
+    pinKeys(ctx, endpoint, keys);
+    return;
+  }
+  if (pins.some((k) => k.key_id === keyId)) return verifyProfile(profile, pins);
   const fresh = await getDiscovery(ctx, endpoint, { refresh: true, timeoutMs });
-  verifyProfile(profile, fresh.signing_keys);
+  const key = endorsedKey(fresh, pins, keyId);
+  verifyProfile(profile, [key]);
+  pinKeys(ctx, endpoint, [key]);
+}
+function checkBinding(profile, tenant, repo) {
+  if (profile.tenant.id !== tenant)
+    throw new SignatureError(`The profile is signed for tenant ${profile.tenant.id}, not ${tenant}`);
+  const asked = repo.repo?.toLowerCase();
+  const signed = profile.repo?.toLowerCase();
+  if (asked && signed && asked !== signed)
+    throw new SignatureError(`The profile is signed for ${profile.repo}, not ${repo.repo}`);
 }
 async function fetchProfile(ctx, endpoint, repo, timeoutMs, tenant) {
   const creds = loadCredentials(ctx, tenant, endpoint);
@@ -15438,9 +15588,11 @@ async function fetchProfile(ctx, endpoint, repo, timeoutMs, tenant) {
     throw new SignatureError("The control plane returned something that is not a profile");
   }
   await verifyWithRotation(ctx, endpoint, profile, timeoutMs);
+  checkBinding(profile, tenantOf(creds), repo);
   if (isExpired(ctx, profile))
     throw new SignatureError(`The control plane sent an expired profile (${profile.expires_at})`);
   rememberCliUpdate(ctx, loginKey(endpoint, tenantOf(creds)), res.headers);
+  rememberFailMode(ctx, loginKey(endpoint, tenantOf(creds)), profile);
   const meta2 = {
     repo_key: repo.key,
     remote: repo.remote,
@@ -15574,6 +15726,34 @@ The hook needs **no network**: no host has to be allowlisted in the cloud agent'
 - Updating the policies means running the command again, which opens a new pull request. To stop, delete \`${HOOKS_FILE}\` and \`.github/tempa/\`.
 `;
 }
+async function signedBundle(ctx, remote, endpoint, tenant) {
+  const query = new URLSearchParams({ repo: remote, cli_version: VERSION });
+  let body2;
+  try {
+    ({ body: body2 } = await authedRequest(ctx, `/cloud-agent/bundle?${query}`, {
+      timeoutMs: 1e4,
+      endpoint,
+      ...tenant ? { tenant } : {}
+    }));
+  } catch (err2) {
+    if (err2 instanceof HttpError && err2.status === 404)
+      throw new CloudAgentError(
+        "This Tempa control plane cannot sign cloud agent bundles yet (GET /v1/cloud-agent/bundle); update it first."
+      );
+    if (err2 instanceof HttpError && err2.status === 409) throw new CloudAgentError(err2.message);
+    throw err2;
+  }
+  const bundle = parseBundle(JSON.stringify(body2));
+  const keyId = bundle.signature.key_id;
+  const discovery = await getDiscovery(ctx, endpoint, { timeoutMs: 1e4 });
+  const key = discovery.signing_keys.find((k) => k.key_id === keyId);
+  if (!key)
+    throw new CloudAgentError(
+      `The bundle is signed with key ${keyId}, which the control plane does not publish.`
+    );
+  verifyBundle(bundle, key);
+  return { bundle, key };
+}
 async function enableCloudAgent(ctx, options, openPullRequest = ghOpener) {
   const repo = repoContext(options.repoDir);
   if (!repo.git) throw new CloudAgentError(`${options.repoDir} is not a git repo.`);
@@ -15585,8 +15765,9 @@ async function enableCloudAgent(ctx, options, openPullRequest = ghOpener) {
     throw new CloudAgentError(
       `The control plane cannot be reached (${synced.remoteError.message}); try again online.`
     );
-  const bundle = bundleFromProfile(synced.profile, VERSION, ctx.now());
-  await ensureModule(ctx, synced.profile, loginForRepo(ctx, repo.key), 1e4);
+  const login2 = loginForRepo(ctx, repo.key);
+  const { bundle, key } = await signedBundle(ctx, repo.remote ?? "", synced.meta.endpoint, login2?.tenant);
+  await ensureModule(ctx, synced.profile, login2, 1e4);
   const module2 = readModule(ctx, bundle.policies.wasm);
   if (!module2) throw new CloudAgentError("The policy module could not be downloaded and verified.");
   const git2 = gitIn(repo.git.root);
@@ -15596,7 +15777,7 @@ async function enableCloudAgent(ctx, options, openPullRequest = ghOpener) {
   const parent = git2(["rev-parse", "--verify", `${baseRef}^{commit}`]);
   const branch = options.branch ?? `tempa/copilot-cloud-agent-${bundle.profile_version.slice(0, 12)}`;
   const files = [
-    [HOOKS_FILE, hooksFile()],
+    [HOOKS_FILE, hooksFile(key)],
     [CLI_FILE, cli],
     [MODULE_FILE, module2],
     [BUNDLE_FILE, `${JSON.stringify(bundle, null, 2)}
@@ -15641,9 +15822,9 @@ function defaultBranch(git2, remote) {
   }
 }
 function commitOnTemporaryIndex(root, parent, files, bundle) {
-  const dir = mkdtempSync(join13(tmpdir(), "tempa-cloud-agent-"));
+  const dir = mkdtempSync(join15(tmpdir(), "tempa-cloud-agent-"));
   try {
-    const git2 = gitIn(root, { GIT_INDEX_FILE: join13(dir, "index") });
+    const git2 = gitIn(root, { GIT_INDEX_FILE: join15(dir, "index") });
     git2(["read-tree", parent]);
     for (const [path, content] of files) {
       const blob = git2(["hash-object", "-w", "--stdin"], content);
@@ -15713,22 +15894,22 @@ var copilot = copilotCommand();
 
 // src/doctor.ts
 import { execFile as execFile3 } from "node:child_process";
-import { existsSync as existsSync11, readFileSync as readFileSync18 } from "node:fs";
-import { join as join33 } from "node:path";
+import { existsSync as existsSync12, readFileSync as readFileSync18 } from "node:fs";
+import { join as join38 } from "node:path";
 
 // src/antigravity-surfaces.ts
-import { existsSync as existsSync10, readFileSync as readFileSync16 } from "node:fs";
-import { join as join30, relative as relative3, sep as sep2 } from "node:path";
+import { existsSync as existsSync11, readFileSync as readFileSync16 } from "node:fs";
+import { join as join35, relative as relative4, sep as sep3 } from "node:path";
 
 // src/hook/antigravity-hooks.ts
 import { createHash as createHash5 } from "node:crypto";
 import { readdirSync as readdirSync4 } from "node:fs";
-import { join as join14 } from "node:path";
+import { join as join16 } from "node:path";
 var DIR = "antigravity-hooks";
 var isRecord = (value) => typeof value === "object" && value !== null && typeof value.cwd === "string" && typeof value.session === "string" && typeof value.at === "string";
 function recordAntigravityHook(ctx, session) {
   const name2 = `${createHash5("sha256").update(ctx.cwd).digest("hex").slice(0, 16)}.json`;
-  const path = join14(ctx.tempaHome, DIR, name2);
+  const path = join16(ctx.tempaHome, DIR, name2);
   if (readJsonLenient(path)?.session === session) return;
   try {
     writeJsonAtomic(path, { cwd: ctx.cwd, session, at: new Date(ctx.now()).toISOString() }, { mode: 384 });
@@ -15738,16 +15919,16 @@ function recordAntigravityHook(ctx, session) {
 function antigravityHookRecords(ctx) {
   let names;
   try {
-    names = readdirSync4(join14(ctx.tempaHome, DIR));
+    names = readdirSync4(join16(ctx.tempaHome, DIR));
   } catch {
     return [];
   }
-  return names.filter((n) => n.endsWith(".json")).map((n) => readJsonLenient(join14(ctx.tempaHome, DIR, n))).filter(isRecord).sort((a, b) => b.at.localeCompare(a.at));
+  return names.filter((n) => n.endsWith(".json")).map((n) => readJsonLenient(join16(ctx.tempaHome, DIR, n))).filter(isRecord).sort((a, b) => b.at.localeCompare(a.at));
 }
 
 // src/setup.ts
-import { existsSync as existsSync9, readdirSync as readdirSync9 } from "node:fs";
-import { join as join29 } from "node:path";
+import { existsSync as existsSync10, readdirSync as readdirSync9 } from "node:fs";
+import { join as join34 } from "node:path";
 
 // src/harness/adapter.ts
 var CAPABILITIES = [
@@ -15763,12 +15944,12 @@ var CAPABILITIES = [
 ];
 
 // src/harness/codex.ts
-import { existsSync as existsSync7, readFileSync as readFileSync14 } from "node:fs";
-import { dirname as dirname3, join as join26 } from "node:path";
+import { existsSync as existsSync8, readFileSync as readFileSync14 } from "node:fs";
+import { dirname as dirname4, join as join31 } from "node:path";
 
 // src/hook/handler.ts
 import { execFile as execFile2 } from "node:child_process";
-import { join as join25, resolve as resolve6 } from "node:path";
+import { join as join30, resolve as resolve7 } from "node:path";
 
 // src/harness/degrade.ts
 function askAsDeny(verdict, harnessName) {
@@ -15837,13 +16018,13 @@ var CODEX = {
     ask: {
       level: "degraded",
       rule: "ask-as-deny",
-      how: "hooks have no ask; execpolicy `prefix_rules` with `prompt` for shell prefixes (TEMPA-143)"
+      how: "hooks have no ask; execpolicy `prefix_rules` with `prompt` for shell prefixes"
     },
     mcp_proxy: { level: "native", how: "`[mcp_servers.<name>]` in `config.toml`" },
     telemetry: {
       level: "degraded",
       rule: "telemetry-without-cost",
-      how: "`-c otel.*` from the `codex` wrapper (TEMPA-147); `codex.tool_decision` and tokens, no cost"
+      how: "`-c otel.*` from the `codex` wrapper; `codex.tool_decision` and tokens, no cost"
     },
     lock_down: { level: "native", how: "`requirements.toml` (managed hooks, MCP, marketplaces) through MDM" }
   }
@@ -15888,7 +16069,9 @@ var ANTIGRAVITY = {
   name: "Antigravity",
   support: "supported",
   epic: "TEMPA-E17",
-  failMode: "open",
+  // Recorded on agy 1.5.2 in `-p`, against the docs' "fail open": a PreToolUse hook that exits 1 or 2,
+  // times out or prints invalid JSON blocks the call; empty output is no opinion.
+  failMode: "closed",
   capabilities: {
     standards: {
       level: "native",
@@ -15903,15 +16086,15 @@ var ANTIGRAVITY = {
     subagents: { level: "native", how: "`.agents/agents/tempa-<name>.md`" },
     deny: {
       level: "native",
-      how: "PreToolUse `decision: deny` with exit 0; the docs say a non-zero exit is ignored (fail open)"
+      how: "PreToolUse `decision: deny` with exit 0, the reason reaches the model; the CLI blocks on a hook that fails (exit 1 or 2, a timeout, invalid JSON)"
     },
     ask: {
       level: "native",
-      how: "PreToolUse `force_ask`; `ask-as-deny` headless; `permissions.ask` and `.deny` `command(...)` in the CLI settings"
+      how: "PreToolUse `force_ask`; `ask-as-deny` headless, where `agy -p` denies a forced ask without the reason and ends the run; `permissions.ask` and `.deny` `command(...)` in the CLI settings"
     },
     mcp_proxy: {
       level: "native",
-      how: "the plugin's `mcp_config.json` (`tempa_tempa`); the repo from MCP roots or the hook's workspace; `mcp(tempa_tempa/*)` allowed in the CLI settings"
+      how: "the plugin's `mcp_config.json` (`tempa_tempa`, called through `call_mcp_tool`); the repo from the MCP roots Antigravity sends, else the hook's workspace; `mcp(tempa_tempa/*)` allowed in the CLI settings"
     },
     telemetry: {
       level: "degraded",
@@ -15940,7 +16123,7 @@ var COPILOT = {
     commands: {
       level: "degraded",
       rule: "commands-as-skills",
-      how: "the Copilot CLI has no command files; a skill in `.github/skills` is invoked as `/<name>` (TEMPA-162)"
+      how: "the Copilot CLI has no command files; a skill in `.github/skills` is invoked as `/<name>`"
     },
     subagents: { level: "native", how: "`.github/agents/*.agent.md`" },
     deny: { level: "native", how: "preToolUse `deny`; command hooks fail closed on errors, open on timeout" },
@@ -15990,7 +16173,7 @@ var CLAUDE_CODE_TOOLS = {
   sessionTools: ["TodoWrite"],
   mcpNaming: "mcp__server__tool",
   commandKeys: ["command"],
-  source: "Claude Code hook payloads (TEMPA-004 spike)"
+  source: "Claude Code hook payloads (spike)"
 };
 var CODEX_TOOLS = {
   harness: "codex",
@@ -16002,12 +16185,12 @@ var CODEX_TOOLS = {
     apply_patch: "edit",
     update_plan: "other",
     spawn_agent: "agent",
-    // Codex 0.157.1 (multi-agent, TEMPA-149) reports its collaboration tools with the namespace glued on.
+    // Codex 0.157.1 (multi-agent) reports its collaboration tools with the namespace glued on.
     collaborationspawn_agent: "agent",
     collaborationwait_agent: "other",
     view_image: "read",
     // The model-facing function names, in case a payload carries them instead (in code mode the hook still
-    // reports `Bash`, TEMPA-149).
+    // reports `Bash`).
     exec_command: "shell",
     shell: "shell",
     local_shell: "shell",
@@ -16027,7 +16210,7 @@ var CODEX_TOOLS = {
     local_shell: "Bash",
     view_image: "Read"
   },
-  source: "Codex hooks docs (learn.chatgpt.com/docs/hooks) and codex-rs/hooks, 2026-11-02; payloads of Codex CLI 0.157.1, 2026-11-05 (TEMPA-149)"
+  source: "Codex hooks docs (learn.chatgpt.com/docs/hooks) and codex-rs/hooks, 2026-11-02; payloads of Codex CLI 0.157.1, 2026-11-05"
 };
 var GEMINI_CLI_TOOLS = {
   harness: "gemini-cli",
@@ -16087,7 +16270,7 @@ var COPILOT_TOOLS = {
     web_fetch: "fetch",
     task: "agent",
     ask_user: "other",
-    // What the Copilot CLI 1.0.105 offers besides (TEMPA-167): reading, listing and stopping its shell sessions,
+    // What the Copilot CLI 1.0.105 offers besides: reading, listing and stopping its shell sessions,
     // skills, its session database, background agents and workflows.
     read_bash: "other",
     list_bash: "other",
@@ -16114,7 +16297,7 @@ var COPILOT_TOOLS = {
     "read_agent",
     "list_agents"
   ],
-  // Recorded: `tempa-second-brain__list_collections`, `tempa-work_item` (TEMPA-167).
+  // Recorded: `tempa-second-brain__list_collections`, `tempa-work_item`.
   mcpNaming: "server-tool",
   commandKeys: ["command"],
   claudeCodeNames: {
@@ -16127,7 +16310,7 @@ var COPILOT_TOOLS = {
     web_fetch: "WebFetch",
     task: "Task"
   },
-  source: "GitHub Docs, hooks configuration: tool names for hook matching (camelCase payloads), 2026-10-31; the Copilot CLI 1.0.105's tool list and hook payloads, recorded 2026-11-05 (TEMPA-167)"
+  source: "GitHub Docs, hooks configuration: tool names for hook matching (camelCase payloads), 2026-10-31; the Copilot CLI 1.0.105's tool list and hook payloads, recorded 2026-11-05"
 };
 var ANTIGRAVITY_TOOLS = {
   harness: "antigravity",
@@ -16137,6 +16320,13 @@ var ANTIGRAVITY_TOOLS = {
     write_to_file: "write",
     replace_file_content: "edit",
     multi_replace_file_content: "edit",
+    // What `agy -p` 1.5.2 gave Gemini 3.8 Flash instead of the three above, recorded in `read_file`
+    // (`Path`), `write_file` (`Content`, `Path`), `edit_file` (`Path`, `Target`, `Replacement`).
+    read_file: "read",
+    write_file: "write",
+    edit_file: "edit",
+    sed_file: "edit",
+    notebook_edit: "edit",
     list_dir: "search",
     find_by_name: "search",
     grep_search: "search",
@@ -16145,20 +16335,33 @@ var ANTIGRAVITY_TOOLS = {
     invoke_subagent: "agent",
     define_subagent: "agent",
     send_message: "agent",
-    manage_subagents: "agent"
+    manage_subagents: "agent",
+    browser_subagent: "agent",
+    // The CLI's own bookkeeping (in the 1.5.2 tool list): a running command's status, waiting,
+    // ending the turn, asking the developer, listing the permission rules.
+    command_status: "other",
+    wait: "other",
+    wait_5_seconds: "other",
+    finish: "other",
+    ask_question: "other",
+    list_permissions: "other"
   },
-  unverified: [],
-  sessionTools: [],
-  // How an MCP tool is named in `toolCall.name` is not documented (TEMPA-185): Tempa reads the three forms
-  // Antigravity uses elsewhere (TEMPA-178), never one of its own tools.
+  // In the 1.5.2 tool list, never seen in a recorded payload.
+  unverified: ["sed_file", "notebook_edit", "browser_subagent"],
+  sessionTools: ["command_status", "wait", "wait_5_seconds", "finish", "ask_question", "list_permissions"],
+  // Recorded on 1.5.2: every MCP tool is called through `call_mcp_tool` with `ServerName`
+  // (`tempa_tempa`), `ToolName` (`second-brain__list_collections`, unsanitised) and `Arguments`, see
+  // `antigravityMcpCall`. The three name forms below are still read, never one of Antigravity's own tools.
   mcpNaming: "antigravity",
-  mcpNamingUnverified: true,
   // run_command's arguments are PascalCase (`CommandLine`, `Cwd`).
   commandKeys: ["CommandLine", "command"],
   claudeCodeNames: {
     run_command: "Bash",
     view_file: "Read",
+    read_file: "Read",
     write_to_file: "Write",
+    write_file: "Write",
+    edit_file: "Edit",
     replace_file_content: "Edit",
     multi_replace_file_content: "MultiEdit",
     list_dir: "LS",
@@ -16168,16 +16371,16 @@ var ANTIGRAVITY_TOOLS = {
     read_url_content: "WebFetch",
     invoke_subagent: "Task"
   },
-  source: "Antigravity hooks and subagents docs (antigravity.google/docs), TEMPA-176 spike, 2026-11-05"
+  source: "Antigravity hooks and subagents docs (antigravity.google/docs), spike, 2026-11-05; the agy 1.5.2 tool list and hook payloads, recorded 2026-11-06"
 };
 function splitCopilotMcpName(table, name2) {
   if (Object.hasOwn(table.tools, name2)) return void 0;
   const qualified = /^mcp__(.+?)__(.+)$/.exec(name2) ?? /^([^/]+)\/(.+)$/.exec(name2);
   if (qualified) return [qualified[1], qualified[2]];
   const proxy2 = [...TEMPA_MCP_SERVERS].find((s) => name2.startsWith(`${s}-`) && name2.length > s.length + 1);
-  const sep3 = proxy2 ? proxy2.length : name2.lastIndexOf("-");
-  if (sep3 <= 0 || sep3 === name2.length - 1) return void 0;
-  return [name2.slice(0, sep3), name2.slice(sep3 + 1)];
+  const sep5 = proxy2 ? proxy2.length : name2.lastIndexOf("-");
+  if (sep5 <= 0 || sep5 === name2.length - 1) return void 0;
+  return [name2.slice(0, sep5), name2.slice(sep5 + 1)];
 }
 var ANTIGRAVITY_PROXY = "tempa_tempa";
 function splitAntigravityMcpName(table, name2) {
@@ -16187,9 +16390,9 @@ function splitAntigravityMcpName(table, name2) {
   if (!name2.startsWith("mcp_")) return void 0;
   const body2 = name2.slice("mcp_".length);
   const proxy2 = [ANTIGRAVITY_PROXY, ...TEMPA_MCP_SERVERS].sort((a, b) => b.length - a.length).find((s) => body2.startsWith(`${s}_`) && body2.length > s.length + 1);
-  const sep3 = proxy2 ? proxy2.length : body2.indexOf("_");
-  if (sep3 <= 0 || sep3 === body2.length - 1) return void 0;
-  return [body2.slice(0, sep3), body2.slice(sep3 + 1)];
+  const sep5 = proxy2 ? proxy2.length : body2.indexOf("_");
+  if (sep5 <= 0 || sep5 === body2.length - 1) return void 0;
+  return [body2.slice(0, sep5), body2.slice(sep5 + 1)];
 }
 function parseMcpName(table, name2) {
   let server;
@@ -16203,10 +16406,10 @@ function parseMcpName(table, name2) {
     if (!name2.startsWith("mcp_")) return void 0;
     const body2 = name2.slice("mcp_".length);
     const proxy2 = [...TEMPA_MCP_SERVERS].find((s) => body2.startsWith(`${s}_`) && body2.length > s.length + 1);
-    const sep4 = proxy2 ? proxy2.length : body2.indexOf("_");
-    if (sep4 <= 0 || sep4 === body2.length - 1) return void 0;
-    server = body2.slice(0, sep4);
-    rest = body2.slice(sep4 + 1);
+    const sep6 = proxy2 ? proxy2.length : body2.indexOf("_");
+    if (sep6 <= 0 || sep6 === body2.length - 1) return void 0;
+    server = body2.slice(0, sep6);
+    rest = body2.slice(sep6 + 1);
   } else if (table.mcpNaming === "server-tool") {
     const split = splitCopilotMcpName(table, name2);
     if (!split) return void 0;
@@ -16219,9 +16422,9 @@ function parseMcpName(table, name2) {
     return void 0;
   }
   if (!TEMPA_MCP_SERVERS.has(server)) return { server, endpoint: null, tool: rest };
-  const sep3 = rest.indexOf("__");
-  if (sep3 === -1) return { server, endpoint: null, tool: rest };
-  return { server, endpoint: rest.slice(0, sep3), tool: rest.slice(sep3 + 2) };
+  const sep5 = rest.indexOf("__");
+  if (sep5 === -1) return { server, endpoint: null, tool: rest };
+  return { server, endpoint: rest.slice(0, sep5), tool: rest.slice(sep5 + 2) };
 }
 var SHELLS = /* @__PURE__ */ new Set(["sh", "bash", "zsh", "dash", "ksh"]);
 function quote(word) {
@@ -16236,7 +16439,18 @@ function commandLine(value) {
   if (argv.length === 3 && SHELLS.has(shell) && /^-l?c$/.test(argv[1])) return argv[2];
   return argv.map(quote).join(" ");
 }
+function antigravityMcpCall(table, name2, input) {
+  if (table.mcpNaming !== "antigravity" || name2 !== "call_mcp_tool") return void 0;
+  const { ServerName: server, ToolName: tool, Arguments: args2 } = input;
+  if (typeof server !== "string" || typeof tool !== "string" || !server || !tool) return void 0;
+  const mcp2 = parseMcpName(table, `${server}/${tool}`);
+  if (!mcp2) return void 0;
+  const isArgs = typeof args2 === "object" && args2 !== null && !Array.isArray(args2);
+  return { name: name2, kind: "mcp", mcp: mcp2, input: isArgs ? args2 : {} };
+}
 function normaliseTool(table, name2, input) {
+  const viaCall = antigravityMcpCall(table, name2, input);
+  if (viaCall) return viaCall;
   const mcp2 = parseMcpName(table, name2);
   if (mcp2) return { name: name2, kind: "mcp", mcp: mcp2, input };
   const kind = Object.hasOwn(table.tools, name2) ? table.tools[name2] : "other";
@@ -16310,12 +16524,13 @@ function toEvent(payload, ctx, tools = CLAUDE_CODE_TOOLS) {
   return event2;
 }
 function preToolUse(decision, reason, additionalContext) {
-  if (!decision && !additionalContext) return void 0;
+  const decided = decision === "allow" ? void 0 : decision;
+  if (!decided && !additionalContext) return void 0;
   return {
     hookSpecificOutput: {
       hookEventName: "PreToolUse",
-      ...decision ? { permissionDecision: decision } : {},
-      ...decision && reason ? { permissionDecisionReason: reason } : {},
+      ...decided ? { permissionDecision: decided } : {},
+      ...decided && reason ? { permissionDecisionReason: reason } : {},
       ...additionalContext ? { additionalContext } : {}
     }
   };
@@ -16335,9 +16550,7 @@ function decisionToPreToolUse(decision) {
         decision.guidance
       );
     case "guidance":
-      return preToolUse("allow", decisionReason(decision, "allowed with guidance"), decision.guidance);
     case "allow":
-      return preToolUse("allow", decisionReason(decision, "allowed by policy"), decision.guidance);
     case "defer":
       return preToolUse(void 0, void 0, decision.guidance);
   }
@@ -16482,12 +16695,13 @@ function permissionsMerge(rules) {
     format: "json",
     path: SETTINGS_PATH,
     what: "permission rules",
-    lists: ["allow", "ask", "deny"].map((list2) => ({
+    lists: ["ask", "deny"].map((list2) => ({
       key: ["permissions", list2],
       entries: [...rules[list2]]
     }))
   };
 }
+var ALLOW_RULES_SKIPPED = "allow rules are left to Claude Code's own permission settings; Tempa's hook applies the policies";
 function planClaudeCode(profile) {
   const files = [];
   const skipped = [];
@@ -16524,11 +16738,13 @@ ${text}` : text;
       }
     }
   }
+  const permissions = profile.permissions ?? { allow: [], ask: [], deny: [] };
+  if (permissions.allow.length) skipped.push({ asset: "permissions", reason: ALLOW_RULES_SKIPPED });
   return {
     harness: "claude-code",
     profileVersion: v,
     files,
-    settings: [permissionsMerge(profile.permissions ?? { allow: [], ask: [], deny: [] })],
+    settings: [permissionsMerge(permissions)],
     skipped
   };
 }
@@ -16536,11 +16752,11 @@ var claudeCodeRenderer = { id: "claude-code", plan: planClaudeCode };
 
 // src/render/index.ts
 import { existsSync as existsSync4, readFileSync as readFileSync9, realpathSync as realpathSync2 } from "node:fs";
-import { join as join17 } from "node:path";
+import { join as join19 } from "node:path";
 
 // src/telemetry/claude-settings.ts
 import { copyFileSync, existsSync as existsSync2, readFileSync as readFileSync7, rmSync as rmSync7 } from "node:fs";
-import { join as join15 } from "node:path";
+import { join as join17 } from "node:path";
 
 // src/shell.ts
 function shellQuote(value) {
@@ -16583,10 +16799,10 @@ function mergeSettings(current3, previous, env, helper) {
   };
 }
 function claudeSettingsPath(ctx) {
-  return join15(ctx.home, ".claude", "settings.json");
+  return join17(ctx.home, ".claude", "settings.json");
 }
 function ownedPath(ctx) {
-  return join15(ctx.tempaHome, "claude-settings.json");
+  return join17(ctx.tempaHome, "claude-settings.json");
 }
 function readOwned(ctx) {
   return readJsonLenient(ownedPath(ctx)) ?? { env_keys: [], otel_headers_helper: null };
@@ -16654,7 +16870,7 @@ import {
   rmdirSync,
   statSync as statSync4
 } from "node:fs";
-import { basename, dirname as dirname2, join as join16 } from "node:path";
+import { basename, dirname as dirname2, join as join18 } from "node:path";
 
 // src/render/local-files.ts
 function blockMarkers(comment, id = "tempa") {
@@ -16862,7 +17078,7 @@ function readManifestAt(path) {
 }
 function repoManifestPath(git2, harness = "claude-code") {
   if (harness === "claude-code") return git2.manifestPath;
-  return join16(dirname2(git2.manifestPath), `${basename(git2.manifestPath, ".json")}-${harness}.json`);
+  return join18(dirname2(git2.manifestPath), `${basename(git2.manifestPath, ".json")}-${harness}.json`);
 }
 function readManifest(git2, harness = "claude-code") {
   return readManifestAt(repoManifestPath(git2, harness));
@@ -16877,7 +17093,7 @@ function readText(path) {
 function hasSymlink(root, rel) {
   let current3 = root;
   for (const part of rel.split("/")) {
-    current3 = join16(current3, part);
+    current3 = join18(current3, part);
     try {
       if (lstatSync2(current3).isSymbolicLink()) return true;
     } catch {
@@ -16893,7 +17109,7 @@ function isInside(path) {
 function removeEmptyDirs(root, rel) {
   let dir = dirname2(rel);
   while (dir !== "." && dir.split("/").some((part) => part.startsWith("tempa-"))) {
-    const abs = join16(root, dir);
+    const abs = join18(root, dir);
     try {
       if (readdirSync5(abs).length) return;
       rmdirSync(abs);
@@ -16910,6 +17126,8 @@ function modeOf(path) {
     return void 0;
   }
 }
+var REPO_FILE_MODE = 420;
+var newFileMode = (t) => t.target === "repo" ? REPO_FILE_MODE : 384;
 function emptyReport(root) {
   return {
     root,
@@ -16963,7 +17181,7 @@ function applyTarget(t, plan2, report, renderedAt) {
   const files = {};
   for (const file of mine) {
     const shown = t.display(file.path);
-    const abs = join16(root, file.path);
+    const abs = join18(root, file.path);
     if (!isInside(file.path)) {
       report.conflicts.push({ path: shown, reason: "path leaves the target folder" });
       continue;
@@ -16998,7 +17216,12 @@ function applyTarget(t, plan2, report, renderedAt) {
     }
     mkdirSync2(dirname2(abs), { recursive: true });
     if (current3 === file.content && file.mode !== void 0) chmodSync2(abs, file.mode);
-    else writeFileAtomic(abs, file.content, file.mode !== void 0 ? { mode: file.mode } : {});
+    else
+      writeFileAtomic(
+        abs,
+        file.content,
+        file.mode !== void 0 ? { mode: file.mode } : { newMode: newFileMode(t) }
+      );
     report.written.push(shown);
     files[file.path] = { sha256: hash, kind: file.kind };
     if (file.kind === "skill") report.skillsChanged = true;
@@ -17008,7 +17231,7 @@ function applyTarget(t, plan2, report, renderedAt) {
   for (const path of [...Object.keys(previous.files), ...previous.kept]) {
     if (planned.has(path) || tracked.has(path) || kept.includes(path) || !isInside(path)) continue;
     if (handedOver.has(path)) continue;
-    const abs = join16(root, path);
+    const abs = join18(root, path);
     const current3 = readText(abs);
     if (current3 === void 0) continue;
     const last = previous.files[path];
@@ -17048,7 +17271,8 @@ function applyTarget(t, plan2, report, renderedAt) {
       if (prev) settings[merge2.path] = prev;
       continue;
     }
-    const result = merge2.format === "json" ? applyJson(root, merge2, prev) : applyBlock(root, merge2, prev);
+    const newMode = newFileMode(t);
+    const result = merge2.format === "json" ? applyJson(root, merge2, prev, newMode) : applyBlock(root, merge2, prev, newMode);
     if ("conflict" in result) {
       report.conflicts.push({ path: shown, reason: `${result.conflict}; ${what} not written` });
       if (prev) settings[merge2.path] = prev;
@@ -17061,11 +17285,11 @@ function applyTarget(t, plan2, report, renderedAt) {
   if (t.git) {
     excluded.push(...Object.keys(files), ...kept);
     for (const path of Object.keys(settings))
-      if (!tracked.has(path) && existsSync3(join16(root, path))) excluded.push(path);
+      if (!tracked.has(path) && existsSync3(join18(root, path))) excluded.push(path);
     const entries = [...new Set(excluded)].sort();
     const before = readText(t.git.excludePath) ?? "";
     const after = updateExcludeBlock(before, entries.map(excludeEntry), plan2.harness);
-    if (after !== before) writeFileAtomic(t.git.excludePath, after);
+    if (after !== before) writeFileAtomic(t.git.excludePath, after, { newMode: REPO_FILE_MODE });
     excluded.splice(0, excluded.length, ...entries);
   }
   const manifest = {
@@ -17083,8 +17307,8 @@ function applyTarget(t, plan2, report, renderedAt) {
 function ownsSomething(owned) {
   return owned.created || !!owned.block || (owned.lists ?? []).some((l) => l.entries.length) || (owned.values ?? []).some((v) => v.keys.length);
 }
-function applyJson(root, merge2, prev) {
-  const abs = join16(root, merge2.path);
+function applyJson(root, merge2, prev, newMode) {
+  const abs = join18(root, merge2.path);
   const existed = existsSync3(abs);
   let current3;
   try {
@@ -17115,14 +17339,14 @@ function applyJson(root, merge2, prev) {
     changed = true;
   } else if (result.changed && (existed || anyOwned)) {
     mkdirSync2(dirname2(abs), { recursive: true });
-    writeJsonAtomic(abs, result.settings);
+    writeJsonAtomic(abs, result.settings, { newMode });
     if (!existed) created = true;
     changed = true;
   }
   return { owned: { ...owned, created }, changed };
 }
-function applyBlock(root, merge2, prev) {
-  const abs = join16(root, merge2.path);
+function applyBlock(root, merge2, prev, newMode) {
+  const abs = join18(root, merge2.path);
   const before = readText(abs);
   const lines = merge2.text ? merge2.text.replace(/\n+$/, "").split("\n") : [];
   const after = updateBlock(before ?? "", blockMarkers(merge2.comment), lines);
@@ -17134,7 +17358,7 @@ function applyBlock(root, merge2, prev) {
     changed = true;
   } else if (after !== (before ?? "") && (before !== void 0 || lines.length)) {
     mkdirSync2(dirname2(abs), { recursive: true });
-    writeFileAtomic(abs, after);
+    writeFileAtomic(abs, after, { newMode });
     if (before === void 0) created = true;
     changed = true;
   }
@@ -17146,7 +17370,7 @@ function checkDrift(git2, harness = "claude-code") {
 function checkDriftAt(root, manifest) {
   const report = { missing: [], modified: [], ok: [], ...manifest ? { manifest } : {} };
   for (const [path, file] of Object.entries(manifest?.files ?? {})) {
-    const current3 = readText(join16(root, path));
+    const current3 = readText(join18(root, path));
     if (current3 === void 0) report.missing.push(path);
     else if (sha256(current3) !== file.sha256) report.modified.push(path);
     else report.ok.push(path);
@@ -17156,7 +17380,7 @@ function checkDriftAt(root, manifest) {
 
 // src/harness/codex-rules.ts
 var WORD = /^[\w@%+=:,./-]+$/;
-function parse(rule) {
+function parse2(rule) {
   const m = /^Bash\((.*)\)$/.exec(rule.trim());
   if (!m) return { reason: "not a shell rule" };
   let body2 = m[1].trim();
@@ -17168,15 +17392,15 @@ function parse(rule) {
     body2 = body2.slice(0, -2).trim();
     prefix = true;
   }
-  const words = body2.split(/\s+/).filter(Boolean);
-  if (!words.length) return { reason: "matches every command" };
-  if (!words.every((w) => WORD.test(w))) return { reason: "has wildcards, quoting or shell operators" };
-  return { words, prefix };
+  const words2 = body2.split(/\s+/).filter(Boolean);
+  if (!words2.length) return { reason: "matches every command" };
+  if (!words2.every((w) => WORD.test(w))) return { reason: "has wildcards, quoting or shell operators" };
+  return { words: words2, prefix };
 }
 function prefixRules(permissions) {
   const out2 = { rules: [], skipped: [] };
   const add = (rule, decision) => {
-    const parsed = parse(rule);
+    const parsed = parse2(rule);
     if ("reason" in parsed) {
       out2.skipped.push({ rule, reason: parsed.reason });
       return;
@@ -17211,9 +17435,9 @@ function rulesFile(rules, head2) {
 var COMPOUND = /[;&|<>`$()\n]/;
 function coveringRule(rules, command, decision) {
   if (COMPOUND.test(command)) return void 0;
-  const words = command.trim().split(/\s+/);
+  const words2 = command.trim().split(/\s+/);
   return rules.find(
-    (r) => r.decision === decision && r.pattern.length <= words.length && r.pattern.every((w, i2) => words[i2] === w)
+    (r) => r.decision === decision && r.pattern.length <= words2.length && r.pattern.every((w, i2) => words2[i2] === w)
   );
 }
 
@@ -17420,7 +17644,7 @@ ${tempa}` : tempa;
   if (!packed.fits)
     skipped.push({
       asset: "standards",
-      // Codex 0.157 cuts the text at project_doc_max_bytes, mid-line, and adds no later file (TEMPA-149).
+      // Codex 0.157 cuts the text at project_doc_max_bytes, mid-line, and adds no later file.
       reason: `${path} is ${packed.bytes} bytes, over Tempa's ${AGENTS_MD_BUDGET_BYTES}; Codex cuts what passes its limit`
     });
   return files;
@@ -17500,7 +17724,7 @@ function codexUserHooks(command) {
     ])
   );
   const hash = `sha256:${sha256(JSON.stringify(hooks)).slice(0, 12)}`;
-  const description = `${MANAGED_MARKER}, content ${hash}. tempa sync overwrites changes. Tempa's hooks for Codex (TEMPA-145).`;
+  const description = `${MANAGED_MARKER}, content ${hash}. tempa sync overwrites changes. Tempa's hooks for Codex.`;
   return {
     path: CODEX_USER_HOOKS,
     content: `${JSON.stringify({ description, hooks }, null, 2)}
@@ -17950,7 +18174,7 @@ function renderProfile(repo, profile, now, renderer = claudeCodeRenderer, sessio
 function committedAgentsMd(root) {
   if (!trackedPaths(root, ["AGENTS.md"]).has("AGENTS.md")) return void 0;
   try {
-    return readFileSync9(join17(root, "AGENTS.md"), "utf8");
+    return readFileSync9(join19(root, "AGENTS.md"), "utf8");
   } catch {
     return void 0;
   }
@@ -17965,7 +18189,7 @@ function contextFileNames(path) {
   return void 0;
 }
 function geminiRepo(git2, home2) {
-  const names = contextFileNames(join17(git2.root, GEMINI_PROJECT_SETTINGS)) ?? (home2 ? contextFileNames(join17(home2, ".gemini", "settings.json")) : void 0) ?? [GEMINI_MD];
+  const names = contextFileNames(join19(git2.root, GEMINI_PROJECT_SETTINGS)) ?? (home2 ? contextFileNames(join19(home2, ".gemini", "settings.json")) : void 0) ?? [GEMINI_MD];
   const tracked = trackedPaths(git2.root, [...names, TEMPA_MD, GEMINI_PROJECT_SETTINGS]);
   return {
     geminiContextFileNames: names,
@@ -17974,7 +18198,7 @@ function geminiRepo(git2, home2) {
   };
 }
 function antigravityRepo(git2) {
-  const present = (harness) => Object.keys(readManifest(git2, harness)?.files ?? {}).filter((p) => existsSync4(join17(git2.root, p)));
+  const present = (harness) => Object.keys(readManifest(git2, harness)?.files ?? {}).filter((p) => existsSync4(join19(git2.root, p)));
   return { codexFiles: present("codex"), geminiFiles: present("gemini-cli") };
 }
 function codexHookTrust(ctx) {
@@ -17988,7 +18212,7 @@ function codexHookTrust(ctx) {
 function codexRequirementsPath(ctx) {
   if (ctx.env.TEMPA_CODEX_REQUIREMENTS) return ctx.env.TEMPA_CODEX_REQUIREMENTS;
   if (ctx.platform === "win32")
-    return join17(ctx.env.ProgramData ?? "C:\\ProgramData", "OpenAI", "Codex", "requirements.toml");
+    return join19(ctx.env.ProgramData ?? "C:\\ProgramData", "OpenAI", "Codex", "requirements.toml");
   return "/etc/codex/requirements.toml";
 }
 function codexMcpTempa(ctx) {
@@ -18012,7 +18236,7 @@ function renderSession(ctx, harness) {
   if (harness === "claude-code") return void 0;
   const tempaPath = harness === "codex" ? codexMcpTempa(ctx) : void 0;
   const trust = harness === "codex" ? codexHookTrust(ctx) : void 0;
-  const tempaHome = ctx.tempaHome !== join17(ctx.home, ".tempa") ? ctx.tempaHome : void 0;
+  const tempaHome = ctx.tempaHome !== join19(ctx.home, ".tempa") ? ctx.tempaHome : void 0;
   return {
     env: {
       cli: cliCommand(ctx),
@@ -18022,7 +18246,7 @@ function renderSession(ctx, harness) {
       ...tempaHome ? { tempaHome } : {},
       ...trust ? { codexHookTrust: trust } : {}
     },
-    user: { root: ctx.home, manifestPath: join17(ctx.tempaHome, `user-manifest-${harness}.json`) }
+    user: { root: ctx.home, manifestPath: join19(ctx.tempaHome, `user-manifest-${harness}.json`) }
   };
 }
 function describeRender(report) {
@@ -18035,17 +18259,73 @@ function describeRender(report) {
   return lines;
 }
 
-// src/telemetry/events.ts
-import { readdirSync as readdirSync8, readFileSync as readFileSync11, renameSync as renameSync2, rmSync as rmSync11, statSync as statSync6 } from "node:fs";
+// src/render/clean.ts
+import { existsSync as existsSync5, rmSync as rmSync9 } from "node:fs";
 import { join as join20 } from "node:path";
+var RENDERING_HARNESSES = [
+  "claude-code",
+  "codex",
+  "gemini-cli",
+  "copilot",
+  "antigravity"
+];
+function cleanRepo(git2, dryRun) {
+  const results = [];
+  for (const harness of RENDERING_HARNESSES) {
+    const manifest = readManifest(git2, harness);
+    const exclude = readText(git2.excludePath) ?? "";
+    const blocked = excludeEntries(exclude, harness).length > 0;
+    if (!manifest && !blocked) continue;
+    if (dryRun) {
+      const drift = checkDrift(git2, harness);
+      results.push({
+        harness,
+        removed: drift.ok,
+        kept: [...drift.modified, ...manifest?.kept ?? []],
+        settings: Object.keys(manifest?.settings ?? {})
+      });
+      continue;
+    }
+    const settings = Object.keys(manifest?.settings ?? {});
+    const report = manifest ? applyRender(git2, { harness, profileVersion: "", files: [], settings: [], skipped: [] }) : void 0;
+    const after = updateExcludeBlock(readText(git2.excludePath) ?? "", [], harness);
+    if (after !== (readText(git2.excludePath) ?? ""))
+      writeFileAtomic(git2.excludePath, after, { newMode: 420 });
+    rmSync9(repoManifestPath(git2, harness), { force: true });
+    results.push({ harness, removed: report?.removed ?? [], kept: report?.kept ?? [], settings });
+  }
+  return results;
+}
+function renderedPath(ctx) {
+  return join20(ctx.tempaHome, "rendered-repos.json");
+}
+function rememberRenderedRepo(ctx, root) {
+  const roots = readJsonLenient(renderedPath(ctx)) ?? [];
+  if (roots.includes(root)) return;
+  try {
+    writeJsonAtomic(renderedPath(ctx), [...roots, root].sort(), { mode: 384, dirMode: 448 });
+  } catch {
+  }
+}
+function renderedRepos(ctx) {
+  const roots = readJsonLenient(renderedPath(ctx)) ?? [];
+  return roots.filter((r) => existsSync5(r)).flatMap((r) => gitInfo(r) ?? []);
+}
+function forgetRenderedRepos(ctx, dryRun) {
+  if (!dryRun) rmSync9(renderedPath(ctx), { force: true });
+}
+
+// src/telemetry/events.ts
+import { readdirSync as readdirSync8, readFileSync as readFileSync11, renameSync as renameSync2, rmSync as rmSync12, statSync as statSync6 } from "node:fs";
+import { join as join23 } from "node:path";
 
 // src/hook/state.ts
 import { createHash as createHash7 } from "node:crypto";
-import { appendFileSync, readFileSync as readFileSync10, readdirSync as readdirSync6, rmSync as rmSync9, statSync as statSync5, writeFileSync as writeFileSync2 } from "node:fs";
-import { join as join18 } from "node:path";
+import { appendFileSync, readFileSync as readFileSync10, readdirSync as readdirSync6, rmSync as rmSync10, statSync as statSync5, writeFileSync as writeFileSync2 } from "node:fs";
+import { join as join21 } from "node:path";
 function sessionFile(ctx, sessionId) {
   const safe = /^[A-Za-z0-9_-]{1,128}$/.test(sessionId) ? sessionId : createHash7("sha256").update(sessionId).digest("hex");
-  return join18(ctx.tempaHome, "sessions", `${safe}.json`);
+  return join21(ctx.tempaHome, "sessions", `${safe}.json`);
 }
 function readSession(ctx, sessionId) {
   return readJsonLenient(sessionFile(ctx, sessionId)) ?? {
@@ -18058,8 +18338,8 @@ function writeSession(ctx, state) {
   writeJsonAtomic(sessionFile(ctx, state.session_id), state, { dirMode: 448 });
 }
 function endSession(ctx, sessionId) {
-  rmSync9(sessionFile(ctx, sessionId), { force: true });
-  rmSync9(reposFile(ctx, sessionId), { force: true });
+  rmSync10(sessionFile(ctx, sessionId), { force: true });
+  rmSync10(reposFile(ctx, sessionId), { force: true });
 }
 function reposFile(ctx, sessionId) {
   return sessionFile(ctx, sessionId).replace(/\.json$/, ".repos.json");
@@ -18090,8 +18370,8 @@ function writeLastEvent(ctx, sessionId, event2) {
 }
 var CLAIM_WINDOW_MS = 1e4;
 function claimEvent(ctx, key) {
-  const dir = join18(ctx.tempaHome, "sessions");
-  const path = join18(dir, `${createHash7("sha256").update(key).digest("hex")}.claim`);
+  const dir = join21(ctx.tempaHome, "sessions");
+  const path = join21(dir, `${createHash7("sha256").update(key).digest("hex")}.claim`);
   const take = () => writeFileSync2(path, `${new Date(ctx.now()).toISOString()}
 `, { flag: "wx", mode: 384 });
   try {
@@ -18104,7 +18384,7 @@ function claimEvent(ctx, key) {
   }
   try {
     if (Date.now() - statSync5(path).mtimeMs <= CLAIM_WINDOW_MS) return false;
-    rmSync9(path, { force: true });
+    rmSync10(path, { force: true });
     take();
     return true;
   } catch {
@@ -18112,7 +18392,7 @@ function claimEvent(ctx, key) {
   }
 }
 function pruneSessions(ctx, maxAgeMs = 7 * 864e5) {
-  const dir = join18(ctx.tempaHome, "sessions");
+  const dir = join21(ctx.tempaHome, "sessions");
   let names;
   try {
     names = readdirSync6(dir);
@@ -18120,15 +18400,15 @@ function pruneSessions(ctx, maxAgeMs = 7 * 864e5) {
     return;
   }
   for (const name2 of names) {
-    const path = join18(dir, name2);
+    const path = join21(dir, name2);
     try {
-      if (Date.now() - statSync5(path).mtimeMs > maxAgeMs) rmSync9(path, { force: true });
+      if (Date.now() - statSync5(path).mtimeMs > maxAgeMs) rmSync10(path, { force: true });
     } catch {
     }
   }
 }
 function spoolDir(ctx) {
-  return join18(ctx.tempaHome, "spool");
+  return join21(ctx.tempaHome, "spool");
 }
 function spool(ctx, record2) {
   ensurePrivateDir(ctx.tempaHome);
@@ -18138,7 +18418,7 @@ function spool(ctx, record2) {
   const tagged = ctx.harness && attributes.harness === void 0 ? { ...record2, attributes: { ...attributes, harness: ctx.harness } } : record2;
   const line = `${JSON.stringify({ at: new Date(ctx.now()).toISOString(), ...tagged })}
 `;
-  appendFileSync(join18(spoolDir(ctx), `${day}.jsonl`), line, { mode: 384 });
+  appendFileSync(join21(spoolDir(ctx), `${day}.jsonl`), line, { mode: 384 });
 }
 function recordOffline(ctx, state, mode, repo, attributes = {}) {
   if (state.recorded?.includes(mode)) return;
@@ -18149,16 +18429,16 @@ function recordOffline(ctx, state, mode, repo, attributes = {}) {
 
 // src/telemetry/token.ts
 import { createHash as createHash8 } from "node:crypto";
-import { readdirSync as readdirSync7, rmSync as rmSync10 } from "node:fs";
-import { join as join19 } from "node:path";
+import { readdirSync as readdirSync7, rmSync as rmSync11 } from "node:fs";
+import { join as join22 } from "node:path";
 var REFRESH_BEFORE_MS = 30 * 6e4;
 function tokenDir(ctx) {
-  return join19(ctx.tempaHome, "telemetry");
+  return join22(ctx.tempaHome, "telemetry");
 }
 function tokenPath(ctx, repo, tenant) {
   const key = createHash8("sha256").update(`${normalizeRemote(repo) ?? repo ?? "@default"}${tenant ? `
 ${tenant}` : ""}`).digest("hex");
-  return join19(tokenDir(ctx), `${key}.json`);
+  return join22(tokenDir(ctx), `${key}.json`);
 }
 function remaining(ctx, token2) {
   return Date.parse(token2.expires_at) - ctx.now();
@@ -18188,7 +18468,7 @@ async function telemetryToken(ctx, repo, options = {}) {
 }
 function clearTelemetryTokens(ctx) {
   try {
-    for (const name2 of readdirSync7(tokenDir(ctx))) rmSync10(join19(tokenDir(ctx), name2), { force: true });
+    for (const name2 of readdirSync7(tokenDir(ctx))) rmSync11(join22(tokenDir(ctx), name2), { force: true });
   } catch {
   }
 }
@@ -18268,7 +18548,7 @@ function claimFiles(ctx) {
   }
   const claimed = [];
   for (const name2 of names.sort()) {
-    const path = join20(dir, name2);
+    const path = join23(dir, name2);
     const inflight = name2.includes(".inflight-");
     if (inflight) {
       try {
@@ -18279,7 +18559,7 @@ function claimFiles(ctx) {
     } else if (!name2.endsWith(".jsonl")) {
       continue;
     }
-    const target = join20(dir, `${name2.replace(/\.inflight-.*$/, "")}.inflight-${process.pid}-${Date.now()}`);
+    const target = join23(dir, `${name2.replace(/\.inflight-.*$/, "")}.inflight-${process.pid}-${Date.now()}`);
     try {
       renameSync2(path, target);
       claimed.push(target);
@@ -18288,7 +18568,7 @@ function claimFiles(ctx) {
   }
   return claimed;
 }
-function parse2(path) {
+function parse3(path) {
   const out2 = [];
   let text = "";
   try {
@@ -18313,7 +18593,7 @@ async function flush(ctx, options = {}) {
   if (!files.length) return result;
   const fresh = [];
   for (const file of files) {
-    for (const r of parse2(file)) {
+    for (const r of parse3(file)) {
       if (ctx.now() - Date.parse(r.at) > MAX_AGE_MS) result.dropped += 1;
       else fresh.push(r);
     }
@@ -18350,7 +18630,7 @@ async function flush(ctx, options = {}) {
       else unsent.push(...records.slice(sentInGroup));
     }
   }
-  for (const file of files) rmSync11(file, { force: true });
+  for (const file of files) rmSync12(file, { force: true });
   const untagged = { ...ctx, harness: void 0 };
   for (const r of unsent) {
     spool(untagged, r);
@@ -18391,6 +18671,7 @@ function afterSync(ctx, info2) {
       options
     );
   }
+  if (report && repo.git) rememberRenderedRepo(ctx, repo.git.root);
   if (report?.restored.length) {
     emit(ctx, "render.drift", { files: report.restored.length, repo: repo.repo ?? "" }, options);
   }
@@ -18400,12 +18681,12 @@ function afterSync(ctx, info2) {
 
 // src/runtime.ts
 import { readFileSync as readFileSync12 } from "node:fs";
-import { join as join21 } from "node:path";
+import { join as join24 } from "node:path";
 function nodePathFile(ctx) {
-  return join21(ctx.tempaHome, "node-path");
+  return join24(ctx.tempaHome, "node-path");
 }
 function cliPathFile(ctx) {
-  return join21(ctx.tempaHome, "cli-path");
+  return join24(ctx.tempaHome, "cli-path");
 }
 function current(path) {
   try {
@@ -18432,7 +18713,7 @@ function rememberRuntime(ctx) {
 
 // src/work/track.ts
 import { createHash as createHash9 } from "node:crypto";
-import { join as join22 } from "node:path";
+import { join as join25 } from "node:path";
 
 // src/work/references.ts
 function repoKey2(path, n) {
@@ -18578,7 +18859,7 @@ function inferStep(profile, toolName, toolInput2, root) {
 // src/work/track.ts
 function explicitPath(ctx, repo) {
   const id = createHash9("sha256").update(repo.key).digest("hex").slice(0, 32);
-  return join22(ctx.tempaHome, "work", `${id}.json`);
+  return join25(ctx.tempaHome, "work", `${id}.json`);
 }
 function readExplicit(ctx, repo) {
   return readJsonLenient(explicitPath(ctx, repo)) ?? {};
@@ -18719,8 +19000,40 @@ function trackStep(ctx, options, state, explicit, root, now) {
   return true;
 }
 
+// src/mcp/sign-ins.ts
+var NotConnectedError = class extends Error {
+  constructor(message, endpoint, connectUrl) {
+    super(message);
+    this.endpoint = endpoint;
+    this.connectUrl = connectUrl;
+    this.name = "NotConnectedError";
+  }
+};
+function hasPerUser(profile) {
+  return !!profile?.mcp.some((m) => m.auth === "per-user");
+}
+async function unconnected(ctx, login2, timeoutMs) {
+  try {
+    const { body: body2 } = await authedRequest(ctx, "/me/connections", {
+      timeoutMs,
+      ...login2?.tenant ? { tenant: login2.tenant } : {},
+      ...login2?.endpoint ? { endpoint: login2.endpoint } : {}
+    });
+    return (body2.connections ?? []).filter((c) => c.in_profile && c.status !== "connected");
+  } catch (err2) {
+    if (err2 instanceof HttpError && err2.status === 404) return [];
+    throw err2;
+  }
+}
+function signInNotice(item) {
+  const name2 = item.description ? `${item.description} (${item.endpoint})` : item.endpoint;
+  const what = item.status === "needs_reconnect" ? "needs you to connect it again" : "is not connected for you yet";
+  const where = item.connect_url ? `Open ${item.connect_url} to connect (one click).` : "Connect it in Tempa, Me, MCP servers.";
+  return `${name2} ${what}. ${where}`;
+}
+
 // src/policy/local.ts
-import { existsSync as existsSync6 } from "node:fs";
+import { existsSync as existsSync7 } from "node:fs";
 
 // src/policy/grammar.ts
 import { readFileSync as readFileSync13 } from "node:fs";
@@ -19051,12 +19364,12 @@ var Tree = class _Tree {
       throw new TypeError("Argument must be a Tree");
     }
     C._ts_tree_get_changed_ranges_wasm(this[0], other[0]);
-    const count = C.getValue(TRANSFER_BUFFER, "i32");
+    const count2 = C.getValue(TRANSFER_BUFFER, "i32");
     const buffer = C.getValue(TRANSFER_BUFFER + SIZE_OF_INT, "i32");
-    const result = new Array(count);
-    if (count > 0) {
+    const result = new Array(count2);
+    if (count2 > 0) {
       let address = buffer;
-      for (let i2 = 0; i2 < count; i2++) {
+      for (let i2 = 0; i2 < count2; i2++) {
         result[i2] = unmarshalRange(address);
         address += SIZE_OF_RANGE;
       }
@@ -19067,12 +19380,12 @@ var Tree = class _Tree {
   /** Get the included ranges that were used to parse the syntax tree. */
   getIncludedRanges() {
     C._ts_tree_included_ranges_wasm(this[0]);
-    const count = C.getValue(TRANSFER_BUFFER, "i32");
+    const count2 = C.getValue(TRANSFER_BUFFER, "i32");
     const buffer = C.getValue(TRANSFER_BUFFER + SIZE_OF_INT, "i32");
-    const result = new Array(count);
-    if (count > 0) {
+    const result = new Array(count2);
+    if (count2 > 0) {
       let address = buffer;
-      for (let i2 = 0; i2 < count; i2++) {
+      for (let i2 = 0; i2 < count2; i2++) {
         result[i2] = unmarshalRange(address);
         address += SIZE_OF_RANGE;
       }
@@ -19602,12 +19915,12 @@ var Node = class {
   childrenForFieldId(fieldId) {
     marshalNode(this);
     C._ts_node_children_by_field_id_wasm(this.tree[0], fieldId);
-    const count = C.getValue(TRANSFER_BUFFER, "i32");
+    const count2 = C.getValue(TRANSFER_BUFFER, "i32");
     const buffer = C.getValue(TRANSFER_BUFFER + SIZE_OF_INT, "i32");
-    const result = new Array(count);
-    if (count > 0) {
+    const result = new Array(count2);
+    if (count2 > 0) {
       let address = buffer;
-      for (let i2 = 0; i2 < count; i2++) {
+      for (let i2 = 0; i2 < count2; i2++) {
         result[i2] = unmarshalNode(this.tree, address);
         address += SIZE_OF_NODE;
       }
@@ -19679,12 +19992,12 @@ var Node = class {
     if (!this._children) {
       marshalNode(this);
       C._ts_node_children_wasm(this.tree[0]);
-      const count = C.getValue(TRANSFER_BUFFER, "i32");
+      const count2 = C.getValue(TRANSFER_BUFFER, "i32");
       const buffer = C.getValue(TRANSFER_BUFFER + SIZE_OF_INT, "i32");
-      this._children = new Array(count);
-      if (count > 0) {
+      this._children = new Array(count2);
+      if (count2 > 0) {
         let address = buffer;
-        for (let i2 = 0; i2 < count; i2++) {
+        for (let i2 = 0; i2 < count2; i2++) {
           this._children[i2] = unmarshalNode(this.tree, address);
           address += SIZE_OF_NODE;
         }
@@ -19702,12 +20015,12 @@ var Node = class {
     if (!this._namedChildren) {
       marshalNode(this);
       C._ts_node_named_children_wasm(this.tree[0]);
-      const count = C.getValue(TRANSFER_BUFFER, "i32");
+      const count2 = C.getValue(TRANSFER_BUFFER, "i32");
       const buffer = C.getValue(TRANSFER_BUFFER + SIZE_OF_INT, "i32");
-      this._namedChildren = new Array(count);
-      if (count > 0) {
+      this._namedChildren = new Array(count2);
+      if (count2 > 0) {
         let address = buffer;
-        for (let i2 = 0; i2 < count; i2++) {
+        for (let i2 = 0; i2 < count2; i2++) {
           this._namedChildren[i2] = unmarshalNode(this.tree, address);
           address += SIZE_OF_NODE;
         }
@@ -20176,12 +20489,12 @@ var Language = class _Language {
    */
   get supertypes() {
     C._ts_language_supertypes_wasm(this[0]);
-    const count = C.getValue(TRANSFER_BUFFER, "i32");
+    const count2 = C.getValue(TRANSFER_BUFFER, "i32");
     const buffer = C.getValue(TRANSFER_BUFFER + SIZE_OF_INT, "i32");
-    const result = new Array(count);
-    if (count > 0) {
+    const result = new Array(count2);
+    if (count2 > 0) {
       let address = buffer;
-      for (let i2 = 0; i2 < count; i2++) {
+      for (let i2 = 0; i2 < count2; i2++) {
         result[i2] = C.getValue(address, "i16");
         address += SIZE_OF_SHORT;
       }
@@ -20193,12 +20506,12 @@ var Language = class _Language {
    */
   subtypes(supertype) {
     C._ts_language_subtypes_wasm(this[0], supertype);
-    const count = C.getValue(TRANSFER_BUFFER, "i32");
+    const count2 = C.getValue(TRANSFER_BUFFER, "i32");
     const buffer = C.getValue(TRANSFER_BUFFER + SIZE_OF_INT, "i32");
-    const result = new Array(count);
-    if (count > 0) {
+    const result = new Array(count2);
+    if (count2 > 0) {
       let address = buffer;
-      for (let i2 = 0; i2 < count; i2++) {
+      for (let i2 = 0; i2 < count2; i2++) {
         result[i2] = C.getValue(address, "i16");
         address += SIZE_OF_SHORT;
       }
@@ -20356,13 +20669,13 @@ async function Module2(moduleArg = {}) {
       }
       readAsync = /* @__PURE__ */ __name(async (url2) => {
         if (isFileURI(url2)) {
-          return new Promise((resolve12, reject) => {
+          return new Promise((resolve14, reject) => {
             var xhr = new XMLHttpRequest();
             xhr.open("GET", url2, true);
             xhr.responseType = "arraybuffer";
             xhr.onload = () => {
               if (xhr.status == 200 || xhr.status == 0 && xhr.response) {
-                resolve12(xhr.response);
+                resolve14(xhr.response);
                 return;
               }
               reject(xhr.status);
@@ -20558,9 +20871,9 @@ async function Module2(moduleArg = {}) {
     __name(receiveInstantiationResult, "receiveInstantiationResult");
     var info2 = getWasmImports();
     if (Module["instantiateWasm"]) {
-      return new Promise((resolve12, reject) => {
+      return new Promise((resolve14, reject) => {
         Module["instantiateWasm"](info2, (mod, inst) => {
-          resolve12(receiveInstance(mod, inst));
+          resolve14(receiveInstance(mod, inst));
         });
       });
     }
@@ -20684,9 +20997,9 @@ async function Module2(moduleArg = {}) {
     }
     __name(getString, "getString");
     function getStringList() {
-      var count2 = getLEB();
+      var count22 = getLEB();
       var rtn = [];
-      while (count2--) rtn.push(getString());
+      while (count22--) rtn.push(getString());
       return rtn;
     }
     __name(getStringList, "getStringList");
@@ -20735,8 +21048,8 @@ async function Module2(moduleArg = {}) {
       } else if (subsectionType === WASM_DYLINK_NEEDED) {
         customSection.neededDynlibs = getStringList();
       } else if (subsectionType === WASM_DYLINK_EXPORT_INFO) {
-        var count = getLEB();
-        while (count--) {
+        var count2 = getLEB();
+        while (count2--) {
           var symname = getString();
           var flags2 = getLEB();
           if (flags2 & WASM_SYMBOL_TLS) {
@@ -20744,8 +21057,8 @@ async function Module2(moduleArg = {}) {
           }
         }
       } else if (subsectionType === WASM_DYLINK_IMPORT_INFO) {
-        var count = getLEB();
-        while (count--) {
+        var count2 = getLEB();
+        while (count2--) {
           var modname = getString();
           var symname = getString();
           var flags2 = getLEB();
@@ -20904,9 +21217,9 @@ async function Module2(moduleArg = {}) {
     }
     return func2;
   }, "getWasmTableEntry");
-  var updateTableMap = /* @__PURE__ */ __name((offset, count) => {
+  var updateTableMap = /* @__PURE__ */ __name((offset, count2) => {
     if (functionsInTableMap) {
-      for (var i2 = offset; i2 < offset + count; i2++) {
+      for (var i2 = offset; i2 < offset + count2; i2++) {
         var item = getWasmTableEntry(i2);
         if (item) {
           functionsInTableMap.set(item, i2);
@@ -21893,8 +22206,8 @@ async function Module2(moduleArg = {}) {
   if (runtimeInitialized) {
     moduleRtn = Module;
   } else {
-    moduleRtn = new Promise((resolve12, reject) => {
-      readyPromiseResolve = resolve12;
+    moduleRtn = new Promise((resolve14, reject) => {
+      readyPromiseResolve = resolve14;
       readyPromiseReject = reject;
     });
   }
@@ -22081,12 +22394,12 @@ var Parser = class {
   /** Get the ranges of text that the parser will include when parsing. */
   getIncludedRanges() {
     C._ts_parser_included_ranges_wasm(this[0]);
-    const count = C.getValue(TRANSFER_BUFFER, "i32");
+    const count2 = C.getValue(TRANSFER_BUFFER, "i32");
     const buffer = C.getValue(TRANSFER_BUFFER + SIZE_OF_INT, "i32");
-    const result = new Array(count);
-    if (count > 0) {
+    const result = new Array(count2);
+    if (count2 > 0) {
       let address = buffer;
-      for (let i2 = 0; i2 < count; i2++) {
+      for (let i2 = 0; i2 < count2; i2++) {
         result[i2] = unmarshalRange(address);
         address += SIZE_OF_RANGE;
       }
@@ -22655,14 +22968,14 @@ var Query = class {
       matchLimit,
       maxStartDepth
     );
-    const count = C.getValue(TRANSFER_BUFFER, "i32");
+    const count2 = C.getValue(TRANSFER_BUFFER, "i32");
     const startAddress = C.getValue(TRANSFER_BUFFER + SIZE_OF_INT, "i32");
     const didExceedMatchLimit = C.getValue(TRANSFER_BUFFER + 2 * SIZE_OF_INT, "i32");
     const result = new Array();
     this.exceededMatchLimit = Boolean(didExceedMatchLimit);
     const captures = new Array();
     let address = startAddress;
-    for (let i2 = 0; i2 < count; i2++) {
+    for (let i2 = 0; i2 < count2; i2++) {
       const patternIndex = C.getValue(address, "i32");
       address += SIZE_OF_INT;
       const captureCount = C.getValue(address, "i32");
@@ -22851,15 +23164,15 @@ function isSensitiveVariable(name2) {
   return name2.includes("PATH") || SENSITIVE_VAR_PREFIXES.some((p) => name2.startsWith(p)) || SENSITIVE_VARS.has(name2);
 }
 function fileTestOperands(all) {
-  const words = all.length && all[all.length - 1] === "]" ? all.slice(0, -1) : all;
+  const words2 = all.length && all[all.length - 1] === "]" ? all.slice(0, -1) : all;
   const paths = [];
-  words.forEach((word, i2) => {
-    const next = words[i2 + 1];
-    const startsExpression = i2 === 0 || TEST_EXPRESSION_STARTS.has(words[i2 - 1]);
+  words2.forEach((word, i2) => {
+    const next = words2[i2 + 1];
+    const startsExpression = i2 === 0 || TEST_EXPRESSION_STARTS.has(words2[i2 - 1]);
     if (TEST_UNARY_FILE_OPS.has(word) && next !== void 0) {
       if (word !== "-a" || startsExpression) paths.push(next);
     } else if (TEST_BINARY_FILE_OPS.has(word) && next !== void 0 && i2 > 0) {
-      paths.push(words[i2 - 1], next);
+      paths.push(words2[i2 - 1], next);
     }
   });
   return paths;
@@ -22991,12 +23304,12 @@ function assignedNames(nodes, original) {
       if (n.type === "variable_assignment") names.add(slice(original, n).split("=", 1)[0]);
       else if (n.type === "for_statement") names.add(n.childForFieldName("variable")?.text ?? "");
       else if (n.type === "command" || n.type === "declaration_command" || n.type === "unset_command") {
-        const words = commandWords(n, original);
-        const first = words[0];
+        const words2 = commandWords(n, original);
+        const first = words2[0];
         if (first === void 0) continue;
         if (ENV_REPLACING.has(first)) return null;
         if (DECLARING.has(first) || ASSIGNING.has(first))
-          for (const w of words.slice(1)) names.add(w.split("=", 1)[0]);
+          for (const w of words2.slice(1)) names.add(w.split("=", 1)[0]);
       }
     }
   }
@@ -23179,14 +23492,14 @@ var Parse = class {
     const variable = node2.childForFieldName("variable")?.text ?? "";
     const all = kids(node2);
     const hasIn = all.some((c) => c.type === "in");
-    const words = hasIn ? all.filter((_, i2) => node2.fieldNameForChild(i2) === "value") : [];
+    const words2 = hasIn ? all.filter((_, i2) => node2.fieldNameForChild(i2) === "value") : [];
     const bodyNode = node2.childForFieldName("body");
     const body2 = bodyNode ? kids(bodyNode).filter((c) => c.type !== "do" && c.type !== "done") : [];
     const statements = [];
     const items = [];
     let literal2 = hasIn;
     const substitutions = [];
-    for (const w of words) {
+    for (const w of words2) {
       const { value, expanded, subs } = this.word(w, scope);
       substitutions.push(...subs);
       const raw = slice(scope.original, w);
@@ -23269,19 +23582,19 @@ var Parse = class {
     const redirectNodes = node2 && given.length === 0 ? this.extraRedirects.get(node2.id) ?? [] : given;
     const items = node2 ? commandParts(node2) : [];
     for (const r of redirectNodes) items.push({ kind: "redirect", node: r });
-    const words = [];
+    const words2 = [];
     const redirects = [];
     const subs = [];
     const expanded = [];
     const assignments = [];
     for (const part of items) {
-      if (part.kind === "literal") words.push(part.value);
+      if (part.kind === "literal") words2.push(part.value);
       else if (part.kind === "word") {
         const w = this.word(part.node, scope);
         subs.push(...w.subs);
         if (w.value === null) continue;
         if (w.expanded) expanded.push(w.value);
-        words.push(w.value);
+        words2.push(w.value);
       } else if (part.kind === "assignment") {
         const w = this.word(part.node, scope);
         subs.push(...w.subs);
@@ -23291,8 +23604,8 @@ var Parse = class {
         if (redirect) redirects.push(redirect);
       }
     }
-    if (!words.length) return this.assignmentOnly(assignments, redirects, subs, scope);
-    return this.simpleCommand(words, assignments, redirects, subs, expanded, scope);
+    if (!words2.length) return this.assignmentOnly(assignments, redirects, subs, scope);
+    return this.simpleCommand(words2, assignments, redirects, subs, expanded, scope);
   }
   redirect(r, scope, subs, expanded) {
     const op = kids(r).find((c) => !c.isNamed)?.type ?? ">";
@@ -23333,8 +23646,8 @@ var Parse = class {
       process_substitutions: subs
     });
   }
-  simpleCommand(words, assignments, redirects, subs, expanded, scope) {
-    const [executable2, ...remaining2] = words;
+  simpleCommand(words2, assignments, redirects, subs, expanded, scope) {
+    const [executable2, ...remaining2] = words2;
     trackAssignments(executable2, remaining2, expanded, scope);
     let subcommand = null;
     const args2 = [];
@@ -23436,28 +23749,28 @@ function commandParts(node2) {
   });
   return parts2;
 }
-function trackAssignments(executable2, words, expanded, scope) {
+function trackAssignments(executable2, words2, expanded, scope) {
   if (ENV_REPLACING.has(executable2)) scope.forgetAll();
   else if (DECLARING.has(executable2)) {
-    const withFlags = words.some((w) => w.startsWith("-"));
-    for (const w of words) {
+    const withFlags = words2.some((w) => w.startsWith("-"));
+    for (const w of words2) {
       if (!w.includes("=")) continue;
       const known = !withFlags && !expanded.includes(w);
       scope.assign(w, known ? w.split("=").slice(1).join("=") : null);
     }
-  } else if (ASSIGNING.has(executable2)) for (const w of words) scope.assign(w, null);
+  } else if (ASSIGNING.has(executable2)) for (const w of words2) scope.assign(w, null);
 }
 function parseCommand(parser, command) {
   if (!command || !command.trim()) throw new ParseError("Empty command");
-  const parse5 = new Parse();
-  const text = cutHeredocs(command, parse5.heredocs);
+  const parse6 = new Parse();
+  const text = cutHeredocs(command, parse6.heredocs);
   const tree = parser.parse(text);
   if (!tree) throw new ParseError("Command too complex for policy validation: no tree");
   try {
     const root = tree.rootNode;
     if (root.hasError) throw new ParseError("Command too complex for policy validation: syntax error");
     const scope = new Scope(text, /* @__PURE__ */ new Map(), { left: MAX_STATEMENTS });
-    return parse5.sequenceNode(parse5.sequence(kids(root), scope, true));
+    return parse6.sequenceNode(parse6.sequence(kids(root), scope, true));
   } finally {
     tree.delete();
   }
@@ -23481,7 +23794,7 @@ function normpath(p) {
   return "/".repeat(initial) + comps.join("/") || ".";
 }
 var isabs = (p) => p.startsWith("/");
-var join23 = (a, b) => isabs(b) ? b : !a || a.endsWith("/") ? a + b : `${a}/${b}`;
+var join26 = (a, b) => isabs(b) ? b : !a || a.endsWith("/") ? a + b : `${a}/${b}`;
 var rstripSlash = (s) => s.replace(/\/+$/, "");
 function relpath(path, start2) {
   const p = normpath(path).split("/").filter(Boolean);
@@ -23517,7 +23830,7 @@ function afterCd(location, event2, cd) {
   const climbs = isabs(target) || target.split("/").includes("..");
   let cwd;
   if (isabs(target)) cwd = normpath(target);
-  else if (location.cwd) cwd = normpath(join23(location.cwd, target));
+  else if (location.cwd) cwd = normpath(join26(location.cwd, target));
   else return { cwd: null, outside: location.outside || climbs };
   if (event2.workspace_root) return { cwd, outside: !isWithin(cwd, event2.workspace_root) };
   return { cwd, outside: location.outside || climbs };
@@ -23541,7 +23854,7 @@ function normalizePath(path, workspaceRoot, cwd, home2) {
   if (!isabs(p) && !p.split("/").includes("..")) return p;
   let resolved;
   if (isabs(p)) resolved = normpath(p);
-  else if (cwd) resolved = normpath(join23(cwd, p));
+  else if (cwd) resolved = normpath(join26(cwd, p));
   else return p;
   const root = rstripSlash(workspaceRoot);
   if (resolved === root || resolved.startsWith(`${root}/`)) return relpath(resolved, root);
@@ -23549,7 +23862,7 @@ function normalizePath(path, workspaceRoot, cwd, home2) {
 }
 function outsidePath(path, location, workspaceRoot) {
   if (!location.cwd) return path;
-  const resolved = normpath(join23(location.cwd, path));
+  const resolved = normpath(join26(location.cwd, path));
   if (workspaceRoot && isWithin(resolved, workspaceRoot))
     return relpath(resolved, rstripSlash(workspaceRoot));
   return resolved;
@@ -23912,19 +24225,19 @@ async function decideWithBytes(bytes3, request) {
 
 // src/policy/resident.ts
 import { spawn } from "node:child_process";
-import { chmodSync as chmodSync3, existsSync as existsSync5, mkdirSync as mkdirSync3, rmSync as rmSync12, statSync as statSync7, writeFileSync as writeFileSync3 } from "node:fs";
+import { chmodSync as chmodSync3, existsSync as existsSync6, mkdirSync as mkdirSync3, rmSync as rmSync13, statSync as statSync7, writeFileSync as writeFileSync3 } from "node:fs";
 import { createConnection, createServer } from "node:net";
-import { join as join24 } from "node:path";
+import { join as join27 } from "node:path";
 var RESIDENT_TIMEOUT_MS = 250;
 var DEFAULT_IDLE_MS = 15 * 6e4;
 var MAX_REQUEST_BYTES = 1e6;
 var MAX_SOCKET_PATH = 100;
 var STARTING_GRACE_MS = 5e3;
 function runDir(ctx) {
-  return join24(ctx.tempaHome, "run");
+  return join27(ctx.tempaHome, "run");
 }
 function socketPath(ctx) {
-  return join24(runDir(ctx), `evaluator-${VERSION}.sock`);
+  return join27(runDir(ctx), `evaluator-${VERSION}.sock`);
 }
 function residentEnabled(ctx) {
   const env = ctx.env.TEMPA_RESIDENT_EVALUATOR?.trim().toLowerCase();
@@ -23935,7 +24248,7 @@ function isResult(value) {
   return !!value && typeof value === "object" && typeof value.ok === "boolean";
 }
 function askResident(ctx, request, timeoutMs = RESIDENT_TIMEOUT_MS) {
-  return new Promise((resolve12) => {
+  return new Promise((resolve14) => {
     let buffer = "";
     let done = false;
     const finish = (result) => {
@@ -23943,7 +24256,7 @@ function askResident(ctx, request, timeoutMs = RESIDENT_TIMEOUT_MS) {
       done = true;
       clearTimeout(timer);
       socket.destroy();
-      resolve12(result);
+      resolve14(result);
     };
     const socket = createConnection(socketPath(ctx));
     const timer = setTimeout(() => finish(void 0), timeoutMs);
@@ -24025,21 +24338,21 @@ function handle2(ctx, socket, touch) {
   });
 }
 function alive(path) {
-  return new Promise((resolve12) => {
+  return new Promise((resolve14) => {
     const probe = createConnection(path);
     probe.on("connect", () => {
       probe.destroy();
-      resolve12(true);
+      resolve14(true);
     });
-    probe.on("error", () => resolve12(false));
+    probe.on("error", () => resolve14(false));
   });
 }
 function listen(server, path) {
-  return new Promise((resolve12, reject) => {
+  return new Promise((resolve14, reject) => {
     server.once("error", reject);
     server.listen(path, () => {
       server.off("error", reject);
-      resolve12();
+      resolve14();
     });
   });
 }
@@ -24052,16 +24365,16 @@ async function serve(ctx, onIdle = () => process.exit(0)) {
     await listen(server, path);
   } catch (err2) {
     if (err2.code !== "EADDRINUSE" || await alive(path)) return void 0;
-    rmSync12(path, { force: true });
+    rmSync13(path, { force: true });
     await listen(server, path);
   }
   chmodSync3(path, 384);
-  rmSync12(`${path}.starting`, { force: true });
+  rmSync13(`${path}.starting`, { force: true });
   const idle = idleMs(ctx);
-  const close = () => new Promise((resolve12) => {
+  const close = () => new Promise((resolve14) => {
     clearInterval(timer);
-    server.close(() => resolve12());
-    if (existsSync5(path)) rmSync12(path, { force: true });
+    server.close(() => resolve14());
+    if (existsSync6(path)) rmSync13(path, { force: true });
   });
   const timer = setInterval(
     () => {
@@ -24099,7 +24412,7 @@ async function localShellDecision(ctx, profile, event2) {
   const wasm = profile.policies.wasm;
   if (!wasm) return { ok: false, fallback: "no_module" };
   if (abiMajor(wasm.abi) !== SUPPORTED_ABI_MAJOR) return { ok: false, fallback: "abi", detail: wasm.abi };
-  if (!existsSync6(modulePath(ctx, wasm.sha256))) return { ok: false, fallback: "not_downloaded" };
+  if (!existsSync7(modulePath(ctx, wasm.sha256))) return { ok: false, fallback: "not_downloaded" };
   const request = {
     wasm,
     event: bashEvent(event2, profile),
@@ -24114,6 +24427,225 @@ async function localShellDecision(ctx, profile, event2) {
   const result = await decideWithModule(ctx, request);
   if (resident && result.ok) startResident(ctx);
   return result.ok ? { ...result, evaluator: "in-process" } : result;
+}
+
+// src/policy/exceptions.ts
+var shellCommandOf = (input) => commandLine(input.command) ?? commandLine(input.cmd);
+var EXCEPTION_POLICY_ID = "tempa/exception";
+var SHELL_METACHARACTERS = new Set(";&|<>$`()\\\n\r'\"{}*?[]!#~");
+var words = (text) => text.split(/\s+/).filter(Boolean);
+function commandMatches(rule, command) {
+  for (const c of command) if (SHELL_METACHARACTERS.has(c)) return false;
+  const have = words(command);
+  if (!have.length) return false;
+  if (rule.endsWith(":*")) {
+    const prefix = words(rule.slice(0, -2));
+    return prefix.length > 0 && prefix.every((w, i2) => have[i2] === w);
+  }
+  const want = words(rule);
+  return want.length === have.length && want.every((w, i2) => have[i2] === w);
+}
+function waive(decision, exceptions, command) {
+  if (command === void 0 || decision.decision !== "deny" && decision.decision !== "ask") return decision;
+  const decided = new Set(decision.policy_ids);
+  if (!decided.size || decided.size === 1 && decided.has(EXCEPTION_POLICY_ID)) return decision;
+  const exception = (exceptions ?? []).find(
+    (e) => e.tool === "Bash" && [...decided].every((id) => e.waives.includes(id)) && commandMatches(e.command, command)
+  );
+  if (!exception) return decision;
+  return {
+    decision: "allow",
+    reason: `Tempa: an exception allows this command (${exception.command}), waiving ${decision.policy_ids.join(", ")}.`,
+    guidance: decision.guidance ?? null,
+    policy_ids: [EXCEPTION_POLICY_ID, ...decision.policy_ids],
+    bundle_version: decision.bundle_version
+  };
+}
+
+// src/profile-changes.ts
+import { join as join28 } from "node:path";
+var ANNOUNCED_FILE = "announced.json";
+var MAX_ITEMS = 12;
+function profileFacts(profile) {
+  const assets = {};
+  for (const [kind, list2] of [
+    ["skill", profile.skills],
+    ["command", profile.commands],
+    ["agent", profile.agents]
+  ]) {
+    for (const a of list2 ?? []) assets[`${kind} ${a.name}`] = a.content_hash;
+  }
+  const mcp2 = {};
+  for (const m of profile.mcp ?? []) mcp2[m.name] = `${m.url} ${m.tools ? m.tools.join(",") : "*"}`;
+  const p = profile.permissions ?? { allow: [], ask: [], deny: [] };
+  return {
+    permissions: { allow: [...p.allow], ask: [...p.ask], deny: [...p.deny] },
+    default_decision: profile.policies.default_decision,
+    policies: profile.policies.bundles.map((b) => b.name),
+    assets,
+    mcp: mcp2
+  };
+}
+function added(before, after) {
+  return after.filter((x) => !before.includes(x));
+}
+function permissionChanges(before, after) {
+  const out2 = [];
+  for (const list2 of ["allow", "ask", "deny"]) {
+    for (const rule of added(before.permissions[list2], after.permissions[list2])) out2.push(`+${list2} ${rule}`);
+    for (const rule of added(after.permissions[list2], before.permissions[list2])) out2.push(`-${list2} ${rule}`);
+  }
+  return out2;
+}
+function policyChanges(before, after) {
+  const out2 = [];
+  if (before.default_decision !== after.default_decision)
+    out2.push(`default ${before.default_decision} \u2192 ${after.default_decision}`);
+  for (const name2 of added(before.policies, after.policies)) out2.push(`+${name2}`);
+  for (const name2 of added(after.policies, before.policies)) out2.push(`-${name2}`);
+  return out2;
+}
+function keyedChanges(before, after, show, changed, addedText) {
+  const out2 = [];
+  for (const key of Object.keys(after)) {
+    if (!(key in before)) out2.push(`+${addedText(key)}`);
+    else if (before[key] !== after[key]) out2.push(`~${changed(key)}`);
+  }
+  for (const key of Object.keys(before)) if (!(key in after)) out2.push(`-${show(key)}`);
+  return out2;
+}
+function mcpUrl(facts, name2) {
+  return (facts.mcp[name2] ?? "").split(" ")[0] ?? "";
+}
+function clipItems(items) {
+  if (items.length <= MAX_ITEMS) return items.join(", ");
+  return `${items.slice(0, MAX_ITEMS).join(", ")} and ${items.length - MAX_ITEMS} more`;
+}
+function count(n, one, many) {
+  return `${n} ${n === 1 ? one : many}`;
+}
+function firstProfile(facts) {
+  const p = facts.permissions;
+  const assets = Object.keys(facts.assets);
+  return [
+    count(p.allow.length + p.ask.length + p.deny.length, "permission rule", "permission rules"),
+    count(facts.policies.length, "policy bundle", "policy bundles"),
+    count(assets.filter((a) => a.startsWith("skill ")).length, "skill", "skills"),
+    count(assets.filter((a) => !a.startsWith("skill ")).length, "command or agent", "commands and agents"),
+    count(Object.keys(facts.mcp).length, "MCP endpoint", "MCP endpoints")
+  ].join(", ");
+}
+function describeProfileChanges(before, after) {
+  if (!before) return [`first profile for this repo: ${firstProfile(after)}`];
+  const name2 = (key) => key.replace(/^(skill|command|agent) /, "");
+  const areas = [
+    ["permissions", permissionChanges(before, after)],
+    ["policies", policyChanges(before, after)],
+    ["skills, commands and agents", keyedChanges(before.assets, after.assets, name2, name2, name2)],
+    [
+      "MCP",
+      keyedChanges(
+        before.mcp,
+        after.mcp,
+        (n) => n,
+        (n) => mcpUrl(before, n) === mcpUrl(after, n) ? `${n} (tools changed)` : `${n} (now ${mcpUrl(after, n)})`,
+        (n) => `${n} (${mcpUrl(after, n)})`
+      )
+    ]
+  ];
+  return areas.filter(([, items]) => items.length).map(([area, items]) => `${area}: ${clipItems(items)}`);
+}
+function announcedPath(ctx, repoKey3) {
+  return join28(cacheDir(ctx, repoKey3), ANNOUNCED_FILE);
+}
+function announceProfileChanges(ctx, repoKey3, repoName, profile) {
+  const facts = profileFacts(profile);
+  const before = readJsonLenient(announcedPath(ctx, repoKey3));
+  const known = before?.permissions ? before : void 0;
+  const lines = describeProfileChanges(known, facts);
+  try {
+    writeJsonAtomic(announcedPath(ctx, repoKey3), facts, { mode: 384, dirMode: 448 });
+  } catch {
+  }
+  const where = repoName ?? "this directory";
+  if (!known) return `Tempa: first profile for ${where}: ${firstProfile(facts)}.`;
+  if (!lines.length) return void 0;
+  return `Tempa profile changes for ${where} since the last sync: ${lines.join("; ")}.`;
+}
+
+// src/hook/paths.ts
+import { realpathSync as realpathSync3 } from "node:fs";
+import { basename as basename2, dirname as dirname3, isAbsolute as isAbsolute2, join as join29, relative as relative3, resolve as resolve6, sep as sep2 } from "node:path";
+var FILE_KINDS = /* @__PURE__ */ new Set(["read", "search", "write", "edit"]);
+var PATH_KEYS = /* @__PURE__ */ new Set([
+  "path",
+  "paths",
+  "filepath",
+  "notebookpath",
+  "absolutepath",
+  "dirpath",
+  "dir",
+  "directory",
+  "directorypath",
+  "searchdirectory",
+  "searchpath",
+  "targetfile",
+  "file",
+  "files"
+]);
+var GLOB_TOOLS = /^glob$/i;
+function toolPaths(name2, input) {
+  const out2 = [];
+  for (const [key, value] of Object.entries(input)) {
+    const k = key.toLowerCase().replace(/_/g, "");
+    if (!PATH_KEYS.has(k) && !(k === "pattern" && GLOB_TOOLS.test(name2))) continue;
+    for (const v of Array.isArray(value) ? value : [value]) if (typeof v === "string" && v) out2.push(v);
+  }
+  return out2;
+}
+function real(path) {
+  let head2 = path;
+  const tail = [];
+  for (; ; ) {
+    try {
+      return join29(realpathSync3(head2), ...tail);
+    } catch {
+      const parent = dirname3(head2);
+      if (parent === head2) return path;
+      tail.unshift(basename2(head2));
+      head2 = parent;
+    }
+  }
+}
+function within(root, path) {
+  const rel = relative3(root, path);
+  return rel === "" || rel !== ".." && !rel.startsWith(`..${sep2}`) && !isAbsolute2(rel);
+}
+function staticPart(value) {
+  if (/[{}$]/.test(value)) return void 0;
+  const wild = value.search(/[*?[]/);
+  return wild < 0 ? value : value.slice(0, wild);
+}
+function pathReach(paths, where) {
+  const tempa = real(resolve6(where.tempaHome));
+  const roots = where.roots.map((r) => real(resolve6(r)));
+  let reach = "inside";
+  for (const raw of paths) {
+    const value = staticPart(raw);
+    if (value === void 0) {
+      reach = "outside";
+      continue;
+    }
+    const expanded = value === "~" || /^~[\\/]/.test(value) ? join29(where.home, value.slice(1)) : value;
+    if (expanded.startsWith("~")) {
+      reach = "outside";
+      continue;
+    }
+    const path = real(resolve6(where.cwd, expanded));
+    if (within(tempa, path)) return "tempa";
+    if (!roots.some((root) => within(root, path))) reach = "outside";
+  }
+  return reach;
 }
 
 // src/hook/secrets.ts
@@ -24394,6 +24926,7 @@ function noProfileContext(reason) {
 var DEFAULT_DECIDE_TIMEOUT_MS = 1e3;
 var SESSION_START_TIMEOUT_MS = 3e3;
 var MODULE_DOWNLOAD_TIMEOUT_MS = 2e3;
+var SIGN_IN_CHECK_MS = 1500;
 var HEARTBEAT_EVERY_MS = 10 * 6e4;
 function decideTimeoutMs(ctx, fallback = DEFAULT_DECIDE_TIMEOUT_MS) {
   const fromEnv = Number(ctx.env.TEMPA_DECIDE_TIMEOUT_MS);
@@ -24415,7 +24948,7 @@ function withDeadline(promise, ms) {
   return Promise.race([promise, deadline]).finally(() => clearTimeout(timer));
 }
 function statePath(ctx) {
-  return join25(ctx.tempaHome, "state.json");
+  return join30(ctx.tempaHome, "state.json");
 }
 function readState(ctx) {
   return readJsonLenient(statePath(ctx)) ?? {};
@@ -24447,14 +24980,14 @@ function refreshVersion(ctx, binary2) {
   const checked = stamp ? Date.parse(stamp) : 0;
   const skip = ctx.env.TEMPA_SKIP_HARNESS_VERSION || ctx.env.TEMPA_SKIP_CLAUDE_VERSION;
   if (ctx.now() - checked < 864e5 || skip) return Promise.resolve();
-  return new Promise((resolve12) => {
+  return new Promise((resolve14) => {
     execFile2(binary2, ["--version"], { timeout: 1500 }, (err2, stdout) => {
       const version2 = err2 ? void 0 : /\d+\.\d+\.\d+/.exec(stdout)?.[0];
       updateState(ctx, {
         [`${binary2}_version_checked_at`]: new Date(ctx.now()).toISOString(),
         ...version2 ? { [`${binary2}_version`]: version2 } : {}
       });
-      resolve12();
+      resolve14();
     });
   });
 }
@@ -24554,7 +25087,7 @@ function decisionEvent(ctx, payload, repo, attributes) {
   );
 }
 function sessionRepo(ctx, payload) {
-  const known = sessionRepos(ctx, payload.session_id)[resolve6(payload.cwd)];
+  const known = sessionRepos(ctx, payload.session_id)[resolve7(payload.cwd)];
   if (known) return known;
   const repo = repoContext(payload.cwd);
   rememberSessionRepo(ctx, payload.session_id, repo);
@@ -24607,6 +25140,7 @@ async function onSessionStart(ctx, d, payload) {
       loginForRepo(ctx, repo.key),
       MODULE_DOWNLOAD_TIMEOUT_MS
     ).then(() => pruneModules(ctx)).catch(() => void 0);
+    const signIns = hasPerUser(result.profile) ? withDeadline(unconnected(ctx, loginForRepo(ctx, repo.key), SIGN_IN_CHECK_MS), SIGN_IN_CHECK_MS + 300).then((items) => items.map((item) => `Tempa: ${signInNotice(item)}`)).catch(() => []) : Promise.resolve([]);
     const report = d.renderer ? renderProfile(repo, result.profile, ctx.now, d.renderer, renderSession(ctx, d.harness)) : void 0;
     warnings.push(
       ...afterSync(ctx, {
@@ -24618,6 +25152,8 @@ async function onSessionStart(ctx, d, payload) {
         sessionId: payload.session_id
       })
     );
+    const changes = announceProfileChanges(ctx, repo.key, repo.repo, result.profile);
+    if (changes) warnings.push(changes);
     const ambiguous = ambiguityWarning(repo.repo ?? "This repo", result.tenant);
     if (ambiguous) warnings.push(`Tempa: ${ambiguous}`);
     const update = rememberedCliUpdate(ctx, loginKey(result.meta.endpoint, result.meta.tenant));
@@ -24649,10 +25185,11 @@ async function onSessionStart(ctx, d, payload) {
 ${context}`, HARD_CAP);
     if (account.message) warnings.push(account.message);
     trackWork(ctx, { sessionId: payload.session_id, repo, profile: result.profile });
+    warnings.push(...await signIns);
     output = d.sessionStart(context, warnings.join(" ") || void 0);
   } catch (err2) {
     const message = err2.message;
-    const fix = err2 instanceof AuthError ? d.loginHint(message) : `${NO_PROFILE_REASON}: ${message}. Tool calls will ask once, then run without Tempa's guardrails.`;
+    const fix = err2 instanceof AuthError ? d.loginHint(message) : `${NO_PROFILE_REASON}: ${message}. Until a profile is synced, Tempa asks before every tool call that is not a read, and blocks shell commands where it never had a profile. ${NO_PROFILE_FIX}`;
     warnings.unshift(`Tempa: ${fix}`);
     accountCheck(ctx, state, await detection, void 0, d.harness);
     output = d.sessionStart(
@@ -24703,11 +25240,35 @@ function accountVerdict(ctx, d, payload) {
   });
   return d.preToolUse(decision, account.reason);
 }
+function fileReach(ctx, payload, tool) {
+  const cwd = resolve7(payload.cwd);
+  const root = sessionRepos(ctx, payload.session_id)[cwd]?.git?.root;
+  const roots = [cwd, ...root ? [root] : []];
+  const paths = toolPaths(tool.name, tool.input ?? {});
+  return pathReach(paths, { cwd, roots, home: ctx.home, tempaHome: ctx.tempaHome });
+}
+var TEMPA_HOME_REASON = "Tempa: Tempa's own folder (~/.tempa: your login tokens and settings) is off limits to the agent.";
+function tempaHomeDenied(ctx, d, payload, tool) {
+  const repo = sessionRepo(ctx, payload);
+  decisionEvent(ctx, payload, repo, {
+    decision: "deny",
+    policy_ids: ["tempa/own-files"],
+    bundle_version: cachedProfile(ctx, repo)?.version ?? "",
+    started: Date.now(),
+    source: "local"
+  });
+  return d.preToolUse("deny", `${TEMPA_HOME_REASON} (${tool.name})`);
+}
 async function onPreToolUse(ctx, d, payload) {
   const verdict = accountVerdict(ctx, d, payload);
   if (verdict) return verdict;
   const tool = claudeTool(payload, d.tools);
-  if (isReadOnly(d.tools, tool)) return d.preToolUse("allow", `Tempa: ${tool.name} is read-only`);
+  const reach = FILE_KINDS.has(tool.kind) ? fileReach(ctx, payload, tool) : "inside";
+  if (reach === "tempa") return tempaHomeDenied(ctx, d, payload, tool);
+  if (isReadOnly(d.tools, tool)) {
+    if (reach === "outside") return d.preToolUse(void 0);
+    return d.preToolUse("allow", `Tempa: ${tool.name} is read-only`);
+  }
   const started = Date.now();
   const repo = sessionRepo(ctx, payload);
   const profile = cachedProfile(ctx, repo);
@@ -24722,11 +25283,12 @@ async function onPreToolUse(ctx, d, payload) {
     });
     return d.preToolUse("deny", local.reason);
   }
-  const answer = (decision, attributes) => {
-    decisionEvent(ctx, payload, repo, { ...decision, started, ...attributes });
-    if (decision.decision === "ask" && d.asksItself?.({ ctx, payload, tool, profile, repo }))
-      return d.preToolUse(void 0, void 0, decision.guidance);
-    return d.respond(decision, "tool.pre");
+  const answer = (policies, attributes) => {
+    const decision2 = tool.kind === "shell" ? waive(policies, profile?.policies.exceptions, shellCommandOf(tool.input ?? {})) : policies;
+    decisionEvent(ctx, payload, repo, { ...decision2, started, ...attributes });
+    if (decision2.decision === "ask" && d.asksItself?.({ ctx, payload, tool, profile, repo }))
+      return d.preToolUse(void 0, void 0, decision2.guidance);
+    return d.respond(decision2, "tool.pre");
   };
   const evaluated = profile && tool.kind === "shell" ? await localShellDecision(ctx, profile, event(ctx, d, payload, repo, profile)) : void 0;
   const fromModule = evaluated?.ok ? { source: "local", module: evaluated.module, evaluator: evaluated.evaluator } : void 0;
@@ -24742,8 +25304,8 @@ async function onPreToolUse(ctx, d, payload) {
   } else {
     try {
       const body2 = event(ctx, d, payload, repo, profile);
-      const decision = await decide(ctx, body2, decideTimeoutMs(ctx, d.decideTimeoutMs), login2);
-      return answer(decision, { source: "remote", ...localFallback ? { localFallback } : {} });
+      const decision2 = await decide(ctx, body2, decideTimeoutMs(ctx, d.decideTimeoutMs), login2);
+      return answer(decision2, { source: "remote", ...localFallback ? { localFallback } : {} });
     } catch (err2) {
       failure3 = err2;
       if (isRateLimited(err2)) backOff(ctx, state, err2);
@@ -24765,13 +25327,31 @@ async function onPreToolUse(ctx, d, payload) {
       return d.preToolUse(void 0);
     return d.preToolUse(offline.decision, offline.reason);
   }
-  if (state.no_profile_asked)
-    return d.preToolUse("allow", `${NO_PROFILE_REASON}; allowed after the first confirmation`);
-  state.no_profile_asked = true;
-  writeSession(ctx, state);
-  recordOffline(ctx, state, "offline_no_profile", repo.repo);
+  if (!state.no_profile_asked) {
+    state.no_profile_asked = true;
+    writeSession(ctx, state);
+    recordOffline(ctx, state, "offline_no_profile", repo.repo);
+  }
+  const call = {
+    kind: tool.kind,
+    loggedIn: !!login2,
+    ...withFailMode(login2 ? rememberedFailMode(ctx, loginKey(login2.endpoint, login2.tenant)) : void 0)
+  };
+  const decision = noProfileDecision(call);
+  decisionEvent(ctx, payload, repo, {
+    decision,
+    policy_ids: ["tempa/no-profile"],
+    bundle_version: "",
+    started,
+    source: "offline"
+  });
+  if (decision === "ask" && d.asksItself?.({ ctx, payload, tool, profile, repo }))
+    return d.preToolUse(void 0);
   const reason = failure3 instanceof AuthError && failure3.kind !== "not-logged-in" ? `${NO_PROFILE_REASON} (${failure3.message})` : noProfileReason(offlineCause(failure3));
-  return d.preToolUse("ask", reason);
+  return d.preToolUse(decision, noProfileMessage(reason, decision, call));
+}
+function withFailMode(failMode) {
+  return failMode ? { failMode } : {};
 }
 async function onPostToolUse(ctx, d, payload) {
   const classified = claudeTool(payload, d.tools);
@@ -24959,19 +25539,19 @@ var CODEX_DECIDE_TIMEOUT_MS = 2e3;
 function codexLoginHint(message) {
   return message.replace(/Run 'tempa login'( again)?\./, "Run 'tempa login'$1 in a terminal.");
 }
-var codexHome = (ctx) => ctx.env.CODEX_HOME || join26(ctx.home, ".codex");
+var codexHome = (ctx) => ctx.env.CODEX_HOME || join31(ctx.home, ".codex");
 function codexTrustsProject(ctx, root) {
   let text;
   try {
-    text = readFileSync14(join26(codexHome(ctx), "config.toml"), "utf8");
+    text = readFileSync14(join31(codexHome(ctx), "config.toml"), "utf8");
   } catch {
     return false;
   }
   const lines = text.split("\n").map((l) => l.trim());
-  for (let path = root; ; path = dirname3(path)) {
+  for (let path = root; ; path = dirname4(path)) {
     const trusted = projectTrust(lines, path);
     if (trusted !== void 0) return trusted;
-    if (dirname3(path) === path) return false;
+    if (dirname4(path) === path) return false;
   }
 }
 function projectTrust(lines, path) {
@@ -24988,7 +25568,7 @@ function codexAsksItself({ ctx, payload, tool, profile, repo }) {
   if (tool.kind !== "shell" || typeof command !== "string" || !profile || !repo.git) return false;
   if (payload.permission_mode !== "default") return false;
   if (!coveringRule(prefixRules(profile.permissions).rules, command, "prompt")) return false;
-  if (!existsSync7(join26(repo.git.root, CODEX_RULES_FILE))) return false;
+  if (!existsSync8(join31(repo.git.root, CODEX_RULES_FILE))) return false;
   return codexTrustsProject(ctx, repo.git.root);
 }
 var CODEX_HOOK = {
@@ -25217,7 +25797,7 @@ var ANTIGRAVITY_DIRS = {
 var ANTIGRAVITY_RULE_MAX_BYTES = 24e3;
 var SHARED_CONTEXT_FILES = ["AGENTS.md", "GEMINI.md"];
 var ANTIGRAVITY_TOOL_NAMES = Object.fromEntries(
-  Object.entries(ANTIGRAVITY_TOOLS.claudeCodeNames ?? {}).map(([agy, claude]) => [claude, agy])
+  Object.entries(ANTIGRAVITY_TOOLS.claudeCodeNames ?? {}).reverse().map(([agy, claude]) => [claude, agy])
 );
 var CLAUDE_ONLY_AGENT_KEYS3 = ["model", "color"];
 var hasKey3 = (lines, key) => lines.some((l) => new RegExp(`^${key}\\s*:`).test(l));
@@ -25391,20 +25971,20 @@ import { createHash as createHash10 } from "node:crypto";
 import { homedir } from "node:os";
 
 // src/mcp/workspace.ts
-import { existsSync as existsSync8 } from "node:fs";
-import { join as join27 } from "node:path";
+import { existsSync as existsSync9 } from "node:fs";
+import { join as join32 } from "node:path";
 import { fileURLToPath } from "node:url";
 var HOOK_WORKSPACE = "antigravity-workspace.json";
 var PROXY_WORKSPACE = "antigravity-mcp-workspace.json";
 var isRecorded = (value) => typeof value === "object" && value !== null && typeof value.workspace === "string" && typeof value.at === "string";
 function write2(ctx, file, value) {
   try {
-    writeJsonAtomic(join27(ctx.tempaHome, file), value, { mode: 384 });
+    writeJsonAtomic(join32(ctx.tempaHome, file), value, { mode: 384 });
   } catch {
   }
 }
 function read2(ctx, file) {
-  const value = readJsonLenient(join27(ctx.tempaHome, file));
+  const value = readJsonLenient(join32(ctx.tempaHome, file));
   return isRecorded(value) ? value : void 0;
 }
 function recordHookWorkspace(ctx, workspace) {
@@ -25413,7 +25993,7 @@ function recordHookWorkspace(ctx, workspace) {
 }
 function startWorkspace(ctx) {
   const recorded2 = read2(ctx, HOOK_WORKSPACE)?.workspace;
-  if (recorded2 && existsSync8(recorded2)) return { dir: recorded2, source: "hook" };
+  if (recorded2 && existsSync9(recorded2)) return { dir: recorded2, source: "hook" };
   return { dir: ctx.cwd, source: "cwd" };
 }
 function rootDir(roots) {
@@ -25440,12 +26020,15 @@ function proxyWorkspace(ctx) {
 }
 
 // src/telemetry/from-hook.ts
-import { resolve as resolve7 } from "node:path";
+import { resolve as resolve8 } from "node:path";
 var code = (value) => value && /^[A-Za-z0-9_.-]{1,64}$/.test(value) ? value : value ? "other" : void 0;
 var isObject2 = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
 function toolAttributes(payload) {
   const name2 = payload.tool_name ?? "";
-  return { tool_name: name2, tool_kind: normaliseTool(ANTIGRAVITY_TOOLS, name2, {}).kind };
+  return {
+    tool_name: name2,
+    tool_kind: normaliseTool(ANTIGRAVITY_TOOLS, name2, payload.tool_input ?? {}).kind
+  };
 }
 function antigravityTelemetry(payload, answer, harnessVersion2) {
   const harness = "antigravity";
@@ -25503,7 +26086,7 @@ function antigravityTelemetry(payload, answer, harnessVersion2) {
   }
 }
 function repoOf(ctx, payload) {
-  const known = sessionRepos(ctx, payload.session_id)[resolve7(payload.cwd)];
+  const known = sessionRepos(ctx, payload.session_id)[resolve8(payload.cwd)];
   if (known) return known.repo;
   const repo = repoContext(payload.cwd);
   rememberSessionRepo(ctx, payload.session_id, repo);
@@ -25570,6 +26153,7 @@ function parseAntigravityPayload(text, hint = {}) {
   if (call !== void 0 && (!isObject3(call) || !str2(call.name)))
     throw new PayloadError("toolCall has no name");
   const index = num(value.stepIdx) ?? num(value.invocationNum) ?? num(value.executionNum);
+  const turn = createHash10("sha256").update(JSON.stringify([num(value.initialNumSteps) ?? null, str2(value.lastUserInput) ?? ""])).digest("hex").slice(0, 16);
   const error2 = str2(value.error);
   return {
     hook_event_name: eventName(event2, value),
@@ -25582,6 +26166,7 @@ function parseAntigravityPayload(text, hint = {}) {
     ...event2 === "Stop" && str2(value.terminationReason) ? { reason: value.terminationReason } : {},
     antigravity_event: event2,
     ...index !== void 0 ? { antigravity_index: index } : {},
+    antigravity_turn: turn,
     ...workspace ? { antigravity_workspace: workspace } : {},
     ...str2(value.modelName) ? { antigravity_model: value.modelName } : {},
     ...event2 === "Stop" && error2 ? { antigravity_error: true } : {}
@@ -25693,6 +26278,7 @@ function antigravityEventKey(payload) {
     "antigravity",
     payload.session_id,
     event2,
+    payload.antigravity_turn ?? null,
     payload.antigravity_index ?? null,
     digest
   ]);
@@ -25939,7 +26525,7 @@ function copilotDialect(shape) {
   return {
     harness: "copilot",
     tools: copilotTools(shape),
-    // Copilot does not tell its hooks its version: `copilot --version`, once a day (TEMPA-165). VS Code's
+    // Copilot does not tell its hooks its version: `copilot --version`, once a day. VS Code's
     // Copilot reports the CLI's version when one is installed, else `unknown`.
     version: copilotVersion,
     refreshVersion: refreshCopilotVersion,
@@ -26022,7 +26608,7 @@ function isCopilotPayload(raw) {
 // src/harness/gemini.ts
 import { createHash as createHash12 } from "node:crypto";
 import { readFileSync as readFileSync15 } from "node:fs";
-import { join as join28 } from "node:path";
+import { join as join33 } from "node:path";
 var str4 = (value) => typeof value === "string" ? value : void 0;
 var GEMINI_EVENTS = {
   SessionStart: "SessionStart",
@@ -26068,9 +26654,9 @@ ${guidance}` : reason;
 }
 var GEMINI_HOOK_ASK_SINCE = "0.36.0";
 function geminiHookCanAsk(version2) {
-  const parse5 = (v) => /^(\d+)\.(\d+)\.(\d+)/.exec(v)?.slice(1).map(Number);
-  const have = parse5(version2);
-  const need = parse5(GEMINI_HOOK_ASK_SINCE);
+  const parse6 = (v) => /^(\d+)\.(\d+)\.(\d+)/.exec(v)?.slice(1).map(Number);
+  const have = parse6(version2);
+  const need = parse6(GEMINI_HOOK_ASK_SINCE);
   if (!have) return false;
   for (let i2 = 0; i2 < 3; i2++) {
     const d = have[i2] - need[i2];
@@ -26118,7 +26704,7 @@ function geminiAsksItself({ ctx, tool, profile }) {
   if (tool.kind !== "shell" || typeof command !== "string" || !profile) return false;
   let text;
   try {
-    text = readFileSync15(join28(ctx.home, GEMINI_USER_POLICY), "utf8");
+    text = readFileSync15(join33(ctx.home, GEMINI_USER_POLICY), "utf8");
   } catch {
     return false;
   }
@@ -26137,7 +26723,7 @@ function geminiHeadless(ctx) {
 function geminiDialect(version2, headless = false) {
   const asks = geminiHookCanAsk(version2) && !headless;
   return {
-    // A Gemini CLI that cannot ask from its hooks may still ask through a rendered Policy Engine rule (TEMPA-153);
+    // A Gemini CLI that cannot ask from its hooks may still ask through a rendered Policy Engine rule;
     // headless, its policy turns ask_user into a deny without Tempa's instructions, so Tempa denies itself.
     ...asks || headless ? {} : { asksItself: geminiAsksItself },
     harness: "gemini-cli",
@@ -26177,7 +26763,7 @@ var claudeCodeAdapter = {
   parsePayload,
   toEvent: (payload, ctx) => isKnownEvent(payload.hook_event_name) ? toEvent(payload, ctx) : void 0,
   respond,
-  // Copilot also runs hooks from `.claude/settings*.json`: such a run answers as Copilot, once (TEMPA-161).
+  // Copilot also runs hooks from `.claude/settings*.json`: such a run answers as Copilot, once.
   handle: (ctx, payload) => isCopilotPayload(payload) ? handleCopilotHook(ctx, parseCopilotPayload(JSON.stringify(payload))) : handleClaudeCodeHook(ctx, payload),
   renderer: claudeCodeRenderer
 };
@@ -26242,23 +26828,23 @@ var HarnessNotSupported = class extends Error {
 var PLUGIN_ID = "tempa@devleaps";
 var CLAUDE_CODE_PLUGIN_REPO = "Devleaps/tempa-claude-code";
 var COPILOT_PLUGIN_REPO = "Devleaps/tempa-copilot";
-var home = (ctx, envVar, folder) => ctx.env[envVar] || join29(ctx.home, folder);
+var home = (ctx, envVar, folder) => ctx.env[envVar] || join34(ctx.home, folder);
 var copilotHome = (ctx) => home(ctx, "COPILOT_HOME", ".copilot");
-var copilotPluginDir = (ctx) => join29(copilotHome(ctx), "installed-plugins", "devleaps", "tempa");
+var copilotPluginDir = (ctx) => join34(copilotHome(ctx), "installed-plugins", "devleaps", "tempa");
 function codexPluginDir(ctx) {
-  const dir = join29(codexHome(ctx), "plugins", "cache", "devleaps", "tempa");
+  const dir = join34(codexHome(ctx), "plugins", "cache", "devleaps", "tempa");
   let versions;
   try {
     versions = readdirSync9(dir);
   } catch {
     return void 0;
   }
-  const installed = versions.filter((v) => existsSync9(join29(dir, v, "bin", "tempa-launch"))).sort((a, b) => a.localeCompare(b, "en", { numeric: true }));
+  const installed = versions.filter((v) => existsSync10(join34(dir, v, "bin", "tempa-launch"))).sort((a, b) => a.localeCompare(b, "en", { numeric: true }));
   const newest = installed.at(-1);
-  return newest === void 0 ? void 0 : join29(dir, newest);
+  return newest === void 0 ? void 0 : join34(dir, newest);
 }
-var geminiHome = (ctx) => join29(ctx.home, ".gemini");
-var geminiExtensionDir = (ctx) => join29(geminiHome(ctx), "extensions", "tempa");
+var geminiHome = (ctx) => join34(ctx.home, ".gemini");
+var geminiExtensionDir = (ctx) => join34(geminiHome(ctx), "extensions", "tempa");
 var GEMINI_RELEASE_BRANCH = "plugin-release-gemini-cli";
 var GEMINI_INSTALL = [
   "gemini",
@@ -26269,8 +26855,8 @@ var GEMINI_INSTALL = [
   GEMINI_RELEASE_BRANCH,
   "--consent"
 ];
-var antigravityConfigDir = (ctx) => join29(home(ctx, "GEMINI_HOME", ".gemini"), "config");
-var antigravityPluginDir = (ctx) => join29(antigravityConfigDir(ctx), "plugins", "tempa");
+var antigravityConfigDir = (ctx) => join34(home(ctx, "GEMINI_HOME", ".gemini"), "config");
+var antigravityPluginDir = (ctx) => join34(antigravityConfigDir(ctx), "plugins", "tempa");
 var ANTIGRAVITY_RELEASE_BRANCH = "plugin-release-antigravity";
 var ANTIGRAVITY_INSTALL = [
   "agy",
@@ -26290,7 +26876,7 @@ async function claudePluginInstalled(ctx, exec) {
     }
   }
   const settings = readJsonLenient(
-    join29(home(ctx, "CLAUDE_CONFIG_DIR", ".claude"), "settings.json")
+    join34(home(ctx, "CLAUDE_CONFIG_DIR", ".claude"), "settings.json")
   );
   return settings?.enabledPlugins?.[PLUGIN_ID];
 }
@@ -26311,35 +26897,35 @@ var INSTALLS = {
       ["copilot", "plugin", "marketplace", "add", COPILOT_PLUGIN_REPO],
       ["copilot", "plugin", "install", PLUGIN_ID]
     ],
-    pluginInstalled: async (ctx) => existsSync9(join29(copilotPluginDir(ctx), "bin", "tempa-launch"))
+    pluginInstalled: async (ctx) => existsSync10(join34(copilotPluginDir(ctx), "bin", "tempa-launch"))
   },
   codex: {
     binary: "codex",
     configDir: codexHome,
-    // `codex plugin add` installs without the /plugins screen (Codex CLI 0.157, TEMPA-149).
+    // `codex plugin add` installs without the /plugins screen (Codex CLI 0.157).
     install: [
       ["codex", "plugin", "marketplace", "add", "Devleaps/tempa"],
       ["codex", "plugin", "add", PLUGIN_ID]
     ],
-    // Hooks that are not managed run only once trusted (TEMPA-145).
+    // Hooks that are not managed run only once trusted.
     next: "then trust Tempa's hooks in Codex: /hooks",
     pluginInstalled: async (ctx) => codexPluginDir(ctx) !== void 0
   },
   "gemini-cli": {
     binary: "gemini",
     configDir: geminiHome,
-    // From the release branch, by git clone (TEMPA-151). --consent: `tempa setup --yes` cannot answer Gemini's
+    // From the release branch, by git clone. --consent: `tempa setup --yes` cannot answer Gemini's
     // prompts (the install's own, and whether to clone when the repo has no GitHub release by that name).
     install: [[...GEMINI_INSTALL]],
-    pluginInstalled: async (ctx) => existsSync9(join29(geminiExtensionDir(ctx), "gemini-extension.json"))
+    pluginInstalled: async (ctx) => existsSync10(join34(geminiExtensionDir(ctx), "gemini-extension.json"))
   },
   antigravity: {
     binary: "agy",
     configDir: antigravityConfigDir,
-    // A GitHub subpath with the release branch (TEMPA-177). The App installs the same folder; its marketplace does
+    // A GitHub subpath with the release branch. The App installs the same folder; its marketplace does
     // not list Tempa.
     install: [[...ANTIGRAVITY_INSTALL]],
-    // Without `agy` (the App or the IDE alone): the release branch cloned into the plugins folder they read (TEMPA-184).
+    // Without `agy` (the App or the IDE alone): the release branch cloned into the plugins folder they read.
     installWithoutBinary: (ctx) => [
       [
         "git",
@@ -26352,7 +26938,7 @@ var INSTALLS = {
         antigravityPluginDir(ctx)
       ]
     ],
-    pluginInstalled: async (ctx) => existsSync9(join29(antigravityPluginDir(ctx), "plugin.json"))
+    pluginInstalled: async (ctx) => existsSync10(join34(antigravityPluginDir(ctx), "plugin.json"))
   }
 };
 async function detectHarnesses(ctx, exec) {
@@ -26361,7 +26947,7 @@ async function detectHarnesses(ctx, exec) {
     const spec = INSTALLS[descriptor.id];
     const binary2 = onPath(ctx.env, spec.binary);
     const dir = spec.configDir(ctx);
-    const configDir = existsSync9(dir) ? dir : void 0;
+    const configDir = existsSync10(dir) ? dir : void 0;
     const found = Boolean(binary2 || configDir);
     const supported = descriptor.support === "supported";
     const released = supported && spec.install.length > 0;
@@ -26429,29 +27015,29 @@ function antigravityAppPaths(ctx, platform = process.platform) {
   const named = ctx.env.TEMPA_ANTIGRAVITY_APP;
   if (named !== void 0) return named ? [named] : [];
   if (platform === "darwin")
-    return ["/Applications/Antigravity.app", join30(ctx.home, "Applications", "Antigravity.app")];
+    return ["/Applications/Antigravity.app", join35(ctx.home, "Applications", "Antigravity.app")];
   if (platform === "win32") {
-    const local = ctx.env.LOCALAPPDATA || join30(ctx.home, "AppData", "Local");
-    return [join30(local, "Programs", "Antigravity", "Antigravity.exe")];
+    const local = ctx.env.LOCALAPPDATA || join35(ctx.home, "AppData", "Local");
+    return [join35(local, "Programs", "Antigravity", "Antigravity.exe")];
   }
   return [];
 }
 function detectAntigravitySurfaces(ctx, platform = process.platform) {
   const cli = onPath(ctx.env, "agy", platform);
-  const app = antigravityAppPaths(ctx, platform).find((p) => existsSync10(p)) ?? (ctx.env.TEMPA_ANTIGRAVITY_APP === void 0 ? onPath(ctx.env, "antigravity", platform) : void 0);
-  const ide = join30(ctx.env.GEMINI_HOME || join30(ctx.home, ".gemini"), "antigravity-ide");
+  const app = antigravityAppPaths(ctx, platform).find((p) => existsSync11(p)) ?? (ctx.env.TEMPA_ANTIGRAVITY_APP === void 0 ? onPath(ctx.env, "antigravity", platform) : void 0);
+  const ide = join35(ctx.env.GEMINI_HOME || join35(ctx.home, ".gemini"), "antigravity-ide");
   return {
     ...cli ? { cli } : {},
     ...app ? { app } : {},
-    ...existsSync10(ide) ? { ide } : {}
+    ...existsSync11(ide) ? { ide } : {}
   };
 }
 var needsUserHooks = (s) => s.app !== void 0 || s.ide !== void 0;
-var antigravityUserHooksPath = (ctx) => join30(antigravityConfigDir(ctx), "hooks.json");
+var antigravityUserHooksPath = (ctx) => join35(antigravityConfigDir(ctx), "hooks.json");
 function antigravityUserLauncher(ctx) {
-  const launcher = join30(antigravityPluginDir(ctx), "bin", "tempa-launch.mjs");
+  const launcher = join35(antigravityPluginDir(ctx), "bin", "tempa-launch.mjs");
   if (!NEEDS_QUOTING.test(launcher)) return launcher;
-  return `./${relative3(antigravityConfigDir(ctx), launcher).split(sep2).join("/")}`;
+  return `./${relative4(antigravityConfigDir(ctx), launcher).split(sep3).join("/")}`;
 }
 function antigravityUserGroup(pluginHooks, launcher) {
   const group2 = isObject4(pluginHooks) ? pluginHooks[ANTIGRAVITY_USER_GROUP] : void 0;
@@ -26482,7 +27068,7 @@ function readJson(path) {
   }
 }
 function plan(ctx) {
-  const plugin = readJson(join30(antigravityPluginDir(ctx), "hooks.json")).value;
+  const plugin = readJson(join35(antigravityPluginDir(ctx), "hooks.json")).value;
   const wanted = antigravityUserGroup(plugin, antigravityUserLauncher(ctx));
   if (!wanted) return { state: "no-plugin" };
   const current3 = readJson(antigravityUserHooksPath(ctx));
@@ -26527,7 +27113,7 @@ function antigravitySetupLines(surfaces, state) {
 }
 function hookSource(ctx, cwd) {
   const inside = (dir) => {
-    const r = relative3(dir, cwd);
+    const r = relative4(dir, cwd);
     return r === "" || !r.startsWith("..") && !r.includes(":");
   };
   if (inside(antigravityPluginDir(ctx))) return "plugin";
@@ -26603,9 +27189,9 @@ function firedCheck(ctx) {
 
 // src/context.ts
 import { spawn as spawn2 } from "node:child_process";
-import { closeSync as closeSync2, openSync as openSync2, realpathSync as realpathSync3, writeSync } from "node:fs";
+import { closeSync as closeSync2, openSync as openSync2, realpathSync as realpathSync4, writeSync } from "node:fs";
 import { homedir as homedir2 } from "node:os";
-import { join as join31 } from "node:path";
+import { join as join36 } from "node:path";
 import * as sea from "node:sea";
 function controllingTerminal(platform = process.platform) {
   if (platform === "win32") return void 0;
@@ -26624,7 +27210,7 @@ function currentRuntime() {
   const script = process.argv[1];
   let cli;
   try {
-    cli = script ? realpathSync3(script) : void 0;
+    cli = script ? realpathSync4(script) : void 0;
   } catch {
     cli = void 0;
   }
@@ -26649,10 +27235,11 @@ async function readAllStdin() {
 function managedConfigPath(platform, env) {
   if (env.TEMPA_MANAGED_CONFIG) return env.TEMPA_MANAGED_CONFIG;
   if (platform === "darwin") return "/Library/Application Support/Tempa/config.json";
-  if (platform === "win32") return join31(env.ProgramData ?? "C:\\ProgramData", "Tempa", "config.json");
+  if (platform === "win32") return join36(env.ProgramData ?? "C:\\ProgramData", "Tempa", "config.json");
   return "/etc/tempa/config.json";
 }
 function openInBrowser(url2, platform = process.platform) {
+  if (!/^https?:\/\//i.test(url2)) return;
   const command = platform === "darwin" ? "open" : platform === "win32" ? "explorer" : "xdg-open";
   try {
     const child = spawn2(command, [url2], { stdio: "ignore", detached: true });
@@ -26675,13 +27262,13 @@ function createContext(overrides = {}) {
     },
     env,
     home: home2,
-    tempaHome: env.TEMPA_HOME ?? join31(home2, ".tempa"),
+    tempaHome: env.TEMPA_HOME ?? join36(home2, ".tempa"),
     managedConfigPath: managedConfigPath(platform, env),
     cwd: process.cwd(),
     platform,
     fetch: (input, init2) => fetch(input, init2),
     now: () => Date.now(),
-    sleep: (ms) => new Promise((resolve12) => setTimeout(resolve12, ms)),
+    sleep: (ms) => new Promise((resolve14) => setTimeout(resolve14, ms)),
     openUrl: (url2) => {
       if (env.TEMPA_NO_BROWSER) return;
       openInBrowser(url2, platform);
@@ -26695,8 +27282,8 @@ function createContext(overrides = {}) {
 }
 
 // src/doctor-codex.ts
-import { accessSync as accessSync2, closeSync as closeSync3, constants as constants2, openSync as openSync3, readFileSync as readFileSync17, readSync, realpathSync as realpathSync4 } from "node:fs";
-import { join as join32 } from "node:path";
+import { accessSync as accessSync2, closeSync as closeSync3, constants as constants2, openSync as openSync3, readFileSync as readFileSync17, readSync, realpathSync as realpathSync5 } from "node:fs";
+import { join as join37 } from "node:path";
 var KEY = String.raw`("(?:[^"\\]|\\.)*"|'[^']*')`;
 var TRUST_TABLE = new RegExp(String.raw`^\[\s*hooks\s*\.\s*state\s*\.\s*${KEY}\s*\]`);
 var STATE_TABLE = /^\[\s*hooks\s*\.\s*state\s*\]/;
@@ -26731,20 +27318,20 @@ function readText2(path) {
 }
 function realpath(path) {
   try {
-    return realpathSync4(path);
+    return realpathSync5(path);
   } catch {
     return path;
   }
 }
 function codexHookTrustCheck(ctx, pluginInstalled) {
   const name2 = "Codex hook trust";
-  const userHooks = join32(ctx.home, CODEX_USER_HOOKS);
+  const userHooks = join37(ctx.home, CODEX_USER_HOOKS);
   const sets = [
     ...pluginInstalled ? [{ what: "the plugin's hooks", sources: ["tempa@devleaps:hooks/hooks.json"] }] : [],
     ...readText2(userHooks).includes(MANAGED_MARKER) ? [{ what: `~/${CODEX_USER_HOOKS}`, sources: [.../* @__PURE__ */ new Set([userHooks, realpath(userHooks)])] }] : []
   ];
   if (!sets.length) return { name: name2, status: "pass", detail: "Codex has no Tempa hooks to trust yet" };
-  const trusted = trustedHookKeys(readText2(join32(codexHome(ctx), "config.toml")));
+  const trusted = trustedHookKeys(readText2(join37(codexHome(ctx), "config.toml")));
   const untrusted = sets.map((set) => ({
     what: set.what,
     events: trustKeys(set.sources[0]).filter((_, i2) => !set.sources.some((s) => trusted.has(trustKeys(s)[i2]?.key ?? ""))).map((k) => k.event)
@@ -26752,11 +27339,11 @@ function codexHookTrustCheck(ctx, pluginInstalled) {
   const missing = untrusted.filter((u) => u.events.length);
   if (!missing.length)
     return { name: name2, status: "pass", detail: `Codex trusts ${sets.map((s) => s.what).join(" and ")}` };
-  const guarded = untrusted.some((u) => !u.events.includes("pre_tool_use"));
+  const guarded2 = untrusted.some((u) => !u.events.includes("pre_tool_use"));
   return {
     name: name2,
-    status: guarded ? "warn" : "fail",
-    detail: `Codex does not run what it has not trusted: ${missing.map((m) => `${m.what} (${m.events.length === CODEX_HOOK_EVENTS.length ? "all" : m.events.join(", ")})`).join("; ")}${guarded ? "" : ", so no Tempa guardrail runs in Codex"}`,
+    status: guarded2 ? "warn" : "fail",
+    detail: `Codex does not run what it has not trusted: ${missing.map((m) => `${m.what} (${m.events.length === CODEX_HOOK_EVENTS.length ? "all" : m.events.join(", ")})`).join("; ")}${guarded2 ? "" : ", so no Tempa guardrail runs in Codex"}`,
     fix: "In Codex, run /hooks and trust Tempa's hooks"
   };
 }
@@ -26794,7 +27381,7 @@ function executable(path) {
 function codexMcpCheck(ctx) {
   const name2 = "Codex MCP server";
   const fix = "tempa sync --harness codex in a repo (a Codex session start does the same)";
-  const command = mcpServerCommand(readText2(join32(ctx.home, CODEX_CONFIG)));
+  const command = mcpServerCommand(readText2(join37(ctx.home, CODEX_CONFIG)));
   if (!command)
     return {
       name: name2,
@@ -26897,6 +27484,12 @@ async function status(ctx, args2) {
   ];
   for (const [label, value] of rows) if (value) ctx.io.stdout(`${`${label}:`.padEnd(14)}${value}`);
   if (report.detail) ctx.io.stdout(report.detail);
+  if (report.state === "logged-in" && !offline) {
+    const login2 = report.tenant ? { endpoint: report.endpoint, tenant: report.tenant } : void 0;
+    const signIns = await unconnected(ctx, login2, 5e3).catch(() => []);
+    if (signIns.length) ctx.io.stdout("MCP servers to connect:");
+    for (const item of signIns) ctx.io.stdout(`  ${signInNotice(item)}`);
+  }
   let allOk = ok(report);
   if (others.length) {
     ctx.io.stdout("Other tenants:");
@@ -26933,7 +27526,7 @@ async function status(ctx, args2) {
 }
 
 // src/doctor.ts
-var defaultExec = (command, args2, options = {}) => new Promise((resolve12) => {
+var defaultExec = (command, args2, options = {}) => new Promise((resolve14) => {
   execFile3(
     command,
     args2,
@@ -26941,7 +27534,7 @@ var defaultExec = (command, args2, options = {}) => new Promise((resolve12) => {
     (err2, stdout, stderr) => {
       const code2 = err2 ? typeof err2.code === "number" ? err2.code : null : 0;
       const why = err2 && !stderr && !stdout ? err2.killed ? `timed out (${err2.message})` : err2.message : "";
-      resolve12({ code: code2, stdout: String(stdout ?? ""), stderr: String(stderr || why) });
+      resolve14({ code: code2, stdout: String(stdout ?? ""), stderr: String(stderr || why) });
     }
   );
 });
@@ -27043,7 +27636,7 @@ function wrapperTelemetryCheck(ctx, enabled, w) {
   const name2 = `Telemetry (${w.name})`;
   if (!enabled) return { name: name2, status: "pass", detail: "turned off by your profile" };
   const fix = `add '. "$HOME/${w.script}"' to your shell profile, then open a new terminal`;
-  if (!existsSync11(join33(ctx.home, w.script)))
+  if (!existsSync12(join38(ctx.home, w.script)))
     return {
       name: name2,
       status: "warn",
@@ -27051,7 +27644,7 @@ function wrapperTelemetryCheck(ctx, enabled, w) {
       fix: `tempa sync --harness ${w.harness}`
     };
   const file = w.script.split("/").pop();
-  const loadedFrom = SHELL_PROFILES.find((profile) => readText3(join33(ctx.home, profile)).includes(file));
+  const loadedFrom = SHELL_PROFILES.find((profile) => readText3(join38(ctx.home, profile)).includes(file));
   if (!loadedFrom)
     return { name: name2, status: "warn", detail: `no shell profile loads the ${w.harness} wrapper`, fix };
   return { name: name2, status: "pass", detail: `${w.harness} wrapper loaded from ~/${loadedFrom}` };
@@ -27139,14 +27732,14 @@ async function claudeChecks(ctx, deps, claudeVersion, enabledPlugins) {
       fix: `claude plugin marketplace add ${CLAUDE_CODE_PLUGIN_REPO} && claude plugin install ${PLUGIN_ID}`
     });
   }
-  const launcher = plugin?.installPath ? join33(plugin.installPath, "bin", "tempa-launch") : void 0;
-  if (launcher && existsSync11(launcher)) {
+  const launcher = plugin?.installPath ? join38(plugin.installPath, "bin", "tempa-launch") : void 0;
+  if (launcher && existsSync12(launcher)) {
     add(await launchCheck(ctx, deps, "Minimal PATH launch", launcher));
   } else {
     const node2 = readLine(nodePathFile(ctx));
     const cli = readLine(cliPathFile(ctx));
     add(
-      node2 && cli && existsSync11(node2) && existsSync11(cli) ? { name: "Minimal PATH launch", status: "pass", detail: `the launcher will use ${node2} and ${cli}` } : {
+      node2 && cli && existsSync12(node2) && existsSync12(cli) ? { name: "Minimal PATH launch", status: "pass", detail: `the launcher will use ${node2} and ${cli}` } : {
         name: "Minimal PATH launch",
         status: "warn",
         detail: "cannot check without the installed plugin, and no remembered node and tempa paths",
@@ -27190,21 +27783,21 @@ async function otherHarnessChecks(ctx, deps, h) {
   }
   const results = [{ name: d.name, status: "pass", detail: `${PLUGIN_ID} installed` }];
   if (d.id === "copilot") {
-    const launcher = join33(copilotPluginDir(ctx), "bin", "tempa-launch");
+    const launcher = join38(copilotPluginDir(ctx), "bin", "tempa-launch");
     results.push(await launchCheck(ctx, deps, `${d.name} launch`, launcher));
   }
   const codexDir = d.id === "codex" ? codexPluginDir(ctx) : void 0;
   if (codexDir) {
-    results.push(await launchCheck(ctx, deps, `${d.name} launch`, join33(codexDir, "bin", "tempa-launch")));
+    results.push(await launchCheck(ctx, deps, `${d.name} launch`, join38(codexDir, "bin", "tempa-launch")));
   }
   if (d.id === "codex")
     results.push(codexUserHooksCheck(ctx), codexHookTrustCheck(ctx, !!codexDir), codexMcpCheck(ctx));
   if (d.id === "gemini-cli") {
-    const launcher = join33(geminiExtensionDir(ctx), "bin", "tempa-launch");
+    const launcher = join38(geminiExtensionDir(ctx), "bin", "tempa-launch");
     results.push(await launchCheck(ctx, deps, `${d.name} launch`, launcher));
   }
   if (d.id === "antigravity") {
-    const launcher = join33(antigravityPluginDir(ctx), "bin", "tempa-launch");
+    const launcher = join38(antigravityPluginDir(ctx), "bin", "tempa-launch");
     results.push(await launchCheck(ctx, deps, `${d.name} launch`, launcher));
     results.push(antigravityMcpCheck(ctx));
     results.push(...await antigravitySurfaceChecks(ctx, deps.exec));
@@ -27231,7 +27824,7 @@ function antigravityMcpCheck(ctx) {
 }
 function codexUserHooksCheck(ctx) {
   const name2 = "Codex hooks (IDE extension)";
-  const text = readText3(join33(ctx.home, CODEX_USER_HOOKS));
+  const text = readText3(join38(ctx.home, CODEX_USER_HOOKS));
   if (!text)
     return {
       name: name2,
@@ -27351,7 +27944,7 @@ async function runChecks(ctx, deps) {
   const claude = await deps.exec("claude", ["--version"], { timeoutMs: 1e4 });
   const claudeVersion = claude.code === 0 ? /\d+\.\d+\.\d+/.exec(claude.stdout)?.[0] : void 0;
   const claudeInUse = Boolean(claudeVersion) || !others.some((h) => h.descriptor.support === "supported");
-  const settings = readJsonLenient(join33(ctx.home, ".claude", "settings.json"));
+  const settings = readJsonLenient(join38(ctx.home, ".claude", "settings.json"));
   if (claudeInUse) {
     results.push(...await claudeChecks(ctx, deps, claudeVersion, settings?.enabledPlugins));
   } else {
@@ -27523,22 +28116,60 @@ function doctorCommand(deps = {}) {
 var doctor = doctorCommand();
 
 // src/commands/hook.ts
-import { resolve as resolve8 } from "node:path";
+import { resolve as resolve10 } from "node:path";
 import { setFlagsFromString } from "node:v8";
 
 // src/cloud-agent/hook.ts
-import { readFileSync as readFileSync19 } from "node:fs";
-import { join as join34 } from "node:path";
-function loadBundle(dir) {
-  const bundle = parseBundle(readFileSync19(join34(dir, "bundle.json"), "utf8"));
+import { existsSync as existsSync13, readFileSync as readFileSync19 } from "node:fs";
+import { dirname as dirname5, isAbsolute as isAbsolute3, join as join39, relative as relative5, resolve as resolve9, sep as sep4 } from "node:path";
+function sessionBundleDir(ctx, sessionId) {
+  return join39(ctx.tempaHome, "cloud-agent", sha256Hex(new TextEncoder().encode(sessionId)));
+}
+function readVerified(dir, key) {
+  const text = readFileSync19(join39(dir, "bundle.json"), "utf8");
+  const bundle = parseBundle(text);
+  verifyBundle(bundle, key);
   let module2;
   try {
-    const bytes3 = new Uint8Array(readFileSync19(join34(dir, "policy.wasm")));
+    const bytes3 = new Uint8Array(readFileSync19(join39(dir, "policy.wasm")));
     module2 = sha256Hex(bytes3) === bundle.policies.wasm.sha256 ? bytes3 : void 0;
   } catch {
     module2 = void 0;
   }
   return { bundle, module: module2 };
+}
+function loadBundle(ctx, dir, key, sessionId) {
+  const root = resolve9(dir, "..", "..");
+  const kept = sessionBundleDir(ctx, sessionId);
+  if (existsSync13(join39(kept, "bundle.json"))) return { ...readVerified(kept, key), root };
+  const loaded = readVerified(dir, key);
+  try {
+    writeFileAtomic(join39(kept, "bundle.json"), readFileSync19(join39(dir, "bundle.json")), { dirMode: 448 });
+    if (loaded.module) writeFileAtomic(join39(kept, "policy.wasm"), loaded.module, { dirMode: 448 });
+  } catch {
+  }
+  return { ...loaded, root };
+}
+function guarded(ctx, root) {
+  return [join39(root, BUNDLE_DIR), join39(root, dirname5(HOOKS_FILE)), join39(ctx.tempaHome, "cloud-agent")];
+}
+var within2 = (base, path) => {
+  const rel = relative5(base, path);
+  return rel === "" || rel !== ".." && !rel.startsWith(`..${sep4}`) && !isAbsolute3(rel);
+};
+function tamperReason(ctx, tool, root, cwd) {
+  const protectedPaths = guarded(ctx, root);
+  if (FILE_KINDS.has(tool.kind) && tool.kind !== "read" && tool.kind !== "search") {
+    const paths = toolPaths(tool.name, tool.input ?? {});
+    if (paths.some((p) => protectedPaths.some((g) => within2(g, resolve9(cwd, p)))))
+      return `Tempa: ${tool.name} may not change Tempa's guardrails (${BUNDLE_DIR}, ${dirname5(HOOKS_FILE)}).`;
+  }
+  if (tool.kind === "shell") {
+    const command = commandLine(tool.input?.command) ?? commandLine(tool.input?.cmd) ?? "";
+    if ([BUNDLE_DIR, dirname5(HOOKS_FILE), ".tempa/cloud-agent"].some((p) => command.includes(p)))
+      return `Tempa: shell commands may not touch Tempa's guardrails (${BUNDLE_DIR}, ${dirname5(HOOKS_FILE)}).`;
+  }
+  return void 0;
 }
 function offlineDecision2(bundle, why) {
   const decision = bundle.offline.default_decision;
@@ -27550,12 +28181,14 @@ function offlineDecision2(bundle, why) {
     bundle_version: bundle.profile_version
   };
 }
-async function handleCloudAgentHook(_ctx, payload, loaded) {
+async function handleCloudAgentHook(ctx, payload, loaded) {
   const { hook: hook2, shape } = payload;
   if (hook2.hook_event_name !== "PreToolUse") return void 0;
   const { bundle } = loaded;
   const tools = copilotTools(shape);
   const tool = claudeTool(hook2, tools);
+  const tamper = tamperReason(ctx, tool, loaded.root, hook2.cwd);
+  if (tamper) return copilotPreToolUse(shape, "deny", tamper);
   if (isReadOnly(tools, tool)) return copilotPreToolUse(shape, "allow", `Tempa: ${tool.name} is read-only`);
   if (tool.kind === "mcp") {
     if (bundle.policies.allow_external_mcp) return void 0;
@@ -27590,7 +28223,7 @@ async function handleCloudAgentHook(_ctx, payload, loaded) {
 
 // src/commands/hook.ts
 async function hook(ctx, args2) {
-  rejectUnknown(args2, ["harness", "event", "bundle"]);
+  rejectUnknown(args2, ["harness", "event", "bundle", "bundle-key"]);
   setFlagsFromString("--liftoff-only");
   const known = harnessIds().join(", ");
   const harness = stringOption(args2, "harness");
@@ -27606,8 +28239,18 @@ async function hook(ctx, args2) {
     const stdin = await ctx.readStdin();
     let output;
     if (bundle !== void 0) {
-      const loaded = loadBundle(resolve8(ctx.cwd, bundle));
+      const pinned = stringOption(args2, "bundle-key");
+      if (!pinned)
+        throw new BundleError(
+          "no --bundle-key: this repo's Tempa files predate signed bundles; run 'tempa copilot cloud-agent enable' again"
+        );
       const payload = parseCopilotPayload(stdin, event2 ? { event: event2 } : {});
+      const loaded = loadBundle(
+        ctx,
+        resolve10(ctx.cwd, bundle),
+        parseBundleKey(pinned),
+        payload.hook.session_id
+      );
       output = await handleCloudAgentHook(ctx, payload, loaded);
     } else {
       const adapter = entry.adapter;
@@ -27628,8 +28271,8 @@ async function hook(ctx, args2) {
 }
 
 // src/commands/library.ts
-import { existsSync as existsSync12, statSync as statSync8 } from "node:fs";
-import { join as join35, resolve as resolve9 } from "node:path";
+import { existsSync as existsSync14, statSync as statSync8 } from "node:fs";
+import { join as join40, resolve as resolve11 } from "node:path";
 var USAGE3 = "Usage: tempa library publish <dir> [--endpoint URL] [--visibility public|private] [--forbid a,b]\n       tempa library publish --partner <dir> [--endpoint URL] [--tenant ID] [--visibility partner_clients|private] [--forbid a,b]";
 var OPERATOR_TOKEN_ENV = "TEMPA_OPERATOR_TOKEN";
 var OPERATOR_VISIBILITIES = ["public", "private"];
@@ -27649,12 +28292,12 @@ async function library(ctx, args2) {
   const token2 = ctx.env[OPERATOR_TOKEN_ENV]?.trim();
   if (!partner && !token2) {
     ctx.io.stderr(
-      `tempa: publishing a library pack is for the installation's operators: set ${OPERATOR_TOKEN_ENV} to your Entra access token for tempa-api, or publish your partner tenant's pack with --partner (docs/library.md)`
+      `tempa: publishing a library pack is for the installation's operators: set ${OPERATOR_TOKEN_ENV} to your Entra access token for tempa-api, or publish your partner tenant's pack with --partner (https://tempa.devleaps.nl/docs/library)`
     );
     return 1;
   }
-  const root = resolve9(ctx.cwd, dir);
-  if (!existsSync12(root) || !statSync8(root).isDirectory() || !existsSync12(join35(root, "pack.yaml"))) {
+  const root = resolve11(ctx.cwd, dir);
+  if (!existsSync14(root) || !statSync8(root).isDirectory() || !existsSync14(join40(root, "pack.yaml"))) {
     ctx.io.stderr(`tempa: ${dir} is not a pack folder (no pack.yaml)`);
     return 1;
   }
@@ -27712,7 +28355,7 @@ async function library(ctx, args2) {
 
 // src/commands/lockdown.ts
 import { mkdirSync as mkdirSync4 } from "node:fs";
-import { dirname as dirname4, isAbsolute as isAbsolute2, join as join36, resolve as resolve10, win32 } from "node:path";
+import { dirname as dirname6, isAbsolute as isAbsolute4, join as join41, resolve as resolve12, win32 } from "node:path";
 
 // src/lockdown/antigravity.ts
 var ANTIGRAVITY_LOCKDOWN_GROUP = "tempa-lockdown";
@@ -27769,7 +28412,7 @@ function antigravityEnterpriseMcp(allowed) {
 var json = (value) => `${JSON.stringify(value, null, 2)}
 `;
 var ANTIGRAVITY_MERGE_SCRIPT = `// Tempa's lock-down for Antigravity, generated by \`tempa lockdown antigravity\`
-// (docs/install.md#locking-antigravity-down). install.sh and install.ps1 run it for one user:
+// (https://tempa.devleaps.nl/docs/install#locking-antigravity-down). install.sh and install.ps1 run it for one user:
 //   node merge.mjs --pack <this folder> --hooks hooks.json|windows/hooks.json --home <the user's home>
 // It merges Tempa's hook group into <home>/.gemini/config/hooks.json and Tempa's deny entries into
 // <home>/.gemini/antigravity-cli/settings.json, keeping everything else in both files.
@@ -27825,6 +28468,14 @@ if (!isObject(settings.permissions)) fail(settingsPath + ": permissions is not a
 const deny = settings.permissions.deny ?? [];
 if (!Array.isArray(deny)) fail(settingsPath + ": permissions.deny is not a list; nothing was changed.");
 for (const entry of fragment.permissions.deny) if (!deny.includes(entry)) deny.push(entry);
+// agy 1.5.2 matched a write_file target only as the exact absolute path: "**/" and "~" did not match.
+// So every write_file(**/<path>) entry is also added for this user's home.
+for (const entry of fragment.permissions.deny) {
+  const glob = /^write_file\\(\\*\\*\\/(.+)\\)$/.exec(entry);
+  if (!glob) continue;
+  const mine = "write_file(" + join(home, ...glob[1].split("/")) + ")";
+  if (!deny.includes(mine)) deny.push(mine);
+}
 settings.permissions.deny = deny;
 if (settings.toolPermission === "always-proceed") settings.toolPermission = fragment.toolPermission;
 
@@ -27862,7 +28513,7 @@ function antigravityInstallScript() {
   return [
     "#!/bin/sh",
     "# Tempa's lock-down for Antigravity, generated by `tempa lockdown antigravity`",
-    "# (docs/install.md#locking-antigravity-down). Run it from your MDM for every user on macOS and Linux: as the",
+    "# (https://tempa.devleaps.nl/docs/install#locking-antigravity-down). Run it from your MDM for every user on macOS and Linux: as the",
     "# user (sh install.sh), or as root with the user's home (sh install.sh /Users/alice). It merges Tempa's hooks",
     "# and deny entries into the user's ~/.gemini files and keeps their own. Safe to run again. Needs Node 20+",
     "# (TEMPA_NODE names another node).",
@@ -27875,7 +28526,7 @@ function antigravityInstallScript() {
 function antigravityInstallPowerShell() {
   return [
     "# Tempa's lock-down for Antigravity, generated by `tempa lockdown antigravity`",
-    "# (docs/install.md#locking-antigravity-down). Run it from your MDM for every user on Windows: as the user",
+    "# (https://tempa.devleaps.nl/docs/install#locking-antigravity-down). Run it from your MDM for every user on Windows: as the user",
     "# (powershell -ExecutionPolicy Bypass -File install.ps1), or with the user's profile folder as the argument",
     "# (install.ps1 C:\\Users\\alice). It merges Tempa's hooks and deny entries into the user's .gemini files and",
     "# keeps their own. Safe to run again. Needs Node 20+ (TEMPA_NODE names another node).",
@@ -27892,7 +28543,7 @@ function antigravityLockdownReadme(o) {
   return [
     "# Tempa's lock-down pack for Antigravity",
     "",
-    "Generated by `tempa lockdown antigravity`; see docs/install.md#locking-antigravity-down.",
+    "Generated by `tempa lockdown antigravity`; see https://tempa.devleaps.nl/docs/install#locking-antigravity-down.",
     "",
     "| File | Where it goes |",
     "|------|---------------|",
@@ -27941,7 +28592,7 @@ var CODEX_MDM_KEY = "requirements_toml_base64";
 function hookTables(o) {
   const command = `${shellQuote(o.tempaPath)} hook --harness codex`;
   const windows = o.tempaPathWindows ? (
-    // `; exit $LASTEXITCODE`: PowerShell would report a blocking exit 2 as 1 (TEMPA-115).
+    // `; exit $LASTEXITCODE`: PowerShell would report a blocking exit 2 as 1.
     `& '${o.tempaPathWindows.replace(/'/g, "''")}' hook --harness codex; exit $LASTEXITCODE`
   ) : void 0;
   return CODEX_HOOK_EVENTS.flatMap(([event2, timeout]) => [
@@ -27956,7 +28607,7 @@ function hookTables(o) {
 }
 function codexRequirements(o) {
   const lines = [
-    "# Tempa's lock-down for OpenAI Codex, generated by `tempa lockdown codex` (docs/install.md#locking-codex-down).",
+    "# Tempa's lock-down for OpenAI Codex, generated by `tempa lockdown codex` (https://tempa.devleaps.nl/docs/install#locking-codex-down).",
     "# Only managed hooks run, so Tempa's hooks below cannot be skipped or answered twice by the plugin's.",
     "allow_managed_hooks_only = true",
     "",
@@ -28060,7 +28711,7 @@ function policyHooks(o) {
         type: "command",
         bash: `${shellQuote(o.tempaPath)} ${args2}`,
         ...o.tempaPathWindows ? (
-          // `; exit $LASTEXITCODE`: PowerShell would report a blocking exit 2 as 1 (TEMPA-115).
+          // `; exit $LASTEXITCODE`: PowerShell would report a blocking exit 2 as 1.
           { powershell: `& '${o.tempaPathWindows.replace(/'/g, "''")}' ${args2}; exit $LASTEXITCODE` }
         ) : {},
         timeoutSec
@@ -28167,7 +28818,7 @@ function geminiSystemSettings(o, windows = false) {
       ...o.strictExtensions ? { allowedExtensions: [extensionPattern(o.extensionSource)] } : {}
     },
     ...o.onlyTempaMcp ? geminiMcpLockdown() : {},
-    // Telemetry itself stays with the `gemini` wrapper: the token expires (TEMPA-156).
+    // Telemetry itself stays with the `gemini` wrapper: the token expires.
     telemetry: { logPrompts: false }
   };
   return `${JSON.stringify(settings, null, 2)}
@@ -28182,7 +28833,7 @@ function geminiAdminPolicies() {
   return `${[
     [
       "# Tempa's admin policies for the Gemini CLI, generated by `tempa lockdown gemini`",
-      "# (docs/install.md#locking-gemini-cli-down). They keep the agent from switching Tempa off; the profile's own",
+      "# (https://tempa.devleaps.nl/docs/install#locking-gemini-cli-down). They keep the agent from switching Tempa off; the profile's own",
       "# rules stay per user, in ~/.gemini/policies/tempa-permissions.toml."
     ].join("\n"),
     [
@@ -28214,7 +28865,7 @@ function geminiInstallScript() {
   return [
     "#!/bin/sh",
     "# Tempa's lock-down for the Gemini CLI, generated by `tempa lockdown gemini`",
-    "# (docs/install.md#locking-gemini-cli-down). Run it as root, from your MDM, on macOS and Linux. It installs",
+    "# (https://tempa.devleaps.nl/docs/install#locking-gemini-cli-down). Run it as root, from your MDM, on macOS and Linux. It installs",
     "# settings.json and the admin policies into Gemini's system folder, owned by root and not writable by group or",
     "# others (Gemini ignores the policies otherwise). It replaces a system settings.json that is there: merge your",
     "# own settings into this one first.",
@@ -28299,14 +28950,14 @@ async function lockdown(ctx, args2) {
   if (harness !== "antigravity" && args2.options["allow-mcp"] !== void 0)
     throw new UsageError("--allow-mcp is for tempa lockdown antigravity; use --only-tempa-mcp");
   const tempaPath = stringOption(args2, "tempa-path");
-  if (!tempaPath || !isAbsolute2(tempaPath))
+  if (!tempaPath || !isAbsolute4(tempaPath))
     throw new UsageError(
       `tempa lockdown ${harness} needs --tempa-path: the absolute path of tempa on every managed machine`
     );
   const asked = stringOption(args2, "out") ?? `tempa-${harness}-lockdown`;
-  const out2 = resolve10(ctx.cwd, asked);
+  const out2 = resolve12(ctx.cwd, asked);
   const override = ctx.env.GEMINI_CLI_SYSTEM_SETTINGS_PATH;
-  const extra = override ? [dirname4(resolve10(ctx.cwd, override))] : [];
+  const extra = override ? [dirname6(resolve12(ctx.cwd, override))] : [];
   if (isSystemDir(out2, extra) || isSystemDir(asked, extra))
     throw new UsageError(
       `${out2} is where ${NAMES[harness]} reads managed settings; write the pack elsewhere and deploy it`
@@ -28349,15 +29000,15 @@ async function lockdown(ctx, args2) {
 }
 function writePack(out2, files) {
   for (const file of files) {
-    const path = join36(out2, file.path);
-    mkdirSync4(dirname4(path), { recursive: true });
-    writeFileAtomic(path, file.content);
+    const path = join41(out2, file.path);
+    mkdirSync4(dirname6(path), { recursive: true });
+    writeFileAtomic(path, file.content, { newMode: 420 });
   }
 }
 function lockdownCodex(ctx, args2, tempaPath, out2) {
   if (args2.options["otel-endpoint"] !== void 0 || args2.options["no-telemetry"] !== void 0)
     throw new UsageError(
-      "Codex's lock-down pack has no telemetry: Codex takes only static OTLP headers, so its telemetry stays with the codex wrapper (docs/telemetry.md#codex-tempa-147)"
+      "Codex's lock-down pack has no telemetry: Codex takes only static OTLP headers, so its telemetry stays with the codex wrapper (https://tempa.devleaps.nl/docs)"
     );
   const windows = stringOption(args2, "tempa-path-windows");
   const files = codexLockdownPack({
@@ -28379,7 +29030,7 @@ function lockdownCodex(ctx, args2, tempaPath, out2) {
     `  macOS MDM: mdm/${CODEX_MDM_DOMAIN}.plist (the ${CODEX_MDM_DOMAIN} domain, key ${CODEX_MDM_KEY})`
   );
   ctx.io.stdout(`And install tempa at ${tempaPath} on every machine; the hooks call it there.`);
-  ctx.io.stdout("Tempa wrote nothing outside this folder. See docs/install.md#locking-codex-down.");
+  ctx.io.stdout("Tempa wrote nothing outside this folder. See https://tempa.devleaps.nl/docs/install#locking-codex-down.");
   return 0;
 }
 function allowedMcp(value) {
@@ -28404,7 +29055,7 @@ function allowedMcp(value) {
 function lockdownAntigravity(ctx, args2, tempaPath, asked, out2) {
   if (args2.options["otel-endpoint"] !== void 0 || args2.options["no-telemetry"] !== void 0)
     throw new UsageError(
-      "Antigravity's lock-down pack has no telemetry: Antigravity exports none, and Tempa's hook reports it (docs/telemetry.md#antigravity-tempa-182)"
+      "Antigravity's lock-down pack has no telemetry: Antigravity exports none, and Tempa's hook reports it (https://tempa.devleaps.nl/docs)"
     );
   for (const option of ["strict-marketplaces", "strict-extensions", "only-tempa-mcp"])
     if (args2.options[option] !== void 0)
@@ -28412,7 +29063,7 @@ function lockdownAntigravity(ctx, args2, tempaPath, asked, out2) {
         `--${option} is not for Antigravity: its plugins and MCP servers are allowed in the Gemini Enterprise console (gemini-enterprise-mcp.json lists Tempa's server; --allow-mcp adds the tenant's)`
       );
   const profile = ctx.env.USERPROFILE;
-  const homes = [join36(ctx.home, ".gemini"), ctx.env.GEMINI_HOME, profile && join36(profile, ".gemini")].filter(
+  const homes = [join41(ctx.home, ".gemini"), ctx.env.GEMINI_HOME, profile && join41(profile, ".gemini")].filter(
     (dir) => Boolean(dir)
   );
   if (isSystemDir(out2, homes) || isSystemDir(asked, homes))
@@ -28454,13 +29105,13 @@ function lockdownAntigravity(ctx, args2, tempaPath, asked, out2) {
   ctx.io.stdout(
     "Advisory: a developer owns these files, can switch hooks off in each surface and can start Antigravity with another GEMINI_HOME (USERPROFILE on Windows)."
   );
-  ctx.io.stdout("Tempa wrote nothing outside this folder. See docs/install.md#locking-antigravity-down.");
+  ctx.io.stdout("Tempa wrote nothing outside this folder. See https://tempa.devleaps.nl/docs/install#locking-antigravity-down.");
   return 0;
 }
 function lockdownGemini(ctx, args2, tempaPath, out2) {
   if (args2.options["otel-endpoint"] !== void 0 || args2.options["no-telemetry"] !== void 0)
     throw new UsageError(
-      "Gemini's lock-down pack has no telemetry: Tempa's token expires, so Gemini's telemetry stays with the gemini wrapper (docs/telemetry.md#gemini-cli-tempa-156); the pack only turns prompt logging off"
+      "Gemini's lock-down pack has no telemetry: Tempa's token expires, so Gemini's telemetry stays with the gemini wrapper (https://tempa.devleaps.nl/docs); the pack only turns prompt logging off"
     );
   if (args2.options["strict-marketplaces"] !== void 0)
     throw new UsageError(
@@ -28490,7 +29141,7 @@ function lockdownGemini(ctx, args2, tempaPath, out2) {
   ctx.io.stdout(
     "Advisory: GEMINI_CLI_SYSTEM_SETTINGS_PATH starts Gemini with other system settings (the admin policies stay)."
   );
-  ctx.io.stdout("Tempa wrote nothing outside this folder. See docs/install.md#locking-gemini-cli-down.");
+  ctx.io.stdout("Tempa wrote nothing outside this folder. See https://tempa.devleaps.nl/docs/install#locking-gemini-cli-down.");
   return 0;
 }
 
@@ -28516,7 +29167,11 @@ async function login(ctx, args2) {
   if (code2.verification_uri_complete) ctx.io.stdout(`  or go straight to ${code2.verification_uri_complete}`);
   ctx.io.stdout("");
   ctx.io.stdout("Waiting for you to sign in in the browser...");
-  ctx.openUrl(url2);
+  if (isSecureUrl(url2) && sameOrigin(url2, endpoint)) ctx.openUrl(url2);
+  else
+    ctx.io.stderr(
+      `tempa: not opening ${url2} (not an https page of ${endpoint}); open the page above yourself.`
+    );
   const tokens = await pollForTokens(ctx, discovery.token_endpoint, code2, wanted);
   const creds = credentialsFromTokens(ctx, tokens, {
     endpoint,
@@ -28527,6 +29182,7 @@ async function login(ctx, args2) {
   const becomesDefault = resolved.source === "flag" && endpoint !== previous && (args2.options.default === true || listLogins(ctx, previous).length === 0);
   if (becomesDefault) writeUserConfig(ctx, { ...readUserConfig(ctx), endpoint });
   await withCredentialsLock(ctx, () => saveCredentials(ctx, creds, { makeDefault: !wanted }));
+  pinKeys(ctx, endpoint, discovery.signing_keys, true);
   forgetRepoTenants(ctx);
   rememberRuntime(ctx);
   if (wanted && tenant !== wanted) {
@@ -28562,6 +29218,65 @@ async function listOtherTenants(ctx, endpoint, tenant) {
   for (const t of others) ctx.io.stdout(`  ${t.id}${t.name && t.name !== t.id ? ` (${t.name})` : ""}`);
   const where = endpoint === resolveEndpoint(ctx).endpoint ? "" : ` --endpoint ${endpoint}`;
   ctx.io.stdout(`Run 'tempa login${where} --tenant <id>' to work in one of them on this laptop too.`);
+}
+
+// src/commands/clean.ts
+import { existsSync as existsSync15, rmSync as rmSync14 } from "node:fs";
+async function clean(ctx, args2) {
+  rejectUnknown(args2, ["repo", "all", "dry-run"]);
+  const dryRun = args2.options["dry-run"] === true;
+  const all = args2.options.all === true;
+  const repoFlag = stringOption(args2, "repo");
+  if (all && repoFlag) throw new UsageError("tempa clean takes --repo or --all, not both");
+  const here = gitInfo(repoFlag ?? ctx.cwd);
+  if (!all && !here)
+    throw new UsageError(`${repoFlag ?? ctx.cwd} is not a git repo; use --all for every repo`);
+  const repos = all ? renderedRepos(ctx) : [];
+  if (here && !repos.some((r) => r.root === here.root)) repos.unshift(here);
+  const verb = dryRun ? "Would remove" : "Removed";
+  let kept = 0;
+  for (const git2 of repos) {
+    const results = cleanRepo(git2, dryRun);
+    if (!results.length) {
+      ctx.io.stdout(`${git2.root}: nothing from Tempa`);
+      continue;
+    }
+    for (const line of describe2(git2.root, results, verb)) ctx.io.stdout(line);
+    kept += results.reduce((n, r) => n + r.kept.length, 0);
+  }
+  if (all) machineLevel(ctx, dryRun);
+  forgetRenderedRepos(ctx, dryRun || !all);
+  if (kept)
+    ctx.io.stdout(
+      `Kept ${kept} file(s) you changed after Tempa wrote them; delete them yourself if you want.`
+    );
+  if (dryRun) ctx.io.stdout("Dry run: nothing was changed.");
+  return 0;
+}
+function describe2(root, results, verb) {
+  const lines = [`${root}:`];
+  for (const r of results) {
+    lines.push(
+      `  ${r.harness}: ${verb.toLowerCase()} ${r.removed.length} file(s) and its .git/info/exclude block`
+    );
+    for (const path of r.removed) lines.push(`    - ${path}`);
+    for (const path of r.settings) lines.push(`    ~ ${path} (Tempa's entries only)`);
+    for (const path of r.kept) lines.push(`    kept (changed by you): ${path}`);
+  }
+  return lines;
+}
+function machineLevel(ctx, dryRun) {
+  const backup = `${claudeSettingsPath(ctx)}.tempa-backup`;
+  if (dryRun) {
+    ctx.io.stdout("Would take Tempa's telemetry keys out of ~/.claude/settings.json");
+    if (existsSync15(backup)) ctx.io.stdout(`Would remove ${backup}`);
+    return;
+  }
+  if (removeClaudeSettings(ctx)) ctx.io.stdout("Took Tempa's telemetry keys out of ~/.claude/settings.json");
+  if (existsSync15(backup)) {
+    rmSync14(backup, { force: true });
+    ctx.io.stdout(`Removed ${backup}`);
+  }
 }
 
 // src/commands/logout.ts
@@ -29259,14 +29974,14 @@ function codePointLength(str5) {
   const units = str5.length;
   if (!highSurrogate.test(str5))
     return units;
-  let count = units;
+  let count2 = units;
   for (let i2 = 0; i2 < units - 1; i2++) {
     if ((str5.charCodeAt(i2) & 64512) === 55296 && (str5.charCodeAt(i2 + 1) & 64512) === 56320) {
-      count--;
+      count2--;
       i2++;
     }
   }
-  return count;
+  return count2;
 }
 function getLengthableOrigin(input) {
   if (Array.isArray(input))
@@ -29809,17 +30524,17 @@ var validateAsync = async (schema, value, _ctx) => {
   return result.issues.length === 0;
 };
 var _encode = (_Err) => {
-  const parse5 = _parse(_Err);
+  const parse6 = _parse(_Err);
   const fn = (schema, value, _ctx, _params) => {
     const ctx = _ctx ? { ..._ctx, direction: "backward" } : { direction: "backward" };
-    return parse5(schema, value, ctx, finalizeParams(fn, _params));
+    return parse6(schema, value, ctx, finalizeParams(fn, _params));
   };
   return fn;
 };
 var _decode = (_Err) => {
-  const parse5 = _parse(_Err);
+  const parse6 = _parse(_Err);
   const fn = (schema, value, _ctx, _params) => {
-    return parse5(schema, value, _ctx, finalizeParams(fn, _params));
+    return parse6(schema, value, _ctx, finalizeParams(fn, _params));
   };
   return fn;
 };
@@ -30905,7 +31620,7 @@ function capSize(inst, size) {
   if (!caps.length)
     return;
   const cap = Math.min(...caps.map((c) => c[0]));
-  const parse5 = inst._zod.parse;
+  const parse6 = inst._zod.parse;
   inst._zod.parse = (payload, ctx) => {
     const n = size(payload.value);
     if (n > cap && !ctx?.skipChecks && ctx?.direction !== "backward") {
@@ -30919,7 +31634,7 @@ function capSize(inst, size) {
         }
       }
     }
-    return parse5(payload, ctx);
+    return parse6(payload, ctx);
   };
 }
 var arraySize = (input) => Array.isArray(input) ? input.length : -1;
@@ -32015,7 +32730,7 @@ var recursive = /* @__PURE__ */ new WeakMap();
 var NONE = 0;
 var ASSUMED = 1;
 var PROVEN = 2;
-function isRecursive(inst, stack, resolve12) {
+function isRecursive(inst, stack, resolve14) {
   const cached2 = recursive.get(inst);
   if (cached2 !== void 0)
     return cached2 ? PROVEN : NONE;
@@ -32025,7 +32740,7 @@ function isRecursive(inst, stack, resolve12) {
   let result = NONE;
   const check2 = (child) => {
     if (result !== PROVEN && child?._zod) {
-      const answer = isRecursive(child, stack, resolve12);
+      const answer = isRecursive(child, stack, resolve14);
       if (answer > result)
         result = answer;
     }
@@ -32036,7 +32751,7 @@ function isRecursive(inst, stack, resolve12) {
       const desc = Object.getOwnPropertyDescriptor(sh, key);
       if (spread && !desc.enumerable)
         continue;
-      const child = desc.get ? ASSUMED : desc.value?._zod ? isRecursive(desc.value, stack, resolve12) : NONE;
+      const child = desc.get ? ASSUMED : desc.value?._zod ? isRecursive(desc.value, stack, resolve14) : NONE;
       if (child > answer)
         answer = child;
     }
@@ -32100,7 +32815,7 @@ function isRecursive(inst, stack, resolve12) {
       break;
     // `$ZodLazy` caches its inner on the def, so a resolved edge is followed exactly
     case "lazy": {
-      const inner = def._cachedInner ?? (resolve12 ? inst._zod.innerType : void 0);
+      const inner = def._cachedInner ?? (resolve14 ? inst._zod.innerType : void 0);
       merge2(inner ? isRecursive(inner, stack, false) : ASSUMED);
       break;
     }
@@ -34130,7 +34845,7 @@ var ZodRealError = /* @__PURE__ */ $constructor("ZodError", initializer2, void 0
 });
 
 // ../node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/parse.js
-var parse3 = /* @__PURE__ */ _parse(ZodRealError);
+var parse4 = /* @__PURE__ */ _parse(ZodRealError);
 var parseAsync = /* @__PURE__ */ _parseAsync(ZodRealError);
 var safeParse2 = /* @__PURE__ */ _safeParse(ZodRealError);
 var safeParseAsync = /* @__PURE__ */ _safeParseAsync(ZodRealError);
@@ -34267,7 +34982,7 @@ var ZodType = /* @__PURE__ */ $constructor("ZodType", (inst, def) => {
     util_exports.own(this, "~standard", value);
   },
   parse: function _parse2(data, params) {
-    return parse3(this, data, params, { callee: _parse2 });
+    return parse4(this, data, params, { callee: _parse2 });
   },
   parseAsync: async function _parseAsync2(data, params) {
     return await parseAsync(this, data, params, { callee: _parseAsync2 });
@@ -36846,12 +37561,12 @@ var StdioServerTransport = class {
     this.onclose?.();
   }
   send(message) {
-    return new Promise((resolve12) => {
+    return new Promise((resolve14) => {
       const json2 = serializeMessage(message);
       if (this._stdout.write(json2)) {
-        resolve12();
+        resolve14();
       } else {
-        this._stdout.once("drain", resolve12);
+        this._stdout.once("drain", resolve14);
       }
     });
   }
@@ -37474,7 +38189,7 @@ var Protocol = class {
           return;
         }
         const pollInterval = task2.pollInterval ?? this._options?.defaultTaskPollInterval ?? 1e3;
-        await new Promise((resolve12) => setTimeout(resolve12, pollInterval));
+        await new Promise((resolve14) => setTimeout(resolve14, pollInterval));
         options?.signal?.throwIfAborted();
       }
     } catch (error2) {
@@ -37491,7 +38206,7 @@ var Protocol = class {
    */
   request(request, resultSchema, options) {
     const { relatedRequestId, resumptionToken, onresumptiontoken, task, relatedTask } = options ?? {};
-    return new Promise((resolve12, reject) => {
+    return new Promise((resolve14, reject) => {
       const earlyReject = (error2) => {
         reject(error2);
       };
@@ -37569,7 +38284,7 @@ var Protocol = class {
           if (!parseResult.success) {
             reject(parseResult.error);
           } else {
-            resolve12(parseResult.data);
+            resolve14(parseResult.data);
           }
         } catch (error2) {
           reject(error2);
@@ -37831,12 +38546,12 @@ var Protocol = class {
       }
     } catch {
     }
-    return new Promise((resolve12, reject) => {
+    return new Promise((resolve14, reject) => {
       if (signal.aborted) {
         reject(new McpError(ErrorCode.InvalidRequest, "Request cancelled"));
         return;
       }
-      const timeoutId = setTimeout(resolve12, interval);
+      const timeoutId = setTimeout(resolve14, interval);
       signal.addEventListener("abort", () => {
         clearTimeout(timeoutId);
         reject(new McpError(ErrorCode.InvalidRequest, "Request cancelled"));
@@ -40927,14 +41642,31 @@ var Upstream = class {
   }
   async freshSession(force = false) {
     if (!force && this.session && this.ctx.now() < this.expiresAt - SESSION_MARGIN_MS) return this.session;
-    const { body: body2 } = await authedRequest(this.ctx, "/mcp/session", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ endpoint: this.endpoint.name, repo: this.repo, harness: this.harness }),
-      timeoutMs: 1e4,
-      // The repo's login (tenant TEMPA-066, control plane TEMPA-113): the endpoint is in its profile.
-      ...loginForRemote(this.ctx, this.repo)
-    });
+    const request = { endpoint: this.endpoint.name, repo: this.repo, harness: this.harness };
+    let body2;
+    try {
+      ({ body: body2 } = await authedRequest(this.ctx, "/mcp/session", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        // `refresh`: the server refused the last token; a per-user endpoint's is renewed.
+        body: JSON.stringify(force ? { ...request, refresh: true } : request),
+        timeoutMs: 1e4,
+        // The repo's login (tenant, control plane): the endpoint is in its profile.
+        ...loginForRemote(this.ctx, this.repo)
+      }));
+    } catch (err2) {
+      if (err2 instanceof HttpError && err2.status === 428) {
+        const answer = err2.body ?? {};
+        const url2 = typeof answer.connect_url === "string" ? answer.connect_url : null;
+        const message = serverMessage(err2.body) ?? `${this.endpoint.name} is not connected for you yet.`;
+        throw new NotConnectedError(message, this.endpoint.name, url2);
+      }
+      throw err2;
+    }
+    if (typeof body2?.url !== "string" || !isSecureUrl(body2.url))
+      throw new Error(
+        `MCP endpoint ${this.endpoint.name}: ${String(body2?.url)} is not an https URL; not connecting`
+      );
     this.session = body2;
     this.expiresAt = this.ctx.now() + (body2.expires_in || 3600) * 1e3;
     return body2;
@@ -41002,6 +41734,15 @@ function workStepTool(profile) {
     }
   };
 }
+function signInTools(upstream, why) {
+  if (!upstream) return [];
+  const names = upstream.endpoint.tools?.length ? upstream.endpoint.tools : ["connect"];
+  return names.map((name2) => ({
+    name: exposedName(upstream.name, name2),
+    description: `Not available yet: ${why.message}`,
+    inputSchema: { type: "object", additionalProperties: true }
+  }));
+}
 var SEP = "__";
 var RESOURCE_SCHEME = "tempa:";
 var RETRY_AFTER_MS = 3e4;
@@ -41053,8 +41794,10 @@ var McpProxy = class {
   server;
   upstreams = /* @__PURE__ */ new Map();
   failedAt = /* @__PURE__ */ new Map();
+  /** Per-user endpoints the person has not signed in to, with the message and link. */
+  notConnected = /* @__PURE__ */ new Map();
   log;
-  /** Requests wait for this: the workspace from the client's MCP roots (TEMPA-181). */
+  /** Requests wait for this: the workspace from the client's MCP roots. */
   ready = Promise.resolve();
   addUpstreams() {
     const { profile, repo, upstreamFetch, harness } = this.options;
@@ -41064,8 +41807,8 @@ var McpProxy = class {
   /** Answer requests only once `until` settles, or after `ms` at the latest. */
   holdUntil(until, ms) {
     let timer;
-    const deadline = new Promise((resolve12) => {
-      timer = setTimeout(resolve12, ms);
+    const deadline = new Promise((resolve14) => {
+      timer = setTimeout(resolve14, ms);
       timer.unref();
     });
     const settled = until.then(
@@ -41083,6 +41826,7 @@ var McpProxy = class {
     this.options = { ...options, ...this.options.log ? { log: this.options.log } : {} };
     this.upstreams.clear();
     this.failedAt.clear();
+    this.notConnected.clear();
     this.addUpstreams();
     await Promise.all(old.map((u) => u.close().catch(() => void 0)));
     await Promise.all([
@@ -41110,9 +41854,11 @@ var McpProxy = class {
         try {
           const client = await upstream.connect();
           this.failedAt.delete(upstream.name);
+          this.notConnected.delete(upstream.name);
           return { upstream, client };
         } catch (err2) {
           this.failedAt.set(upstream.name, this.ctx.now());
+          if (err2 instanceof NotConnectedError) this.notConnected.set(upstream.name, err2);
           this.log(`tempa mcp: cannot reach ${upstream.name}: ${err2.message}`);
           return void 0;
         }
@@ -41125,8 +41871,11 @@ var McpProxy = class {
     if (!upstream)
       throw new McpError(ErrorCode.InvalidParams, `Unknown endpoint '${endpoint}' in this profile`);
     try {
-      return { upstream, client: await upstream.connect() };
+      const client = await upstream.connect();
+      this.notConnected.delete(endpoint);
+      return { upstream, client };
     } catch (err2) {
+      if (err2 instanceof NotConnectedError) this.notConnected.set(endpoint, err2);
       throw new McpError(ErrorCode.InternalError, `Cannot reach ${endpoint}: ${err2.message}`);
     }
   }
@@ -41148,6 +41897,7 @@ var McpProxy = class {
             tools.push({ ...tool, name: exposedName(upstream.name, tool.name) });
         }
       }
+      for (const [name2, why] of this.notConnected) tools.push(...signInTools(this.upstreams.get(name2), why));
       return { tools };
     });
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
@@ -41158,7 +41908,15 @@ var McpProxy = class {
         return this.workStep(this.options.workRepo, request.params.arguments ?? {});
       const parts2 = splitName(request.params.name);
       if (!parts2) throw new McpError(ErrorCode.InvalidParams, `Unknown tool ${request.params.name}`);
-      const { upstream, client } = await this.one(parts2.endpoint);
+      let connected;
+      try {
+        connected = await this.one(parts2.endpoint);
+      } catch (err2) {
+        const why = this.notConnected.get(parts2.endpoint);
+        if (!why) throw err2;
+        return { isError: true, content: [{ type: "text", text: why.message }] };
+      }
+      const { upstream, client } = connected;
       if (!upstream.allows(parts2.name)) {
         throw new McpError(
           ErrorCode.InvalidParams,
@@ -41295,7 +42053,7 @@ async function followRoots(ctx, proxy2, harness, current3) {
 function watchRoots(ctx, proxy2, harness, start2) {
   let workspace = start2;
   let rootsRead = () => void 0;
-  proxy2.holdUntil(new Promise((resolve12) => rootsRead = resolve12), ROOTS_TIMEOUT_MS + 1e3);
+  proxy2.holdUntil(new Promise((resolve14) => rootsRead = resolve14), ROOTS_TIMEOUT_MS + 1e3);
   const follow = () => followRoots(ctx, proxy2, harness, workspace).then((w) => workspace = w).catch(() => void 0);
   proxy2.server.oninitialized = () => void follow().finally(rootsRead);
   proxy2.server.setNotificationHandler(RootsListChangedNotificationSchema, async () => {
@@ -41312,10 +42070,10 @@ async function mcp(ctx, args2) {
   if (harness === "antigravity") watchRoots(ctx, proxy2, "antigravity", start2);
   const transport = new StdioServerTransport();
   await proxy2.server.connect(transport);
-  const closed = new Promise((resolve12) => {
-    proxy2.server.onclose = () => resolve12();
-    process.stdin.on("end", () => resolve12());
-    process.stdin.on("close", () => resolve12());
+  const closed = new Promise((resolve14) => {
+    proxy2.server.onclose = () => resolve14();
+    process.stdin.on("end", () => resolve14());
+    process.stdin.on("close", () => resolve14());
   });
   await closed;
   await proxy2.close().catch(() => void 0);
@@ -41366,9 +42124,9 @@ function codexOtelLines(token2) {
 
 // src/telemetry/copilot-session.ts
 import { execFileSync as execFileSync3 } from "node:child_process";
-import { existsSync as existsSync13, readdirSync as readdirSync10, rmSync as rmSync13 } from "node:fs";
-import { join as join37 } from "node:path";
-var copilotSessionsDir = (ctx) => join37(ctx.tempaHome, "copilot-sessions");
+import { existsSync as existsSync16, readdirSync as readdirSync10, rmSync as rmSync15 } from "node:fs";
+import { join as join42 } from "node:path";
+var copilotSessionsDir = (ctx) => join42(ctx.tempaHome, "copilot-sessions");
 var MAX_ANCESTORS = 4;
 function alive2(pid) {
   try {
@@ -41381,21 +42139,21 @@ function alive2(pid) {
 function recordCopilotSession(ctx, pid, repoDir) {
   try {
     writeJsonAtomic(
-      join37(copilotSessionsDir(ctx), `${pid}.json`),
+      join42(copilotSessionsDir(ctx), `${pid}.json`),
       { dir: repoDir, at: new Date(ctx.now()).toISOString() },
       { dirMode: 448 }
     );
     for (const name2 of readdirSync10(copilotSessionsDir(ctx))) {
       const other = Number(name2.replace(/\.json$/, ""));
       if (other !== pid && Number.isInteger(other) && other > 0 && !alive2(other))
-        rmSync13(join37(copilotSessionsDir(ctx), name2), { force: true });
+        rmSync15(join42(copilotSessionsDir(ctx), name2), { force: true });
     }
   } catch {
   }
 }
 function recorded(ctx, pid) {
-  const record2 = readJsonLenient(join37(copilotSessionsDir(ctx), `${pid}.json`));
-  return typeof record2?.dir === "string" && existsSync13(record2.dir) ? record2.dir : void 0;
+  const record2 = readJsonLenient(join42(copilotSessionsDir(ctx), `${pid}.json`));
+  return typeof record2?.dir === "string" && existsSync16(record2.dir) ? record2.dir : void 0;
 }
 function ancestors(pid, platform, max = MAX_ANCESTORS) {
   if (platform === "win32") return [];
@@ -41488,17 +42246,17 @@ async function otelHeaders(ctx, args2) {
 }
 
 // src/commands/policy.ts
-import { resolve as resolve11 } from "node:path";
+import { resolve as resolve13 } from "node:path";
 var USAGE4 = "tempa policy parse|check [--repo PATH] COMMAND (quote the command, or put it after --)";
 async function policy(ctx, args2) {
   rejectUnknown(args2, ["repo"]);
-  const [sub, ...words] = args2.positionals;
-  if (sub === "serve" && !words.length) {
+  const [sub, ...words2] = args2.positionals;
+  if (sub === "serve" && !words2.length) {
     if (!residentEnabled(ctx)) throw new UsageError("the resident evaluator is off on this machine");
     await serve(ctx);
     return 0;
   }
-  const command = words.join(" ");
+  const command = words2.join(" ");
   if (sub !== "parse" && sub !== "check" || !command.trim()) throw new UsageError(USAGE4);
   if (sub === "parse") {
     try {
@@ -41510,7 +42268,7 @@ async function policy(ctx, args2) {
       return 1;
     }
   }
-  const dir = resolve11(stringOption(args2, "repo") ?? ctx.cwd);
+  const dir = resolve13(stringOption(args2, "repo") ?? ctx.cwd);
   const repo = repoContext(dir);
   const cached2 = loadVerifiedCache(ctx, repoEndpoint(ctx, repo.key), repo.key);
   if (!cached2) throw new NoProfileError("No valid cached profile for this repo. Run 'tempa sync'.");
@@ -41673,6 +42431,8 @@ async function sync(ctx, args2) {
   const ambiguous = ambiguityWarning(repo.repo ?? "This repo", result.tenant);
   if (ambiguous) ctx.io.stderr(`tempa: ${ambiguous}`);
   ctx.io.stdout(`Signed with ${profile.signature?.key_id}, valid until ${profile.expires_at}`);
+  const changes = announceProfileChanges(ctx, repo.key, repo.repo, profile);
+  if (changes) ctx.io.stdout(changes);
   const report = renderProfile(repo, profile, ctx.now, renderer, renderSession(ctx, renderer.id));
   if (report) for (const line of describeRender(report)) ctx.io.stdout(line);
   else
@@ -41680,6 +42440,10 @@ async function sync(ctx, args2) {
       "Not a git repo: nothing rendered; standards reach the harness through the session context."
     );
   await syncModule(ctx, repo.key, profile);
+  if (hasPerUser(profile)) {
+    const signIns = await unconnected(ctx, loginForRepo(ctx, repo.key), 5e3).catch(() => []);
+    for (const item of signIns) ctx.io.stderr(`tempa: ${signInNotice(item)}`);
+  }
   for (const warning of afterSync(ctx, {
     repo,
     result,
@@ -41705,7 +42469,7 @@ function cachedProfile2(ctx, repo) {
     return void 0;
   }
 }
-function describe3(work2) {
+function describe4(work2) {
   return [work2.title ? `${work2.key} \xB7 ${work2.title}` : work2.key, work2.url].filter(Boolean).join("  ");
 }
 async function ship(ctx) {
@@ -41723,14 +42487,14 @@ async function work(ctx, args2) {
     if (!ref) throw new UsageError(`'${input}' is not an issue URL, a key like ABC-123, or #123`);
     const started = startWork(ctx, repo, ref, stringOption(args2, "title"));
     await ship(ctx);
-    ctx.io.stdout(`Working on ${describe3(started)}`);
+    ctx.io.stdout(`Working on ${describe4(started)}`);
     return 0;
   }
   if (action === "stop") {
     if (rest.length) throw new UsageError("tempa work stop takes no arguments");
     const stopped = stopWork(ctx, repo);
     await ship(ctx);
-    ctx.io.stdout(stopped ? `Stopped ${describe3(stopped)}` : "No work item was set for this repo");
+    ctx.io.stdout(stopped ? `Stopped ${describe4(stopped)}` : "No work item was set for this repo");
     return 0;
   }
   if (action === "step") {
@@ -41748,8 +42512,8 @@ async function work(ctx, args2) {
   const explicit = explicitWork(ctx, repo);
   const branch = currentBranch(repo.git?.root ?? repo.dir);
   const fromBranch = branch ? findInBranch(branch, repo.repo, matchers) : void 0;
-  if (explicit) ctx.io.stdout(`Working on ${describe3(explicit)} (set with tempa work start)`);
-  else if (fromBranch) ctx.io.stdout(`Working on ${describe3(fromBranch)} (from branch ${branch})`);
+  if (explicit) ctx.io.stdout(`Working on ${describe4(explicit)} (set with tempa work start)`);
+  else if (fromBranch) ctx.io.stdout(`Working on ${describe4(fromBranch)} (from branch ${branch})`);
   else ctx.io.stdout("No work item: run 'tempa work start <issue URL or key>' or name the issue in a prompt");
   return 0;
 }
@@ -41812,14 +42576,19 @@ Commands:
                                MDM runs; the Gemini Enterprise MCP allowlist
   logout [--endpoint URL] [--tenant ID]
                                Forget this device's tokens and cached profiles (of one endpoint or tenant)
+  clean [--repo PATH] [--all] [--dry-run]
+                               Remove what Tempa rendered into this repo (--all: every repo it rendered
+                               into, and its keys and backup of ~/.claude/settings.json) and its
+                               .git/info/exclude blocks; files you changed are kept
   --version                    Print the version
   help                         Show this help`;
 var COMMANDS = {
   login: { run: login, valued: ["endpoint", "tenant"] },
   status: { run: status },
   logout: { run: logout, valued: ["endpoint", "tenant"] },
+  clean: { run: clean, valued: ["repo"] },
   sync: { run: sync, valued: ["repo", "endpoint", "tenant", "harness"] },
-  hook: { run: hook, valued: ["harness", "event", "bundle"] },
+  hook: { run: hook, valued: ["harness", "event", "bundle", "bundle-key"] },
   copilot: { run: copilot, valued: ["repo", "base", "branch", "cli"] },
   mcp: { run: mcp, valued: ["harness"] },
   doctor: { run: doctor, valued: ["repo"] },

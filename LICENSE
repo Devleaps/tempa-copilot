@@ -23,3 +23,7 @@ Software"). The Software is proprietary to Devleaps B.V. It is licensed to you, 
 
 5. End. This licence ends automatically when the subscription or tenant ends, or when you breach it. You must
    then stop using the Software and delete it.
+
+6. Third-party components. The Software contains open source components of third parties, listed with their
+   licences in THIRD_PARTY_NOTICES.md. Those components are licensed to you under their own licences, not under
+   this licence, and are excluded from it; nothing in this licence limits the rights those licences give you.

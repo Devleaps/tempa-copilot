@@ -8,10 +8,9 @@ reports about the plugin, the CLI and the Tempa service seriously.
 
 Report it privately, never in a public issue, pull request or chat.
 
-- **Where**: the contact in [`https://tempa.devleaps.nl/.well-known/security.txt`](https://tempa.devleaps.nl/.well-known/security.txt)
+- **Where**: e-mail [security@devleaps.nl](mailto:security@devleaps.nl), the contact in
+  [`https://tempa.devleaps.nl/.well-known/security.txt`](https://tempa.devleaps.nl/.well-known/security.txt)
   (RFC 9116).
-  <!-- TODO(human): name the security contact here (the value of TEMPA_WEB_SECURITY_CONTACT once a person has
-  decided it), and make sure security.txt answers, before this repository goes public. -->
 - **What to send**: what you found, the steps to reproduce, the version (`tempa --version`, or `version` in the
   plugin's manifest), the impact you expect, and how to reach you.
 - **Please do not** access, change or keep data that is not yours, degrade the service, or test beyond what your
