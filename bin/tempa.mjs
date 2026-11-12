@@ -13752,7 +13752,7 @@ function credentialsFromTokens(ctx, tokens, base) {
 import { join as join4 } from "node:path";
 
 // src/version.ts
-var VERSION = true ? "0.1.5" : "0.0.0-dev";
+var VERSION = true ? "0.1.6" : "0.0.0-dev";
 
 // src/cli-version.ts
 var CLI_VERSION_HEADER = "x-tempa-cli-version";
