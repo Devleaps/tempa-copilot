@@ -14,7 +14,13 @@
 #
 # When it cannot start tempa, a hook call still gets a proper answer that explains the fix: in Claude Code
 # PreToolUse is denied and prompts are blocked (fail closed), SessionStart gets a warning; any other harness
-# gets exit 2 with the fix on stderr. Anything else exits 127.
+# gets exit 2 with the fix on stderr on a gate, and exit 0 with it on an event that cannot stop anything.
+# Anything else exits 127.
+#
+# When tempa ends a hook with a status other than its own 0 and 2 (a crash, for example Node dying at exit on
+# Windows after the answer was written), an event that cannot stop anything (Stop, SessionStart, PostToolUse, ...)
+# gets exit 0 with a note on stderr: exit 2 would, for example, keep Claude Code from stopping. A gate (a tool
+# call, a prompt) gets the answer tempa already wrote, or fails closed with exit 2 when there is none.
 #
 # Overrides: TEMPA_BINARY (a standalone tempa), TEMPA_NODE (a node binary), TEMPA_CLI (tempa's JS entry point;
 # it also skips the binary), TEMPA_HOME (default ~/.tempa).
@@ -135,21 +141,77 @@ remember_launcher() {
   return 0
 }
 
-# The harness a hook call is for (`hook --harness <id>`); Claude Code when none is named.
-hook_harness() {
+# A hook call's option (`hook --harness <id>`, `--event <name>`): its value, empty when it is not given.
+hook_option() {
+  name=$1
+  shift
   while [ $# -gt 0 ]; do
     case $1 in
-      --harness) printf '%s\n' "${2:-}" && return 0 ;;
-      --harness=*) printf '%s\n' "${1#--harness=}" && return 0 ;;
+      "--$name") printf '%s\n' "${2:-}" && return 0 ;;
+      "--$name="*) printf '%s\n' "${1#--"$name"=}" && return 0 ;;
     esac
     shift
   done
-  printf 'claude-code\n'
+}
+
+# The hook events that cannot stop anything, as each harness names them (Claude Code, Codex, the Gemini CLI,
+# Copilot, Antigravity). Every other event is a gate, and so is one the launcher cannot name. tempa-launch.ps1 and
+# tempa-launch.mjs keep the same list (test/launcher-crash.test.ts holds them to it).
+NON_GATES='SessionStart|SessionEnd|PostToolUse|PostToolUseFailure|Stop|SubagentStop|Notification|PreCompact|AfterTool|AfterAgent|PostInvocation|sessionStart|sessionEnd|postToolUse|agentStop|subagentStop|errorOccurred'
+
+# Whether this hook call's event can stop something. `--event` names it (Copilot, Antigravity), else the input's
+# hook_event_name: only when the input names one and every hook_event_name in it is a non-gate is it not a gate.
+is_gate() {
+  if [ -n "$event_arg" ]; then
+    case "|$NON_GATES|" in *"|$event_arg|"*) return 1 ;; esac
+    return 0
+  fi
+  named=$(printf '%s' "$input" | sed -n '/"hook_event_name" *: *"/p')
+  [ -n "$named" ] || return 0
+  others=$(printf '%s' "$input" | sed -E "s/\"hook_event_name\" *: *\"($NON_GATES)\"//g" |
+    sed -n '/"hook_event_name" *: *"/p')
+  [ -n "$others" ]
+}
+
+# Run tempa for a hook with the input on its stdin; sets `status` and `out` (its stdout, kept byte for byte).
+run_hook() {
+  out=$(
+    printf '%s' "$input" | "$@"
+    s=$?
+    printf .
+    exit "$s"
+  )
+  status=$?
+  out=${out%.}
+}
+
+# End a hook call with tempa's answer. 0 and 2 are tempa's own; anything else is a crash (see the top).
+finish_hook() {
+  if [ "$status" -eq 0 ] || [ "$status" -eq 2 ]; then
+    printf '%s' "$out"
+    exit "$status"
+  fi
+  if ! is_gate; then
+    printf '%s' "$out"
+    echo "tempa-launch: tempa exited with status $status; not blocking this event, which cannot stop anything" >&2
+    exit 0
+  fi
+  answer=$(printf '%s' "$out")
+  case $answer in
+    "{"*"}")
+      printf '%s' "$out"
+      echo "tempa-launch: tempa exited with status $status after answering; passing its answer on" >&2
+      exit 0
+      ;;
+  esac
+  echo "tempa-launch: tempa exited with status $status; blocking (fail closed)" >&2
+  exit 2
 }
 
 # Explain the problem and fail closed. Claude Code gets an answer for the hook event on stdin and exit 0. Every
 # other harness reads hook output in its own format, so it gets the explanation on stderr and exit 2, which
-# blocks a tool call in Copilot and Codex. Outside a hook: exit 127.
+# blocks a tool call in Copilot and Codex; an event that cannot stop anything gets exit 0 instead.
+# Outside a hook: exit 127.
 explain() {
   problem=$1
   case "${harness:-claude-code}" in
@@ -165,8 +227,11 @@ explain() {
     echo "tempa-launch: $problem. $fix" >&2
     exit 127
   fi
-  input=$(cat)
   if [ "$harness" != "claude-code" ]; then
+    if ! is_gate; then
+      echo "tempa-launch: Tempa is not running: $problem. $fix" >&2
+      exit 0
+    fi
     echo "tempa-launch: Tempa is not running: $problem. $fix; blocking (fail closed)" >&2
     exit 2
   fi
@@ -190,20 +255,38 @@ explain() {
 bundled=$(dirname "$0")/tempa.mjs
 [ -f "$bundled" ] || bundled=
 harness=claude-code
-[ "${1:-}" != "hook" ] || harness=$(hook_harness "$@")
+event_arg=
+input=
+if [ "${1:-}" = "hook" ]; then
+  harness=$(hook_option harness "$@")
+  [ -n "$harness" ] || harness=claude-code
+  event_arg=$(hook_option event "$@")
+  # The hook's input, read once: tempa gets it on stdin, and the launcher reads the event from it when tempa
+  # cannot start or crashes. The dot keeps trailing newlines.
+  input=$(
+    cat
+    printf .
+  )
+  input=${input%.}
+fi
 
-# Not exec: when the binary cannot start, nothing has read stdin yet and Node can take over.
+# Not exec: when the binary cannot start, Node can take over with the same input.
 binary=$(find_binary) || binary=
 if [ -n "$binary" ]; then
-  "$binary" "$@"
-  status=$?
-  if [ "$status" -ne 126 ] && [ "$status" -ne 127 ]; then
-    [ -n "${TEMPA_BINARY:-}" ] || remember_launcher
-    if [ "${1:-}" = "hook" ] && [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
-      echo "tempa-launch: tempa exited with status $status; blocking (fail closed)" >&2
-      exit 2
+  if [ "${1:-}" = "hook" ]; then
+    run_hook "$binary" "$@"
+    # 126 or 127 with no answer: the binary could not be executed (or died before answering): try Node.
+    if { [ "$status" -ne 126 ] && [ "$status" -ne 127 ]; } || [ -n "$out" ]; then
+      [ -n "${TEMPA_BINARY:-}" ] || remember_launcher
+      finish_hook
     fi
-    exit "$status"
+  else
+    "$binary" "$@"
+    status=$?
+    if [ "$status" -ne 126 ] && [ "$status" -ne 127 ]; then
+      [ -n "${TEMPA_BINARY:-}" ] || remember_launcher
+      exit "$status"
+    fi
   fi
   echo "tempa-launch: $binary cannot run on this machine (exit $status); trying Node" >&2
 fi
@@ -221,13 +304,9 @@ cli=$(find_cli "$node") || explain "the tempa CLI was not found" "${1:-}"
 
 if [ "${1:-}" = "hook" ]; then
   # Claude Code treats any exit code other than 0 and 2 as a non-blocking error. If node itself fails (a
-  # broken install, a crash before tempa's own handler), turn that into 2 so the hook still fails closed.
-  "$node" "$cli" "$@"
-  status=$?
-  if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
-    echo "tempa-launch: tempa exited with status $status; blocking (fail closed)" >&2
-    exit 2
-  fi
-  exit "$status"
+  # broken install, a crash before or after tempa's own handler), finish_hook decides: a gate fails closed
+  # unless tempa already answered, any other event is let through.
+  run_hook "$node" "$cli" "$@"
+  finish_hook
 fi
 exec "$node" "$cli" "$@"

@@ -1066,8 +1066,8 @@ var require_parse_cst = __commonJS({
         }
         if (this.node) {
           if (blankLine) {
-            const items = context.parent.items || context.parent.contents;
-            if (items) items.push(blankLine);
+            const items2 = context.parent.items || context.parent.contents;
+            if (items2) items2.push(blankLine);
           }
           if (comments.length) Array.prototype.push.apply(this.props, comments);
           offset = this.node.range.end;
@@ -1305,14 +1305,14 @@ var require_parse_cst = __commonJS({
           context: {
             src
           },
-          items,
+          items: items2,
           range,
           value
         } = this;
         if (value != null) return value;
-        let str5 = src.slice(range.start, items[0].range.start) + String(items[0]);
-        for (let i2 = 1; i2 < items.length; ++i2) {
-          const item = items[i2];
+        let str5 = src.slice(range.start, items2[0].range.start) + String(items2[0]);
+        for (let i2 = 1; i2 < items2.length; ++i2) {
+          const item = items2[i2];
           const {
             atLineStart,
             indent
@@ -1931,12 +1931,12 @@ var require_parse_cst = __commonJS({
           context: {
             src
           },
-          items,
+          items: items2,
           range,
           value
         } = this;
         if (value != null) return value;
-        const nodes = items.filter((item) => item instanceof PlainValue.Node);
+        const nodes = items2.filter((item) => item instanceof PlainValue.Node);
         let str5 = "";
         let prevEnd = range.start;
         nodes.forEach((node2) => {
@@ -2881,9 +2881,9 @@ ${ctx.indent}`;
       }
     };
     PlainValue._defineProperty(Alias, "default", true);
-    function findPair(items, key) {
+    function findPair(items2, key) {
       const k = key instanceof Scalar ? key.value : key;
-      for (const it of items) {
+      for (const it of items2) {
         if (it instanceof Pair) {
           if (it.key === key || it.key === k) return it;
           if (it.key && it.key.value === k) return it;
@@ -3038,12 +3038,12 @@ ${ctx.indent}`;
       for (const {
         format,
         test,
-        resolve: resolve14
+        resolve: resolve15
       } of tags) {
         if (test) {
           const match = str5.match(test);
           if (match) {
-            let res = resolve14.apply(null, match);
+            let res = resolve15.apply(null, match);
             if (!(res instanceof Scalar)) res = new Scalar(res);
             if (format) res.format = format;
             return res;
@@ -3780,20 +3780,20 @@ ${ca}` : ca;
       }
       const {
         comments,
-        items
+        items: items2
       } = cst.type === PlainValue.Type.FLOW_MAP ? resolveFlowMapItems(doc, cst) : resolveBlockMapItems(doc, cst);
       const map = new YAMLMap();
-      map.items = items;
+      map.items = items2;
       resolveComments(map, comments);
       let hasCollectionKey = false;
-      for (let i2 = 0; i2 < items.length; ++i2) {
+      for (let i2 = 0; i2 < items2.length; ++i2) {
         const {
           key: iKey
-        } = items[i2];
+        } = items2[i2];
         if (iKey instanceof Collection) hasCollectionKey = true;
         if (doc.schema.merge && iKey && iKey.value === MERGE_KEY) {
-          items[i2] = new Merge(items[i2]);
-          const sources = items[i2].value.items;
+          items2[i2] = new Merge(items2[i2]);
+          const sources = items2[i2].value.items;
           let error2 = null;
           sources.some((node2) => {
             if (node2 instanceof Alias) {
@@ -3807,10 +3807,10 @@ ${ca}` : ca;
           });
           if (error2) doc.errors.push(new PlainValue.YAMLSemanticError(cst, error2));
         } else {
-          for (let j = i2 + 1; j < items.length; ++j) {
+          for (let j = i2 + 1; j < items2.length; ++j) {
             const {
               key: jKey
-            } = items[j];
+            } = items2[j];
             if (iKey === jKey || iKey && jKey && Object.prototype.hasOwnProperty.call(iKey, "value") && iKey.value === jKey.value) {
               const msg = `Map keys must be unique; "${iKey}" is repeated`;
               doc.errors.push(new PlainValue.YAMLSemanticError(cst, msg));
@@ -3862,7 +3862,7 @@ ${ca}` : ca;
     }
     function resolveBlockMapItems(doc, cst) {
       const comments = [];
-      const items = [];
+      const items2 = [];
       let key = void 0;
       let keyStart = null;
       for (let i2 = 0; i2 < cst.items.length; ++i2) {
@@ -3871,18 +3871,18 @@ ${ca}` : ca;
           case PlainValue.Type.BLANK_LINE:
             comments.push({
               afterKey: !!key,
-              before: items.length
+              before: items2.length
             });
             break;
           case PlainValue.Type.COMMENT:
             comments.push({
               afterKey: !!key,
-              before: items.length,
+              before: items2.length,
               comment: item.comment
             });
             break;
           case PlainValue.Type.MAP_KEY:
-            if (key !== void 0) items.push(new Pair(key));
+            if (key !== void 0) items2.push(new Pair(key));
             if (item.error) doc.errors.push(item.error);
             key = resolveNode(doc, item.node);
             keyStart = null;
@@ -3919,7 +3919,7 @@ ${ca}` : ca;
               }
               const pair = new Pair(key, resolveNode(doc, valueNode));
               resolvePairComment(item, pair);
-              items.push(pair);
+              items2.push(pair);
               if (key && typeof keyStart === "number") {
                 if (item.range.start > keyStart + 1024) doc.errors.push(getLongKeyError(cst, key));
               }
@@ -3928,7 +3928,7 @@ ${ca}` : ca;
             }
             break;
           default:
-            if (key !== void 0) items.push(new Pair(key));
+            if (key !== void 0) items2.push(new Pair(key));
             key = resolveNode(doc, item);
             keyStart = item.range.start;
             if (item.error) doc.errors.push(item.error);
@@ -3953,15 +3953,15 @@ ${ca}` : ca;
             }
         }
       }
-      if (key !== void 0) items.push(new Pair(key));
+      if (key !== void 0) items2.push(new Pair(key));
       return {
         comments,
-        items
+        items: items2
       };
     }
     function resolveFlowMapItems(doc, cst) {
       const comments = [];
-      const items = [];
+      const items2 = [];
       let key = void 0;
       let explicitKey = false;
       let next = "{";
@@ -3989,7 +3989,7 @@ ${ca}` : ca;
               explicitKey = false;
             }
             if (key !== void 0) {
-              items.push(new Pair(key));
+              items2.push(new Pair(key));
               key = void 0;
               if (char === ",") {
                 next = ":";
@@ -4010,13 +4010,13 @@ ${ca}` : ca;
         } else if (item.type === PlainValue.Type.BLANK_LINE) {
           comments.push({
             afterKey: !!key,
-            before: items.length
+            before: items2.length
           });
         } else if (item.type === PlainValue.Type.COMMENT) {
           checkFlowCommentSpace(doc.errors, item);
           comments.push({
             afterKey: !!key,
-            before: items.length,
+            before: items2.length,
             comment: item.comment
           });
         } else if (key === void 0) {
@@ -4024,16 +4024,16 @@ ${ca}` : ca;
           key = resolveNode(doc, item);
         } else {
           if (next !== ",") doc.errors.push(new PlainValue.YAMLSemanticError(item, "Indicator : missing in flow map entry"));
-          items.push(new Pair(key, resolveNode(doc, item)));
+          items2.push(new Pair(key, resolveNode(doc, item)));
           key = void 0;
           explicitKey = false;
         }
       }
       checkFlowCollectionEnd(doc.errors, cst);
-      if (key !== void 0) items.push(new Pair(key));
+      if (key !== void 0) items2.push(new Pair(key));
       return {
         comments,
-        items
+        items: items2
       };
     }
     function resolveSeq(doc, cst) {
@@ -4044,12 +4044,12 @@ ${ca}` : ca;
       }
       const {
         comments,
-        items
+        items: items2
       } = cst.type === PlainValue.Type.FLOW_SEQ ? resolveFlowSeqItems(doc, cst) : resolveBlockSeqItems(doc, cst);
       const seq = new YAMLSeq();
-      seq.items = items;
+      seq.items = items2;
       resolveComments(seq, comments);
-      if (!doc.options.mapAsMap && items.some((it) => it instanceof Pair && it.key instanceof Collection)) {
+      if (!doc.options.mapAsMap && items2.some((it) => it instanceof Pair && it.key instanceof Collection)) {
         const warn = "Keys with collection values will be stringified as YAML due to JS Object restrictions. Use mapAsMap: true to avoid this.";
         doc.warnings.push(new PlainValue.YAMLWarning(cst, warn));
       }
@@ -4058,24 +4058,24 @@ ${ca}` : ca;
     }
     function resolveBlockSeqItems(doc, cst) {
       const comments = [];
-      const items = [];
+      const items2 = [];
       for (let i2 = 0; i2 < cst.items.length; ++i2) {
         const item = cst.items[i2];
         switch (item.type) {
           case PlainValue.Type.BLANK_LINE:
             comments.push({
-              before: items.length
+              before: items2.length
             });
             break;
           case PlainValue.Type.COMMENT:
             comments.push({
               comment: item.comment,
-              before: items.length
+              before: items2.length
             });
             break;
           case PlainValue.Type.SEQ_ITEM:
             if (item.error) doc.errors.push(item.error);
-            items.push(resolveNode(doc, item.node));
+            items2.push(resolveNode(doc, item.node));
             if (item.hasProps) {
               const msg = "Sequence items cannot have tags or anchors before the - indicator";
               doc.errors.push(new PlainValue.YAMLSemanticError(item, msg));
@@ -4088,12 +4088,12 @@ ${ca}` : ca;
       }
       return {
         comments,
-        items
+        items: items2
       };
     }
     function resolveFlowSeqItems(doc, cst) {
       const comments = [];
-      const items = [];
+      const items2 = [];
       let explicitKey = false;
       let key = void 0;
       let keyStart = null;
@@ -4107,8 +4107,8 @@ ${ca}` : ca;
             offset
           } = item;
           if (char !== ":" && (explicitKey || key !== void 0)) {
-            if (explicitKey && key === void 0) key = next ? items.pop() : null;
-            items.push(new Pair(key));
+            if (explicitKey && key === void 0) key = next ? items2.pop() : null;
+            items2.push(new Pair(key));
             explicitKey = false;
             key = void 0;
             keyStart = null;
@@ -4119,7 +4119,7 @@ ${ca}` : ca;
             explicitKey = true;
           } else if (next !== "[" && char === ":" && key === void 0) {
             if (next === ",") {
-              key = items.pop();
+              key = items2.pop();
               if (key instanceof Pair) {
                 const msg = "Chaining flow sequence pairs is invalid";
                 const err2 = new PlainValue.YAMLSemanticError(cst, msg);
@@ -4152,13 +4152,13 @@ ${ca}` : ca;
           }
         } else if (item.type === PlainValue.Type.BLANK_LINE) {
           comments.push({
-            before: items.length
+            before: items2.length
           });
         } else if (item.type === PlainValue.Type.COMMENT) {
           checkFlowCommentSpace(doc.errors, item);
           comments.push({
             comment: item.comment,
-            before: items.length
+            before: items2.length
           });
         } else {
           if (next) {
@@ -4167,10 +4167,10 @@ ${ca}` : ca;
           }
           const value = resolveNode(doc, item);
           if (key === void 0) {
-            items.push(value);
+            items2.push(value);
             prevItem = item;
           } else {
-            items.push(new Pair(key, value));
+            items2.push(new Pair(key, value));
             key = void 0;
           }
           keyStart = item.range.start;
@@ -4178,10 +4178,10 @@ ${ca}` : ca;
         }
       }
       checkFlowCollectionEnd(doc.errors, cst);
-      if (key !== void 0) items.push(new Pair(key));
+      if (key !== void 0) items2.push(new Pair(key));
       return {
         comments,
-        items
+        items: items2
       };
     }
     exports.Alias = Alias;
@@ -7098,14 +7098,14 @@ var require_codegen = __commonJS({
         return replaceName(expr);
       if (!canOptimize(expr))
         return expr;
-      return new code_1._Code(expr._items.reduce((items, c) => {
+      return new code_1._Code(expr._items.reduce((items2, c) => {
         if (c instanceof code_1.Name)
           c = replaceName(c);
         if (c instanceof code_1._Code)
-          items.push(...c._items);
+          items2.push(...c._items);
         else
-          items.push(c);
-        return items;
+          items2.push(c);
+        return items2;
       }, []));
       function replaceName(n) {
         const c = constants3[n.str];
@@ -7263,7 +7263,7 @@ var require_util = __commonJS({
         mergeNames: (gen, from, to) => gen.if((0, codegen_1._)`${to} !== true && ${from} !== undefined`, () => gen.assign(to, (0, codegen_1._)`${from} === true ? true : ${to} > ${from} ? ${to} : ${from}`)),
         mergeToName: (gen, from, to) => gen.if((0, codegen_1._)`${to} !== true`, () => gen.assign(to, from === true ? true : (0, codegen_1._)`${to} > ${from} ? ${to} : ${from}`)),
         mergeValues: (from, to) => from === true ? true : Math.max(from, to),
-        resultToName: (gen, items) => gen.var("items", items)
+        resultToName: (gen, items2) => gen.var("items", items2)
       })
     };
     function evaluatedPropsToName(gen, ps) {
@@ -7771,13 +7771,13 @@ var require_defaults = __commonJS({
     var codegen_1 = require_codegen();
     var util_1 = require_util();
     function assignDefaults(it, ty) {
-      const { properties, items } = it.schema;
+      const { properties, items: items2 } = it.schema;
       if (ty === "object" && properties) {
         for (const key in properties) {
           assignDefault(it, key, properties[key].default);
         }
-      } else if (ty === "array" && Array.isArray(items)) {
-        items.forEach((sch, i2) => assignDefault(it, i2, sch.default));
+      } else if (ty === "array" && Array.isArray(items2)) {
+        items2.forEach((sch, i2) => assignDefault(it, i2, sch.default));
       }
     }
     exports.assignDefaults = assignDefaults;
@@ -8581,11 +8581,11 @@ var require_validate = __commonJS({
         gen.return((0, codegen_1._)`${names_1.default.errors} === 0`);
       }
     }
-    function assignEvaluated({ gen, evaluated, props, items }) {
+    function assignEvaluated({ gen, evaluated, props, items: items2 }) {
       if (props instanceof codegen_1.Name)
         gen.assign((0, codegen_1._)`${evaluated}.props`, props);
-      if (items instanceof codegen_1.Name)
-        gen.assign((0, codegen_1._)`${evaluated}.items`, items);
+      if (items2 instanceof codegen_1.Name)
+        gen.assign((0, codegen_1._)`${evaluated}.items`, items2);
     }
     function schemaKeywords(it, types, typeErrors, errsCount) {
       const { gen, schema, data, allErrors, opts, self } = it;
@@ -9048,12 +9048,12 @@ var require_compile = __commonJS({
           validate3.source = { validateName, validateCode, scopeValues: gen._values };
         }
         if (this.opts.unevaluated) {
-          const { props, items } = schemaCxt;
+          const { props, items: items2 } = schemaCxt;
           validate3.evaluated = {
             props: props instanceof codegen_1.Name ? void 0 : props,
-            items: items instanceof codegen_1.Name ? void 0 : items,
+            items: items2 instanceof codegen_1.Name ? void 0 : items2,
             dynamicProps: props instanceof codegen_1.Name,
-            dynamicItems: items instanceof codegen_1.Name
+            dynamicItems: items2 instanceof codegen_1.Name
           };
           if (validate3.source)
             validate3.source.evaluated = (0, codegen_1.stringify)(validate3.evaluated);
@@ -9077,7 +9077,7 @@ var require_compile = __commonJS({
       const schOrFunc = root.refs[ref];
       if (schOrFunc)
         return schOrFunc;
-      let _sch = resolve14.call(this, root, ref);
+      let _sch = resolve15.call(this, root, ref);
       if (_sch === void 0) {
         const schema = (_a3 = root.localRefs) === null || _a3 === void 0 ? void 0 : _a3[ref];
         const { schemaId } = this.opts;
@@ -9104,7 +9104,7 @@ var require_compile = __commonJS({
     function sameSchemaEnv(s1, s2) {
       return s1.schema === s2.schema && s1.root === s2.root && s1.baseId === s2.baseId;
     }
-    function resolve14(root, ref) {
+    function resolve15(root, ref) {
       let sch;
       while (typeof (sch = this.refs[ref]) == "string")
         ref = sch;
@@ -9934,7 +9934,7 @@ var require_fast_uri = __commonJS({
       }
       return uri;
     }
-    function resolve14(baseURI, relativeURI, options) {
+    function resolve15(baseURI, relativeURI, options) {
       const schemelessOptions = options ? Object.assign({ scheme: "null" }, options) : { scheme: "null" };
       const {
         parsed: baseParsed,
@@ -10303,7 +10303,7 @@ var require_fast_uri = __commonJS({
     var fastUri = {
       SCHEMES,
       normalize,
-      resolve: resolve14,
+      resolve: resolve15,
       resolveComponent,
       equal,
       serialize,
@@ -11063,8 +11063,8 @@ var require_ref = __commonJS({
               it.items = util_1.mergeEvaluated.items(gen, schEvaluated.items, it.items);
             }
           } else {
-            const items = gen.var("items", (0, codegen_1._)`${source}.evaluated.items`);
-            it.items = util_1.mergeEvaluated.items(gen, items, it.items, codegen_1.Name);
+            const items2 = gen.var("items", (0, codegen_1._)`${source}.evaluated.items`);
+            it.items = util_1.mergeEvaluated.items(gen, items2, it.items, codegen_1.Name);
           }
         }
       }
@@ -11604,28 +11604,28 @@ var require_additionalItems = __commonJS({
       error: error2,
       code(cxt) {
         const { parentSchema, it } = cxt;
-        const { items } = parentSchema;
-        if (!Array.isArray(items)) {
+        const { items: items2 } = parentSchema;
+        if (!Array.isArray(items2)) {
           (0, util_1.checkStrictMode)(it, '"additionalItems" is ignored when "items" is not an array of schemas');
           return;
         }
-        validateAdditionalItems(cxt, items);
+        validateAdditionalItems(cxt, items2);
       }
     };
-    function validateAdditionalItems(cxt, items) {
+    function validateAdditionalItems(cxt, items2) {
       const { gen, schema, data, keyword, it } = cxt;
       it.items = true;
       const len = gen.const("len", (0, codegen_1._)`${data}.length`);
       if (schema === false) {
-        cxt.setParams({ len: items.length });
-        cxt.pass((0, codegen_1._)`${len} <= ${items.length}`);
+        cxt.setParams({ len: items2.length });
+        cxt.pass((0, codegen_1._)`${len} <= ${items2.length}`);
       } else if (typeof schema == "object" && !(0, util_1.alwaysValidSchema)(it, schema)) {
-        const valid5 = gen.var("valid", (0, codegen_1._)`${len} <= ${items.length}`);
+        const valid5 = gen.var("valid", (0, codegen_1._)`${len} <= ${items2.length}`);
         gen.if((0, codegen_1.not)(valid5), () => validateItems(valid5));
         cxt.ok(valid5);
       }
       function validateItems(valid5) {
-        gen.forRange("i", items.length, len, (i2) => {
+        gen.forRange("i", items2.length, len, (i2) => {
           cxt.subschema({ keyword, dataProp: i2, dataPropType: util_1.Type.Num }, valid5);
           if (!it.allErrors)
             gen.if((0, codegen_1.not)(valid5), () => gen.break());
@@ -13396,6 +13396,47 @@ var require_content_type = __commonJS({
   }
 });
 
+// src/args.ts
+var UsageError = class extends Error {
+};
+function parseArgs(argv, valued = []) {
+  const positionals = [];
+  const options = {};
+  for (let i2 = 0; i2 < argv.length; i2++) {
+    const arg = argv[i2];
+    if (arg === "--") {
+      positionals.push(...argv.slice(i2 + 1));
+      break;
+    }
+    if (!arg.startsWith("--")) {
+      positionals.push(arg);
+      continue;
+    }
+    const eq = arg.indexOf("=");
+    const name2 = arg.slice(2, eq === -1 ? void 0 : eq);
+    if (eq !== -1) {
+      options[name2] = arg.slice(eq + 1);
+    } else if (valued.includes(name2)) {
+      const value = argv[i2 + 1];
+      if (value === void 0 || value.startsWith("--")) throw new UsageError(`--${name2} needs a value`);
+      options[name2] = value;
+      i2++;
+    } else {
+      options[name2] = true;
+    }
+  }
+  return { positionals, options };
+}
+function stringOption(args2, name2) {
+  const value = args2.options[name2];
+  if (value === true) throw new UsageError(`--${name2} needs a value`);
+  return value;
+}
+function rejectUnknown(args2, known) {
+  const unknown2 = Object.keys(args2.options).filter((k) => !known.includes(k));
+  if (unknown2.length) throw new UsageError(`Unknown option: --${unknown2[0]}`);
+}
+
 // src/auth.ts
 import { closeSync, openSync, rmSync as rmSync2, statSync as statSync2 } from "node:fs";
 import { hostname } from "node:os";
@@ -13711,7 +13752,7 @@ function credentialsFromTokens(ctx, tokens, base) {
 import { join as join4 } from "node:path";
 
 // src/version.ts
-var VERSION = true ? "0.1.7" : "0.0.0-dev";
+var VERSION = true ? "0.1.8" : "0.0.0-dev";
 
 // src/cli-version.ts
 var CLI_VERSION_HEADER = "x-tempa-cli-version";
@@ -13828,7 +13869,42 @@ function serverMessage(body2) {
 function isSuspended(err2) {
   return err2 instanceof HttpError && err2.status === 403 && /organisation is (suspended|being deleted)/i.test(serverMessage(err2.body) ?? "");
 }
-async function send(fetchFn, url2, options, accept) {
+var inFlight = /* @__PURE__ */ new Map();
+var exiting = false;
+async function tracked(url2, timeoutMs, work2) {
+  if (exiting) throw new NetworkError(`Cannot reach ${new URL(url2).origin}: tempa is exiting`);
+  const controller = new AbortController();
+  const timer = setTimeout(
+    () => controller.abort(new DOMException(`timed out after ${timeoutMs} ms`, "TimeoutError")),
+    timeoutMs
+  );
+  timer.unref();
+  const running = work2(controller.signal);
+  inFlight.set(
+    controller,
+    running.catch(() => void 0)
+  );
+  try {
+    return await running;
+  } finally {
+    clearTimeout(timer);
+    inFlight.delete(controller);
+  }
+}
+async function abortRequests(withinMs) {
+  exiting = true;
+  if (inFlight.size === 0) return;
+  const settled = Promise.allSettled(inFlight.values());
+  for (const controller of inFlight.keys())
+    controller.abort(new DOMException("tempa is exiting", "AbortError"));
+  let timer;
+  const gaveUp = new Promise((resolve15) => {
+    timer = setTimeout(resolve15, withinMs);
+  });
+  await Promise.race([settled, gaveUp]);
+  clearTimeout(timer);
+}
+async function send(fetchFn, url2, options, accept, signal) {
   const timeoutMs = options.timeoutMs ?? 1e4;
   try {
     return await fetchFn(url2, {
@@ -13836,7 +13912,7 @@ async function send(fetchFn, url2, options, accept) {
       // Every request says which CLI sends it, so the control plane can tell an old one to update.
       headers: { accept, [CLI_VERSION_HEADER]: VERSION, ...options.headers },
       ...options.body !== void 0 ? { body: options.body } : {},
-      signal: AbortSignal.timeout(timeoutMs)
+      signal
     });
   } catch (err2) {
     const e = err2;
@@ -13870,16 +13946,20 @@ function httpError(response, url2, body2) {
   );
 }
 async function requestJson(fetchFn, url2, options = {}) {
-  const response = await send(fetchFn, url2, options, "application/json");
-  const body2 = parseBody(await read(response, url2, (r) => r.text()));
-  if (!response.ok) throw httpError(response, url2, body2);
-  return { status: response.status, headers: response.headers, body: body2 };
+  return tracked(url2, options.timeoutMs ?? 1e4, async (signal) => {
+    const response = await send(fetchFn, url2, options, "application/json", signal);
+    const body2 = parseBody(await read(response, url2, (r) => r.text()));
+    if (!response.ok) throw httpError(response, url2, body2);
+    return { status: response.status, headers: response.headers, body: body2 };
+  });
 }
 async function requestBytes(fetchFn, url2, options = {}) {
-  const response = await send(fetchFn, url2, options, "application/octet-stream");
-  if (!response.ok) throw httpError(response, url2, parseBody(await read(response, url2, (r) => r.text())));
-  const bytes3 = await read(response, url2, (r) => r.arrayBuffer());
-  return { status: response.status, headers: response.headers, body: new Uint8Array(bytes3) };
+  return tracked(url2, options.timeoutMs ?? 1e4, async (signal) => {
+    const response = await send(fetchFn, url2, options, "application/octet-stream", signal);
+    if (!response.ok) throw httpError(response, url2, parseBody(await read(response, url2, (r) => r.text())));
+    const bytes3 = await read(response, url2, (r) => r.arrayBuffer());
+    return { status: response.status, headers: response.headers, body: new Uint8Array(bytes3) };
+  });
 }
 function causeMessage(err2) {
   const cause = err2.cause;
@@ -13986,7 +14066,7 @@ async function withRefreshLock(ctx, fn) {
         continue;
       }
       if (ctx.now() - start2 > LOCK_WAIT_MS) throw new Error("Timed out waiting for another tempa to refresh");
-      await new Promise((resolve14) => setTimeout(resolve14, 50));
+      await new Promise((resolve15) => setTimeout(resolve15, 50));
     }
   }
   const work2 = fn();
@@ -14002,8 +14082,8 @@ var underLock = /* @__PURE__ */ new Map();
 async function settleRefreshes(withinMs) {
   if (underLock.size === 0) return;
   let timer;
-  const gaveUp = new Promise((resolve14) => {
-    timer = setTimeout(resolve14, withinMs);
+  const gaveUp = new Promise((resolve15) => {
+    timer = setTimeout(resolve15, withinMs);
   });
   await Promise.race([Promise.allSettled(underLock.values()), gaveUp]);
   clearTimeout(timer);
@@ -14081,47 +14161,6 @@ async function withDeviceToken(ctx, pathOrUrl, options, send2) {
       creds = await refreshTokens(ctx, creds);
     }
   }
-}
-
-// src/args.ts
-var UsageError = class extends Error {
-};
-function parseArgs(argv, valued = []) {
-  const positionals = [];
-  const options = {};
-  for (let i2 = 0; i2 < argv.length; i2++) {
-    const arg = argv[i2];
-    if (arg === "--") {
-      positionals.push(...argv.slice(i2 + 1));
-      break;
-    }
-    if (!arg.startsWith("--")) {
-      positionals.push(arg);
-      continue;
-    }
-    const eq = arg.indexOf("=");
-    const name2 = arg.slice(2, eq === -1 ? void 0 : eq);
-    if (eq !== -1) {
-      options[name2] = arg.slice(eq + 1);
-    } else if (valued.includes(name2)) {
-      const value = argv[i2 + 1];
-      if (value === void 0 || value.startsWith("--")) throw new UsageError(`--${name2} needs a value`);
-      options[name2] = value;
-      i2++;
-    } else {
-      options[name2] = true;
-    }
-  }
-  return { positionals, options };
-}
-function stringOption(args2, name2) {
-  const value = args2.options[name2];
-  if (value === true) throw new UsageError(`--${name2} needs a value`);
-  return value;
-}
-function rejectUnknown(args2, known) {
-  const unknown2 = Object.keys(args2.options).filter((k) => !known.includes(k));
-  if (unknown2.length) throw new UsageError(`Unknown option: --${unknown2[0]}`);
 }
 
 // src/account/detect.ts
@@ -14222,16 +14261,16 @@ function accountEnv(env) {
   return out2;
 }
 function runAuthStatus() {
-  return new Promise((resolve14) => {
+  return new Promise((resolve15) => {
     try {
       execFile(
         "claude",
         ["auth", "status"],
         { timeout: AUTH_STATUS_TIMEOUT_MS },
-        (_err, stdout) => resolve14(typeof stdout === "string" && stdout.trim() ? stdout : null)
+        (_err, stdout) => resolve15(typeof stdout === "string" && stdout.trim() ? stdout : null)
       );
     } catch {
-      resolve14(null);
+      resolve15(null);
     }
   });
 }
@@ -14309,8 +14348,8 @@ var DEFAULT_ACCOUNT_POLICY = {
 var ACCOUNTS_GUIDE = docsLink("accounts");
 var PRIVACY_CONTROLS = "https://claude.ai/settings/data-privacy-controls";
 var MAYBE_CONSUMER = ["personal", "unknown"];
-function accountPolicy(profile) {
-  const value = profile?.settings?.account_policy?.value;
+function accountPolicy(profile2) {
+  const value = profile2?.settings?.account_policy?.value;
   if (!value || typeof value !== "object") return DEFAULT_ACCOUNT_POLICY;
   const kinds = Array.isArray(value.allowed_kinds) ? value.allowed_kinds.filter(isAccountKind) : null;
   const onViolation = value.on_violation;
@@ -14898,8 +14937,8 @@ function signedBytes(doc) {
   delete unsigned.signature;
   return Buffer.from(canonicalJson2(unsigned), "utf8");
 }
-function verifyProfile(profile, keys) {
-  verifySigned(profile, keys, "profile");
+function verifyProfile(profile2, keys) {
+  verifySigned(profile2, keys, "profile");
 }
 function verifySigned(doc, keys, what) {
   const sig = doc.signature;
@@ -15133,19 +15172,19 @@ function cacheDir(ctx, key) {
 }
 function readCachedProfile(ctx, key) {
   const dir = cacheDir(ctx, key);
-  const profile = readJsonLenient(join10(dir, "profile.json"));
+  const profile2 = readJsonLenient(join10(dir, "profile.json"));
   const meta2 = readJsonLenient(join10(dir, "meta.json"));
-  if (!profile || !meta2 || meta2.repo_key !== key) return void 0;
-  return { profile, meta: meta2, dir };
+  if (!profile2 || !meta2 || meta2.repo_key !== key) return void 0;
+  return { profile: profile2, meta: meta2, dir };
 }
-function writeCachedProfile(ctx, profile, meta2) {
+function writeCachedProfile(ctx, profile2, meta2) {
   const dir = cacheDir(ctx, meta2.repo_key);
-  writeJsonAtomic(join10(dir, "profile.json"), profile, { dirMode: 448 });
+  writeJsonAtomic(join10(dir, "profile.json"), profile2, { dirMode: 448 });
   writeJsonAtomic(join10(dir, "meta.json"), meta2, { dirMode: 448 });
-  return { profile, meta: meta2, dir };
+  return { profile: profile2, meta: meta2, dir };
 }
-function isExpired(ctx, profile) {
-  const expires = Date.parse(profile.expires_at);
+function isExpired(ctx, profile2) {
+  const expires = Date.parse(profile2.expires_at);
   return !Number.isFinite(expires) || expires <= ctx.now();
 }
 function clearCache(ctx) {
@@ -15192,8 +15231,8 @@ function readModule(ctx, wasm) {
   }
   return sha256Hex(bytes3) === wasm.sha256 ? bytes3 : void 0;
 }
-async function ensureModule(ctx, profile, login2, timeoutMs) {
-  const wasm = profile.policies.wasm;
+async function ensureModule(ctx, profile2, login2, timeoutMs) {
+  const wasm = profile2.policies.wasm;
   if (!wasm) return "none";
   if (readModule(ctx, wasm)) return "cached";
   const { body: body2 } = await authedBytes(ctx, `/policy/wasm/${wasm.sha256}`, {
@@ -15325,9 +15364,9 @@ import { join as join12 } from "node:path";
 function failModesPath(ctx) {
   return join12(ctx.tempaHome, "fail-modes.json");
 }
-function rememberFailMode(ctx, login2, profile) {
+function rememberFailMode(ctx, login2, profile2) {
   const all = readJsonLenient(failModesPath(ctx)) ?? {};
-  const default_decision = profile.offline?.default_decision ?? "ask";
+  const default_decision = profile2.offline?.default_decision ?? "ask";
   if (all[login2]?.default_decision === default_decision) return;
   all[login2] = { default_decision, recorded_at: new Date(ctx.now()).toISOString() };
   try {
@@ -15636,8 +15675,8 @@ function parseDuration(value) {
   const unit = { s: 1e3, m: 6e4, h: 36e5, d: 864e5 }[m[2]];
   return Number(m[1]) * unit;
 }
-function syncIntervalMs(profile) {
-  return parseDuration(profile.settings?.sync_interval?.value) ?? DEFAULT_SYNC_INTERVAL_MS;
+function syncIntervalMs(profile2) {
+  return parseDuration(profile2.settings?.sync_interval?.value) ?? DEFAULT_SYNC_INTERVAL_MS;
 }
 function loadVerifiedCache(ctx, endpoint, key, tenant, rootOnly = isRootOnly(ctx, key)) {
   const cached2 = readCachedProfile(ctx, key);
@@ -15653,30 +15692,30 @@ function loadVerifiedCache(ctx, endpoint, key, tenant, rootOnly = isRootOnly(ctx
   }
   return cached2;
 }
-async function verifyWithRotation(ctx, endpoint, profile, timeoutMs) {
-  const keyId = profile.signature?.key_id ?? "";
+async function verifyWithRotation(ctx, endpoint, profile2, timeoutMs) {
+  const keyId = profile2.signature?.key_id ?? "";
   const pins = pinnedKeys(ctx, endpoint);
   if (!pins) {
     const discovery = await getDiscovery(ctx, endpoint, { timeoutMs });
     const known = discovery.signing_keys.some((k) => k.key_id === keyId);
     const keys = known ? discovery.signing_keys : (await getDiscovery(ctx, endpoint, { refresh: true, timeoutMs })).signing_keys;
-    verifyProfile(profile, keys);
+    verifyProfile(profile2, keys);
     pinKeys(ctx, endpoint, keys);
     return;
   }
-  if (pins.some((k) => k.key_id === keyId)) return verifyProfile(profile, pins);
+  if (pins.some((k) => k.key_id === keyId)) return verifyProfile(profile2, pins);
   const fresh = await getDiscovery(ctx, endpoint, { refresh: true, timeoutMs });
   const key = endorsedKey(fresh, pins, keyId);
-  verifyProfile(profile, [key]);
+  verifyProfile(profile2, [key]);
   pinKeys(ctx, endpoint, [key]);
 }
-function checkBinding(profile, tenant, repo) {
-  if (profile.tenant.id !== tenant)
-    throw new SignatureError(`The profile is signed for tenant ${profile.tenant.id}, not ${tenant}`);
+function checkBinding(profile2, tenant, repo) {
+  if (profile2.tenant.id !== tenant)
+    throw new SignatureError(`The profile is signed for tenant ${profile2.tenant.id}, not ${tenant}`);
   const asked = repo.repo?.toLowerCase();
-  const signed = profile.repo?.toLowerCase();
+  const signed = profile2.repo?.toLowerCase();
   if (asked && signed && asked !== signed)
-    throw new SignatureError(`The profile is signed for ${profile.repo}, not ${repo.repo}`);
+    throw new SignatureError(`The profile is signed for ${profile2.repo}, not ${repo.repo}`);
 }
 async function fetchProfile(ctx, endpoint, repo, timeoutMs, tenant, rootOnly = false) {
   const creds = loadCredentials(ctx, tenant, endpoint);
@@ -15697,29 +15736,29 @@ async function fetchProfile(ctx, endpoint, repo, timeoutMs, tenant, rootOnly = f
   });
   if (rootOnly && res.headers.get("x-tempa-matched-by") !== "root")
     throw new SignatureError("The control plane did not apply the root rule; update tempa-api");
-  const profile = res.body;
-  if (!profile || typeof profile !== "object" || typeof profile.version !== "string") {
+  const profile2 = res.body;
+  if (!profile2 || typeof profile2 !== "object" || typeof profile2.version !== "string") {
     throw new SignatureError("The control plane returned something that is not a profile");
   }
-  await verifyWithRotation(ctx, endpoint, profile, timeoutMs);
-  checkBinding(profile, tenantOf(creds), repo);
-  if (isExpired(ctx, profile))
-    throw new SignatureError(`The control plane sent an expired profile (${profile.expires_at})`);
+  await verifyWithRotation(ctx, endpoint, profile2, timeoutMs);
+  checkBinding(profile2, tenantOf(creds), repo);
+  if (isExpired(ctx, profile2))
+    throw new SignatureError(`The control plane sent an expired profile (${profile2.expires_at})`);
   rememberCliUpdate(ctx, loginKey(endpoint, tenantOf(creds)), res.headers);
-  rememberFailMode(ctx, loginKey(endpoint, tenantOf(creds)), profile);
+  rememberFailMode(ctx, loginKey(endpoint, tenantOf(creds)), profile2);
   const meta2 = {
     repo_key: repo.key,
     remote: repo.remote,
     endpoint,
     fetched_at: new Date(ctx.now()).toISOString(),
-    profile_version: profile.version,
-    expires_at: profile.expires_at,
+    profile_version: profile2.version,
+    expires_at: profile2.expires_at,
     node: res.headers.get("x-tempa-node"),
     matched_by: res.headers.get("x-tempa-matched-by"),
     etag: res.headers.get("etag"),
     tenant: tenantOf(creds)
   };
-  return writeCachedProfile(ctx, profile, meta2);
+  return writeCachedProfile(ctx, profile2, meta2);
 }
 async function syncProfile(ctx, repo, options = {}) {
   const choice = await repoTenant(ctx, repo, options);
@@ -16009,11 +16048,11 @@ var copilot = copilotCommand();
 
 // src/doctor.ts
 import { execFile as execFile3 } from "node:child_process";
-import { existsSync as existsSync12, readFileSync as readFileSync18 } from "node:fs";
+import { existsSync as existsSync13, readFileSync as readFileSync19 } from "node:fs";
 import { join as join38 } from "node:path";
 
 // src/antigravity-surfaces.ts
-import { existsSync as existsSync11, readFileSync as readFileSync16 } from "node:fs";
+import { existsSync as existsSync12, readFileSync as readFileSync17 } from "node:fs";
 import { join as join35, relative as relative4, sep as sep3 } from "node:path";
 
 // src/hook/antigravity-hooks.ts
@@ -16042,8 +16081,91 @@ function antigravityHookRecords(ctx) {
 }
 
 // src/setup.ts
-import { existsSync as existsSync10, readdirSync as readdirSync9 } from "node:fs";
+import { existsSync as existsSync11, readdirSync as readdirSync11 } from "node:fs";
 import { join as join34 } from "node:path";
+
+// src/claude-config.ts
+import { existsSync as existsSync2, readFileSync as readFileSync7, readdirSync as readdirSync5, rmSync as rmSync7 } from "node:fs";
+import { posix, win32 } from "node:path";
+var pathFor = (platform) => platform === "win32" ? win32 : posix;
+var filePlatform = (ctx) => ctx.platform === "win32" ? "win32" : process.platform;
+var filePath = (ctx) => pathFor(filePlatform(ctx));
+function resolveConfigDir(raw, where) {
+  const value = raw?.trim();
+  if (!value) return void 0;
+  const path = pathFor(where.platform);
+  const tilde = /^~(?=$|[\\/])/.exec(value);
+  const expanded = tilde ? path.join(where.home, value.slice(1)) : value;
+  return path.resolve(where.cwd, expanded);
+}
+function isAbsoluteConfigDir(ctx, raw) {
+  return filePath(ctx).isAbsolute(raw.trim());
+}
+function configDirOfPlugin(pluginRoot) {
+  const match = /^(.+?)[\\/]plugins[\\/]cache[\\/]/.exec(pluginRoot);
+  return match?.[1];
+}
+function defaultClaudeConfigDir(ctx) {
+  return filePath(ctx).join(ctx.home, ".claude");
+}
+function rememberedPath(ctx) {
+  return filePath(ctx).join(ctx.tempaHome, "claude-config-dir");
+}
+function remembered(ctx) {
+  try {
+    return readFileSync7(rememberedPath(ctx), "utf8").trim() || void 0;
+  } catch {
+    return void 0;
+  }
+}
+function fromEnv(ctx) {
+  const raw = ctx.env.CLAUDE_CONFIG_DIR;
+  const dir = resolveConfigDir(raw, { home: ctx.home, cwd: ctx.cwd, platform: filePlatform(ctx) });
+  return dir && raw ? { dir, source: "env", raw } : void 0;
+}
+function claudeConfig(ctx) {
+  const env = fromEnv(ctx);
+  if (env) return env;
+  const hook2 = remembered(ctx);
+  if (hook2) return { dir: hook2, source: "hook" };
+  return { dir: defaultClaudeConfigDir(ctx), source: "default" };
+}
+function claudeSettingsFile(ctx, config3 = claudeConfig(ctx)) {
+  return filePath(ctx).join(config3.dir, "settings.json");
+}
+function tempaPluginCached(ctx, dir) {
+  return existsSync2(filePath(ctx).join(dir, "plugins", "cache", "devleaps", "tempa"));
+}
+function otherConfigDirs(ctx) {
+  let names;
+  try {
+    names = readdirSync5(ctx.home);
+  } catch {
+    return [];
+  }
+  const path = filePath(ctx);
+  return names.filter((n) => n.startsWith(".claude") && n !== ".claude" && !n.endsWith(".json")).map((n) => path.join(ctx.home, n)).filter((dir) => tempaPluginCached(ctx, dir)).sort();
+}
+function claudeConfigForChecks(ctx) {
+  const config3 = claudeConfig(ctx);
+  if (config3.source !== "default" || tempaPluginCached(ctx, config3.dir)) return config3;
+  const others = otherConfigDirs(ctx);
+  return others.length === 1 && others[0] ? { dir: others[0], source: "found" } : config3;
+}
+function claudeExecEnv(ctx, config3) {
+  if (config3.source !== "hook" && config3.source !== "found") return void 0;
+  return { ...ctx.env, CLAUDE_CONFIG_DIR: config3.dir };
+}
+function rememberClaudeConfig(ctx) {
+  const pluginRoot = ctx.env.CLAUDE_CODE_PLUGIN_CACHE_DIR ? void 0 : ctx.env.CLAUDE_PLUGIN_ROOT;
+  const dir = fromEnv(ctx)?.dir ?? (pluginRoot ? configDirOfPlugin(pluginRoot) : void 0);
+  try {
+    if (!dir || dir === defaultClaudeConfigDir(ctx)) rmSync7(rememberedPath(ctx), { force: true });
+    else if (remembered(ctx) !== dir) writeFileAtomic(rememberedPath(ctx), `${dir}
+`, { dirMode: 448 });
+  } catch {
+  }
+}
 
 // src/harness/adapter.ts
 var CAPABILITIES = [
@@ -16059,8 +16181,8 @@ var CAPABILITIES = [
 ];
 
 // src/harness/codex.ts
-import { createHash as createHash10 } from "node:crypto";
-import { existsSync as existsSync8, readFileSync as readFileSync14 } from "node:fs";
+import { createHash as createHash11 } from "node:crypto";
+import { existsSync as existsSync9, readFileSync as readFileSync15 } from "node:fs";
 import { dirname as dirname4, join as join31 } from "node:path";
 
 // src/hook/deadline.ts
@@ -16772,7 +16894,8 @@ function blockPrompt(reason) {
 }
 
 // src/telemetry/claude-settings.ts
-import { copyFileSync, existsSync as existsSync2, readFileSync as readFileSync7, rmSync as rmSync7 } from "node:fs";
+import { createHash as createHash6 } from "node:crypto";
+import { copyFileSync, existsSync as existsSync3, readFileSync as readFileSync8, readdirSync as readdirSync6, rmSync as rmSync8 } from "node:fs";
 import { join as join17 } from "node:path";
 
 // src/shell.ts
@@ -16833,20 +16956,42 @@ function mergeSettings(current3, previous, env, helper) {
   };
 }
 function claudeSettingsPath(ctx) {
-  return join17(ctx.home, ".claude", "settings.json");
+  return claudeSettingsFile(ctx);
 }
-function ownedPath(ctx) {
-  return join17(ctx.tempaHome, "claude-settings.json");
+var defaultSettingsPath = (ctx) => claudeSettingsFile(ctx, { dir: defaultClaudeConfigDir(ctx), source: "default" });
+var OWNED_RECORD = /^claude-settings-[0-9a-f]{12}\.json$/;
+function ownedPath(ctx, settingsPath) {
+  if (settingsPath === defaultSettingsPath(ctx)) return join17(ctx.tempaHome, "claude-settings.json");
+  const id = createHash6("sha256").update(settingsPath).digest("hex").slice(0, 12);
+  return join17(ctx.tempaHome, `claude-settings-${id}.json`);
 }
-function readOwned(ctx) {
-  return readJsonLenient(ownedPath(ctx)) ?? { env_keys: [], otel_headers_helper: null };
+function readOwned(ctx, settingsPath = claudeSettingsPath(ctx)) {
+  return readJsonLenient(ownedPath(ctx, settingsPath)) ?? {
+    env_keys: [],
+    otel_headers_helper: null
+  };
+}
+var ownsKeys = (owned) => owned.env_keys.length > 0 || Boolean(owned.otel_headers_helper);
+function ownedClaudeSettingsFiles(ctx) {
+  const files = /* @__PURE__ */ new Set([claudeSettingsPath(ctx), defaultSettingsPath(ctx)]);
+  let names;
+  try {
+    names = readdirSync6(ctx.tempaHome);
+  } catch {
+    names = [];
+  }
+  for (const name2 of names.filter((n) => OWNED_RECORD.test(n)).sort()) {
+    const path = readJsonLenient(join17(ctx.tempaHome, name2))?.settings_path;
+    if (path) files.add(path);
+  }
+  return [...files];
 }
 var SettingsError = class extends Error {
 };
 function readSettings(path) {
   let text;
   try {
-    text = readFileSync7(path, "utf8");
+    text = readFileSync8(path, "utf8");
   } catch {
     return {};
   }
@@ -16858,18 +17003,19 @@ function readSettings(path) {
     throw new SettingsError(`${path} is not valid JSON (${err2.message}); Tempa left it alone`);
   }
 }
-function write(ctx, merge2) {
-  const path = claudeSettingsPath(ctx);
+function write(ctx, path, merge2) {
   if (merge2.changed) {
     const backup = `${path}.tempa-backup`;
-    if (existsSync2(path) && !existsSync2(backup)) copyFileSync(path, backup);
+    if (existsSync3(path) && !existsSync3(backup)) copyFileSync(path, backup);
     writeFileAtomic(path, `${JSON.stringify(merge2.settings, null, 2)}
 `);
   }
-  if (merge2.owned.env_keys.length || merge2.owned.otel_headers_helper) {
-    writeJsonAtomic(ownedPath(ctx), merge2.owned, { mode: 384, dirMode: 448 });
+  const owned = ownedPath(ctx, path);
+  if (ownsKeys(merge2.owned)) {
+    const record2 = path === defaultSettingsPath(ctx) ? merge2.owned : { ...merge2.owned, settings_path: path };
+    writeJsonAtomic(owned, record2, { mode: 384, dirMode: 448 });
   } else {
-    rmSync7(ownedPath(ctx), { force: true });
+    rmSync8(owned, { force: true });
   }
   return merge2.changed;
 }
@@ -16883,12 +17029,23 @@ function userContentVariables(ctx) {
 function applyClaudeSettings(ctx, inputs) {
   const env = desiredEnv(inputs);
   const helper = Object.keys(env).length ? inputs.helper : null;
-  return write(ctx, mergeSettings(readSettings(claudeSettingsPath(ctx)), readOwned(ctx), env, helper));
+  const path = claudeSettingsPath(ctx);
+  return write(ctx, path, mergeSettings(readSettings(path), readOwned(ctx, path), env, helper));
 }
 function removeClaudeSettings(ctx) {
-  const owned = readOwned(ctx);
-  if (!owned.env_keys.length && !owned.otel_headers_helper) return false;
-  return write(ctx, mergeSettings(readSettings(claudeSettingsPath(ctx)), owned, {}, null));
+  const changed = [];
+  let failure3;
+  for (const path of ownedClaudeSettingsFiles(ctx)) {
+    const owned = readOwned(ctx, path);
+    if (!ownsKeys(owned)) continue;
+    try {
+      if (write(ctx, path, mergeSettings(readSettings(path), owned, {}, null))) changed.push(path);
+    } catch (err2) {
+      failure3 ??= err2;
+    }
+  }
+  if (failure3) throw failure3;
+  return changed;
 }
 function cliCommand(ctx) {
   const runtime = ctx.runtime;
@@ -16900,10 +17057,10 @@ function helperCommand(ctx) {
 }
 
 // src/render/plan.ts
-import { createHash as createHash6 } from "node:crypto";
+import { createHash as createHash7 } from "node:crypto";
 var MANAGED_MARKER = "tempa: managed by Tempa";
 function sha256(text) {
-  return createHash6("sha256").update(text, "utf8").digest("hex");
+  return createHash7("sha256").update(text, "utf8").digest("hex");
 }
 function header2(profileVersion, contentHash, comment) {
   const text = `${MANAGED_MARKER}, profile ${profileVersion}, content ${contentHash}. tempa sync overwrites changes.`;
@@ -17018,28 +17175,28 @@ function permissionsMerge(rules) {
     }))
   };
 }
-function contentOffValues(profile, userContentOn = []) {
+function contentOffValues(profile2, userContentOn = []) {
   const off = {};
   for (const name2 of userContentOn) {
     const covered = CONTENT_VARIABLES[name2];
-    if (covered && !profile.telemetry[covered]) off[name2] = "0";
+    if (covered && !profile2.telemetry[covered]) off[name2] = "0";
   }
   return off;
 }
-function contentMerge(profile, userContentOn) {
-  const off = contentOffValues(profile, userContentOn);
+function contentMerge(profile2, userContentOn) {
+  const off = contentOffValues(profile2, userContentOn);
   return Object.keys(off).length ? { values: [{ key: ["env"], values: off }] } : {};
 }
 var ALLOW_RULES_SKIPPED = "allow rules are left to Claude Code's own permission settings; Tempa's hook applies the policies";
-function planClaudeCode(profile, env) {
+function planClaudeCode(profile2, env) {
   const files = [];
   const skipped = [];
-  const v = profile.version;
+  const v = profile2.version;
   const groups = [
-    ["standard", profile.standards ?? []],
-    ["skill", profile.skills ?? []],
-    ["command", profile.commands ?? []],
-    ["agent", profile.agents ?? []]
+    ["standard", profile2.standards ?? []],
+    ["skill", profile2.skills ?? []],
+    ["command", profile2.commands ?? []],
+    ["agent", profile2.agents ?? []]
   ];
   for (const [kind, assets] of groups) {
     for (const asset of assets) {
@@ -17067,31 +17224,31 @@ ${text}` : text;
       }
     }
   }
-  const permissions = profile.permissions ?? { allow: [], ask: [], deny: [] };
+  const permissions = profile2.permissions ?? { allow: [], ask: [], deny: [] };
   if (permissions.allow.length) skipped.push({ asset: "permissions", reason: ALLOW_RULES_SKIPPED });
   return {
     harness: "claude-code",
     profileVersion: v,
     files,
-    settings: [{ ...permissionsMerge(permissions), ...contentMerge(profile, env?.userContentOn) }],
+    settings: [{ ...permissionsMerge(permissions), ...contentMerge(profile2, env?.userContentOn) }],
     skipped
   };
 }
 var claudeCodeRenderer = { id: "claude-code", plan: planClaudeCode };
 
 // src/render/index.ts
-import { existsSync as existsSync4, readFileSync as readFileSync9, realpathSync as realpathSync2 } from "node:fs";
+import { existsSync as existsSync5, readFileSync as readFileSync10, realpathSync as realpathSync2 } from "node:fs";
 import { join as join19 } from "node:path";
 
 // src/render/apply.ts
 import {
   chmodSync as chmodSync2,
-  existsSync as existsSync3,
+  existsSync as existsSync4,
   lstatSync as lstatSync2,
   mkdirSync as mkdirSync2,
-  readFileSync as readFileSync8,
-  readdirSync as readdirSync5,
-  rmSync as rmSync8,
+  readFileSync as readFileSync9,
+  readdirSync as readdirSync7,
+  rmSync as rmSync9,
   rmdirSync,
   statSync as statSync4
 } from "node:fs";
@@ -17310,7 +17467,7 @@ function readManifest(git2, harness = "claude-code") {
 }
 function readText(path) {
   try {
-    return readFileSync8(path, "utf8");
+    return readFileSync9(path, "utf8");
   } catch {
     return void 0;
   }
@@ -17336,7 +17493,7 @@ function removeEmptyDirs(root, rel) {
   while (dir !== "." && dir.split("/").some((part) => part.startsWith("tempa-"))) {
     const abs = join18(root, dir);
     try {
-      if (readdirSync5(abs).length) return;
+      if (readdirSync7(abs).length) return;
       rmdirSync(abs);
     } catch {
       return;
@@ -17396,7 +17553,7 @@ function applyTarget(t, plan2, report, renderedAt) {
   const mine = plan2.files.filter((f) => targetOf(f) === t.target);
   const merges = plan2.settings.filter((s) => targetOf(s) === t.target);
   const planned = new Set(mine.map((f) => f.path));
-  const tracked = t.git ? trackedPaths(root, [
+  const tracked2 = t.git ? trackedPaths(root, [
     ...planned,
     ...merges.map((m) => m.path),
     ...Object.keys(previous.files),
@@ -17411,7 +17568,7 @@ function applyTarget(t, plan2, report, renderedAt) {
       report.conflicts.push({ path: shown, reason: "path leaves the target folder" });
       continue;
     }
-    if (tracked.has(file.path)) {
+    if (tracked2.has(file.path)) {
       report.conflicts.push({
         path: shown,
         reason: "tracked by git; Tempa never overwrites committed files"
@@ -17454,14 +17611,14 @@ function applyTarget(t, plan2, report, renderedAt) {
   const kept = [];
   const handedOver = new Set(t.git ? plan2.handedOver ?? [] : []);
   for (const path of [...Object.keys(previous.files), ...previous.kept]) {
-    if (planned.has(path) || tracked.has(path) || kept.includes(path) || !isInside(path)) continue;
+    if (planned.has(path) || tracked2.has(path) || kept.includes(path) || !isInside(path)) continue;
     if (handedOver.has(path)) continue;
     const abs = join18(root, path);
     const current3 = readText(abs);
     if (current3 === void 0) continue;
     const last = previous.files[path];
     if (last !== void 0 && sha256(current3) === last.sha256) {
-      rmSync8(abs, { force: true });
+      rmSync9(abs, { force: true });
       removeEmptyDirs(root, path);
       report.removed.push(t.display(path));
       if (last.kind === "skill") report.skillsChanged = true;
@@ -17486,7 +17643,7 @@ function applyTarget(t, plan2, report, renderedAt) {
       report.conflicts.push({ path: shown, reason: "path leaves the target folder" });
       continue;
     }
-    if (tracked.has(merge2.path)) {
+    if (tracked2.has(merge2.path)) {
       report.conflicts.push({ path: shown, reason: `tracked by git; ${what} not written` });
       if (prev) settings[merge2.path] = prev;
       continue;
@@ -17510,7 +17667,7 @@ function applyTarget(t, plan2, report, renderedAt) {
   if (t.git) {
     excluded.push(...Object.keys(files), ...kept);
     for (const path of Object.keys(settings))
-      if (!tracked.has(path) && existsSync3(join18(root, path))) excluded.push(path);
+      if (!tracked2.has(path) && existsSync4(join18(root, path))) excluded.push(path);
     const entries = [...new Set(excluded)].sort();
     const before = readText(t.git.excludePath) ?? "";
     const after = updateExcludeBlock(before, entries.map(excludeEntry), plan2.harness);
@@ -17534,7 +17691,7 @@ function ownsSomething(owned) {
 }
 function applyJson(root, merge2, prev, newMode) {
   const abs = join18(root, merge2.path);
-  const existed = existsSync3(abs);
+  const existed = existsSync4(abs);
   let current3;
   try {
     current3 = readJsonFile(abs);
@@ -17559,7 +17716,7 @@ function applyJson(root, merge2, prev, newMode) {
   const anyOwned = ownsSomething({ ...owned, created: false });
   const managed = [...result.owned.lists.map((l) => l.key), ...result.owned.values.map((v) => v.key)];
   if (created && existed && !anyOwned && isEmptyJsonSettings(result.settings, managed)) {
-    rmSync8(abs, { force: true });
+    rmSync9(abs, { force: true });
     created = false;
     changed = true;
   } else if (result.changed && (existed || anyOwned)) {
@@ -17578,7 +17735,7 @@ function applyBlock(root, merge2, prev, newMode) {
   let created = prev?.created ?? false;
   let changed = false;
   if (before !== void 0 && created && after === "") {
-    rmSync8(abs, { force: true });
+    rmSync9(abs, { force: true });
     created = false;
     changed = true;
   } else if (after !== (before ?? "") && (before !== void 0 || lines.length)) {
@@ -17874,21 +18031,21 @@ ${tempa}` : tempa;
     });
   return files;
 }
-function planCodex(profile, env) {
-  const v = profile.version;
+function planCodex(profile2, env) {
+  const v = profile2.version;
   const skipped = [];
-  const files = standardsFiles(valid(profile.standards ?? [], skipped), v, env, skipped);
+  const files = standardsFiles(valid(profile2.standards ?? [], skipped), v, env, skipped);
   const addSkill2 = (skill) => {
     const rendered = skillFiles(CODEX_DIRS.skill, skill, v);
     files.push(...rendered.files);
     skipped.push(...rendered.skipped);
   };
-  const skills = valid(profile.skills ?? [], skipped);
+  const skills = valid(profile2.skills ?? [], skipped);
   for (const skill of skills) addSkill2(skill);
-  const commands = commandsAsSkills(valid(profile.commands ?? [], skipped), skills);
+  const commands = commandsAsSkills(valid(profile2.commands ?? [], skipped), skills);
   skipped.push(...commands.skipped);
   for (const skill of commands.skills) addSkill2(skill);
-  for (const agent of valid(profile.agents ?? [], skipped)) {
+  for (const agent of valid(profile2.agents ?? [], skipped)) {
     const { content, dropped } = agentToml(agent, v);
     files.push({
       path: `${CODEX_DIRS.agent}/tempa-${agent.name}.toml`,
@@ -17899,7 +18056,7 @@ function planCodex(profile, env) {
     if (dropped.length)
       skipped.push({ asset: agent.name, reason: `as a Codex agent without ${dropped.join(", ")}` });
   }
-  files.push(...permissionRules(profile.permissions, v, skipped));
+  files.push(...permissionRules(profile2.permissions, v, skipped));
   const mcp2 = env?.cliArgv ? mcpCommand(env, env.cliArgv) : void 0;
   const settings = mcp2 ? [mcpServer(mcp2.argv)] : [];
   if (mcp2?.script) files.push(mcp2.script);
@@ -18097,8 +18254,8 @@ var DENY_PRIORITY = 950;
 function geminiRules(permissions) {
   return prefixRules(permissions);
 }
-function policyOrigin(profile) {
-  return `# Tempa profile: ${profile.node.path} ${profile.version}`;
+function policyOrigin(profile2) {
+  return `# Tempa profile: ${profile2.node.path} ${profile2.version}`;
 }
 function policyFile(rules, head2) {
   const entries = rules.map(
@@ -18114,9 +18271,9 @@ function policyFile(rules, head2) {
   return `${[head2, ...entries].join("\n\n")}
 `;
 }
-function geminiPolicyAsks(profile, command, policyText) {
-  if (!policyText?.includes(policyOrigin(profile))) return false;
-  return coveringRule(geminiRules(profile.permissions).rules, command, "prompt") !== void 0;
+function geminiPolicyAsks(profile2, command, policyText) {
+  if (!policyText?.includes(policyOrigin(profile2))) return false;
+  return coveringRule(geminiRules(profile2.permissions).rules, command, "prompt") !== void 0;
 }
 
 // src/render/gemini.ts
@@ -18154,8 +18311,8 @@ function toolsOf(lines) {
   const index = lines.findIndex((l) => /^tools\s*:/.test(l));
   if (index === -1) return void 0;
   const inline = lines[index].replace(/^tools\s*:\s*/, "").trim();
-  const items = inline ? inline.replace(/^\[|\]$/g, "").split(",") : lines.slice(index + 1).map((l) => /^\s+-\s*(.*)$/.exec(l)?.[1]).filter((t) => t !== void 0);
-  return items.map((t) => t.trim().replace(/^(["'])(.*)\1$/, "$2")).filter(Boolean);
+  const items2 = inline ? inline.replace(/^\[|\]$/g, "").split(",") : lines.slice(index + 1).map((l) => /^\s+-\s*(.*)$/.exec(l)?.[1]).filter((t) => t !== void 0);
+  return items2.map((t) => t.trim().replace(/^(["'])(.*)\1$/, "$2")).filter(Boolean);
 }
 function agentMarkdown(asset, profileVersion) {
   const { frontmatter, body: body2 } = splitFrontmatter(asset.content);
@@ -18258,14 +18415,14 @@ function standardsFiles2(standards, v, env, skipped) {
   ] : [];
   return { files, settings };
 }
-function planGemini(profile, env) {
-  const v = profile.version;
+function planGemini(profile2, env) {
+  const v = profile2.version;
   const skipped = [];
-  const standards = standardsFiles2(valid2(profile.standards ?? [], skipped), v, env, skipped);
+  const standards = standardsFiles2(valid2(profile2.standards ?? [], skipped), v, env, skipped);
   const files = [...standards.files];
   const settings = [...standards.settings];
   const codex = new Set(env?.codexFiles ?? []);
-  const skills = valid2(profile.skills ?? [], skipped);
+  const skills = valid2(profile2.skills ?? [], skipped);
   for (const skill of skills) {
     const theirs = `.agents/skills/tempa-${skill.name}/SKILL.md`;
     if (codex.has(theirs)) {
@@ -18277,7 +18434,7 @@ function planGemini(profile, env) {
     skipped.push(...rendered.skipped);
   }
   const skillNames = new Set(skills.map((s) => s.name));
-  for (const command of valid2(profile.commands ?? [], skipped)) {
+  for (const command of valid2(profile2.commands ?? [], skipped)) {
     if (skillNames.has(command.name)) {
       skipped.push({ asset: command.name, reason: "a skill has the same name; command not rendered" });
       continue;
@@ -18293,7 +18450,7 @@ function planGemini(profile, env) {
       skipped.push({ asset: command.name, reason: `as a Gemini command without ${dropped.join(", ")}` });
     for (const note of notes) skipped.push({ asset: command.name, reason: note });
   }
-  for (const agent of valid2(profile.agents ?? [], skipped)) {
+  for (const agent of valid2(profile2.agents ?? [], skipped)) {
     const { content, dropped, droppedTools } = agentMarkdown(agent, v);
     files.push({
       path: `${GEMINI_DIRS.agent}/tempa-${agent.name}.md`,
@@ -18309,7 +18466,7 @@ function planGemini(profile, env) {
         reason: `tools without a Gemini name left out: ${droppedTools.join(", ")}`
       });
   }
-  files.push(...permissionPolicies(profile, skipped));
+  files.push(...permissionPolicies(profile2, skipped));
   if (env?.cli) {
     files.push(geminiOtelScript(env.cli));
     settings.push(promptLoggingOff());
@@ -18352,18 +18509,18 @@ function promptLoggingOff() {
     values: [{ key: ["telemetry"], values: { logPrompts: false } }]
   };
 }
-function permissionPolicies(profile, skipped) {
-  const { rules, skipped: left } = geminiRules(profile.permissions);
+function permissionPolicies(profile2, skipped) {
+  const { rules, skipped: left } = geminiRules(profile2.permissions);
   for (const s of left) skipped.push({ asset: "permissions", reason: `${s.rule}: ${s.reason}` });
-  if (profile.permissions?.allow.length)
+  if (profile2.permissions?.allow.length)
     skipped.push({
       asset: "permissions",
       reason: "allow rules are left to Gemini's approval settings; Tempa's hook applies the policies"
     });
   if (!rules.length) return [];
   const head2 = [
-    header2(profile.version, `sha256:${sha256(JSON.stringify(rules)).slice(0, 12)}`, "#"),
-    policyOrigin(profile),
+    header2(profile2.version, `sha256:${sha256(JSON.stringify(rules)).slice(0, 12)}`, "#"),
+    policyOrigin(profile2),
     "# Your company's permission rules from Tempa, as Gemini CLI policies. Gemini reads them when it starts."
   ].join("\n");
   return [
@@ -18379,7 +18536,7 @@ function permissionPolicies(profile, skipped) {
 var geminiRenderer = { id: "gemini-cli", plan: planGemini };
 
 // src/render/index.ts
-function renderProfile(repo, profile, now, renderer = claudeCodeRenderer, session) {
+function renderProfile(repo, profile2, now, renderer = claudeCodeRenderer, session) {
   if (!repo.git) return void 0;
   const agentsMd = renderer.id === "codex" ? committedAgentsMd(repo.git.root) : void 0;
   const gemini = renderer.id === "gemini-cli" ? geminiRepo(repo.git, session?.env.home) : void 0;
@@ -18391,7 +18548,7 @@ function renderProfile(repo, profile, now, renderer = claudeCodeRenderer, sessio
     ...gemini,
     ...antigravity
   };
-  return applyRender(repo.git, renderer.plan(profile, env), {
+  return applyRender(repo.git, renderer.plan(profile2, env), {
     ...now ? { now } : {},
     ...session?.user ? { user: session.user } : {}
   });
@@ -18399,7 +18556,7 @@ function renderProfile(repo, profile, now, renderer = claudeCodeRenderer, sessio
 function committedAgentsMd(root) {
   if (!trackedPaths(root, ["AGENTS.md"]).has("AGENTS.md")) return void 0;
   try {
-    return readFileSync9(join19(root, "AGENTS.md"), "utf8");
+    return readFileSync10(join19(root, "AGENTS.md"), "utf8");
   } catch {
     return void 0;
   }
@@ -18415,15 +18572,15 @@ function contextFileNames(path) {
 }
 function geminiRepo(git2, home2) {
   const names = contextFileNames(join19(git2.root, GEMINI_PROJECT_SETTINGS)) ?? (home2 ? contextFileNames(join19(home2, ".gemini", "settings.json")) : void 0) ?? [GEMINI_MD];
-  const tracked = trackedPaths(git2.root, [...names, TEMPA_MD, GEMINI_PROJECT_SETTINGS]);
+  const tracked2 = trackedPaths(git2.root, [...names, TEMPA_MD, GEMINI_PROJECT_SETTINGS]);
   return {
     geminiContextFileNames: names,
-    committedFiles: [...tracked],
+    committedFiles: [...tracked2],
     codexFiles: Object.keys(readManifest(git2, "codex")?.files ?? {})
   };
 }
 function antigravityRepo(git2) {
-  const present = (harness) => Object.keys(readManifest(git2, harness)?.files ?? {}).filter((p) => existsSync4(join19(git2.root, p)));
+  const present = (harness) => Object.keys(readManifest(git2, harness)?.files ?? {}).filter((p) => existsSync5(join19(git2.root, p)));
   return { codexFiles: present("codex"), geminiFiles: present("gemini-cli") };
 }
 function codexHookTrust(ctx) {
@@ -18443,7 +18600,7 @@ function codexRequirementsPath(ctx) {
 function codexMcpTempa(ctx) {
   let requirements = "";
   try {
-    requirements = readFileSync9(codexRequirementsPath(ctx), "utf8");
+    requirements = readFileSync10(codexRequirementsPath(ctx), "utf8");
   } catch {
   }
   const identity = mcpIdentityCommand(requirements);
@@ -18475,9 +18632,11 @@ function renderSession(ctx, harness) {
   };
 }
 function describeRender(report) {
-  const lines = [
-    `Rendered into ${report.root}: ${report.written.length} written, ${report.unchanged.length} unchanged, ${report.removed.length} removed`
-  ];
+  const counts = [
+    [report.written.length, "written"],
+    [report.removed.length, "removed"]
+  ].filter(([n]) => n > 0).map(([n, what]) => `${n} ${what}`);
+  const lines = [`Files in the repo: ${counts.length ? counts.join(", ") : "up to date"}`];
   if (report.restored.length) lines.push(`Restored edited files: ${report.restored.join(", ")}`);
   if (report.kept.length) lines.push(`Left in place (changed since rendered): ${report.kept.join(", ")}`);
   for (const c of report.conflicts) lines.push(`Skipped ${c.path}: ${c.reason}`);
@@ -18485,7 +18644,7 @@ function describeRender(report) {
 }
 
 // src/render/clean.ts
-import { existsSync as existsSync5, rmSync as rmSync9 } from "node:fs";
+import { existsSync as existsSync6, rmSync as rmSync10 } from "node:fs";
 import { join as join20 } from "node:path";
 var RENDERING_HARNESSES = [
   "claude-code",
@@ -18516,7 +18675,7 @@ function cleanRepo(git2, dryRun) {
     const after = updateExcludeBlock(readText(git2.excludePath) ?? "", [], harness);
     if (after !== (readText(git2.excludePath) ?? ""))
       writeFileAtomic(git2.excludePath, after, { newMode: 420 });
-    rmSync9(repoManifestPath(git2, harness), { force: true });
+    rmSync10(repoManifestPath(git2, harness), { force: true });
     results.push({ harness, removed: report?.removed ?? [], kept: report?.kept ?? [], settings });
   }
   return results;
@@ -18534,23 +18693,23 @@ function rememberRenderedRepo(ctx, root) {
 }
 function renderedRepos(ctx) {
   const roots = readJsonLenient(renderedPath(ctx)) ?? [];
-  return roots.filter((r) => existsSync5(r)).flatMap((r) => gitInfo(r) ?? []);
+  return roots.filter((r) => existsSync6(r)).flatMap((r) => gitInfo(r) ?? []);
 }
 function forgetRenderedRepos(ctx, dryRun) {
-  if (!dryRun) rmSync9(renderedPath(ctx), { force: true });
+  if (!dryRun) rmSync10(renderedPath(ctx), { force: true });
 }
 
 // src/telemetry/events.ts
-import { readdirSync as readdirSync8, readFileSync as readFileSync11, renameSync as renameSync2, rmSync as rmSync12, statSync as statSync6 } from "node:fs";
+import { readdirSync as readdirSync10, readFileSync as readFileSync12, renameSync as renameSync2, rmSync as rmSync13, statSync as statSync6 } from "node:fs";
 import { join as join23 } from "node:path";
 
 // src/hook/state.ts
-import { createHash as createHash7 } from "node:crypto";
-import { appendFileSync, readFileSync as readFileSync10, readdirSync as readdirSync6, rmSync as rmSync10, statSync as statSync5, writeFileSync as writeFileSync2 } from "node:fs";
+import { createHash as createHash8 } from "node:crypto";
+import { appendFileSync, readFileSync as readFileSync11, readdirSync as readdirSync8, rmSync as rmSync11, statSync as statSync5, writeFileSync as writeFileSync2 } from "node:fs";
 import { join as join21 } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 function sessionFile(ctx, sessionId) {
-  const safe = /^[A-Za-z0-9_-]{1,128}$/.test(sessionId) ? sessionId : createHash7("sha256").update(sessionId).digest("hex");
+  const safe = /^[A-Za-z0-9_-]{1,128}$/.test(sessionId) ? sessionId : createHash8("sha256").update(sessionId).digest("hex");
   return join21(ctx.tempaHome, "sessions", `${safe}.json`);
 }
 function readSession(ctx, sessionId) {
@@ -18564,8 +18723,8 @@ function writeSession(ctx, state) {
   writeJsonAtomic(sessionFile(ctx, state.session_id), state, { dirMode: 448 });
 }
 function endSession(ctx, sessionId) {
-  rmSync10(sessionFile(ctx, sessionId), { force: true });
-  rmSync10(reposFile(ctx, sessionId), { force: true });
+  rmSync11(sessionFile(ctx, sessionId), { force: true });
+  rmSync11(reposFile(ctx, sessionId), { force: true });
 }
 function reposFile(ctx, sessionId) {
   return sessionFile(ctx, sessionId).replace(/\.json$/, ".repos.json");
@@ -18610,8 +18769,8 @@ function claimEvent(ctx, key) {
   }
   try {
     if (Date.now() - statSync5(path).mtimeMs <= CLAIM_WINDOW_MS) return false;
-    rmSync10(answerFile(ctx, key), { force: true });
-    rmSync10(path, { force: true });
+    rmSync11(answerFile(ctx, key), { force: true });
+    rmSync11(path, { force: true });
     take();
     return true;
   } catch {
@@ -18619,7 +18778,7 @@ function claimEvent(ctx, key) {
   }
 }
 function claimFile(ctx, key) {
-  return join21(ctx.tempaHome, "sessions", `${createHash7("sha256").update(key).digest("hex")}.claim`);
+  return join21(ctx.tempaHome, "sessions", `${createHash8("sha256").update(key).digest("hex")}.claim`);
 }
 function answerFile(ctx, key) {
   return claimFile(ctx, key).replace(/\.claim$/, ".answer");
@@ -18660,14 +18819,14 @@ function pruneSessions(ctx, maxAgeMs = 7 * 864e5) {
   const dir = join21(ctx.tempaHome, "sessions");
   let names;
   try {
-    names = readdirSync6(dir);
+    names = readdirSync8(dir);
   } catch {
     return;
   }
   for (const name2 of names) {
     const path = join21(dir, name2);
     try {
-      if (Date.now() - statSync5(path).mtimeMs > maxAgeMs) rmSync10(path, { force: true });
+      if (Date.now() - statSync5(path).mtimeMs > maxAgeMs) rmSync11(path, { force: true });
     } catch {
     }
   }
@@ -18693,15 +18852,15 @@ function recordOffline(ctx, state, mode, repo, attributes = {}) {
 }
 
 // src/telemetry/token.ts
-import { createHash as createHash8 } from "node:crypto";
-import { readdirSync as readdirSync7, rmSync as rmSync11 } from "node:fs";
+import { createHash as createHash9 } from "node:crypto";
+import { readdirSync as readdirSync9, rmSync as rmSync12 } from "node:fs";
 import { join as join22 } from "node:path";
 var REFRESH_BEFORE_MS = 30 * 6e4;
 function tokenDir(ctx) {
   return join22(ctx.tempaHome, "telemetry");
 }
 function tokenPath(ctx, repo, tenant) {
-  const key = createHash8("sha256").update(`${normalizeRemote(repo) ?? repo ?? "@default"}${tenant ? `
+  const key = createHash9("sha256").update(`${normalizeRemote(repo) ?? repo ?? "@default"}${tenant ? `
 ${tenant}` : ""}`).digest("hex");
   return join22(tokenDir(ctx), `${key}.json`);
 }
@@ -18733,7 +18892,7 @@ async function telemetryToken(ctx, repo, options = {}) {
 }
 function clearTelemetryTokens(ctx) {
   try {
-    for (const name2 of readdirSync7(tokenDir(ctx))) rmSync11(join22(tokenDir(ctx), name2), { force: true });
+    for (const name2 of readdirSync9(tokenDir(ctx))) rmSync12(join22(tokenDir(ctx), name2), { force: true });
   } catch {
   }
 }
@@ -18807,7 +18966,7 @@ function claimFiles(ctx) {
   const dir = spoolDir(ctx);
   let names;
   try {
-    names = readdirSync8(dir);
+    names = readdirSync10(dir);
   } catch {
     return [];
   }
@@ -18837,7 +18996,7 @@ function parse3(path) {
   const out2 = [];
   let text = "";
   try {
-    text = readFileSync11(path, "utf8");
+    text = readFileSync12(path, "utf8");
   } catch {
     return out2;
   }
@@ -18899,7 +19058,7 @@ async function flush(ctx, options = {}) {
       else unsent.push(...records.slice(sentInGroup));
     }
   }
-  for (const file of files) rmSync12(file, { force: true });
+  for (const file of files) rmSync13(file, { force: true });
   const untagged = { ...ctx, harness: void 0 };
   for (const r of unsent) {
     spool(untagged, r);
@@ -18909,7 +19068,7 @@ async function flush(ctx, options = {}) {
 }
 
 // src/telemetry/after-sync.ts
-function configureClaude(ctx, profile) {
+function configureClaude(ctx, profile2) {
   const creds = loadCredentials(ctx);
   const otelEndpoint = cachedDiscovery(ctx, resolveEndpoint(ctx).endpoint)?.document.otel_endpoint;
   if (!creds || !otelEndpoint) return void 0;
@@ -18917,7 +19076,7 @@ function configureClaude(ctx, profile) {
     applyClaudeSettings(ctx, {
       otelEndpoint,
       deviceId: creds.device_id,
-      telemetry: profile.telemetry,
+      telemetry: profile2.telemetry,
       helper: helperCommand(ctx)
     });
     return void 0;
@@ -18950,7 +19109,7 @@ function afterSync(ctx, info2) {
 }
 
 // src/runtime.ts
-import { readFileSync as readFileSync12 } from "node:fs";
+import { readFileSync as readFileSync13 } from "node:fs";
 import { join as join24 } from "node:path";
 function nodePathFile(ctx) {
   return join24(ctx.tempaHome, "node-path");
@@ -18960,7 +19119,7 @@ function cliPathFile(ctx) {
 }
 function current(path) {
   try {
-    return readFileSync12(path, "utf8").trim();
+    return readFileSync13(path, "utf8").trim();
   } catch {
     return void 0;
   }
@@ -18982,7 +19141,7 @@ function rememberRuntime(ctx) {
 }
 
 // src/work/track.ts
-import { createHash as createHash9 } from "node:crypto";
+import { createHash as createHash10 } from "node:crypto";
 import { join as join25 } from "node:path";
 
 // src/work/references.ts
@@ -19018,8 +19177,8 @@ var BUILTIN_URLS = [
 ];
 var BRANCH_KEY = /(?:^|[/_-])([A-Z][A-Z0-9]+-\d+)(?=$|[/_-])/;
 var BRANCH_NUMBER = /^(?:[\w.-]+\/)?(\d+)(?=[-_])/;
-function matchersOf(profile) {
-  const value = profile?.settings?.work_references?.value;
+function matchersOf(profile2) {
+  const value = profile2?.settings?.work_references?.value;
   if (!Array.isArray(value)) return [];
   const out2 = [];
   for (const raw of value) {
@@ -19090,13 +19249,13 @@ function parseStep(value) {
 function stepLabel(ref) {
   return ref.sub_step ? `${ref.step}.${ref.sub_step}` : ref.step;
 }
-function stepNames(profile) {
-  return (profile?.steps?.steps ?? []).flatMap(
+function stepNames(profile2) {
+  return (profile2?.steps?.steps ?? []).flatMap(
     (s) => s.sub_steps.length ? s.sub_steps.map((sub) => `${s.id}.${sub.id}`) : [s.id]
   );
 }
-function knownStep(profile, ref) {
-  const step = profile?.steps?.steps.find((s) => s.id === ref.step);
+function knownStep(profile2, ref) {
+  const step = profile2?.steps?.steps.find((s) => s.id === ref.step);
   return !!step && (!ref.sub_step || step.sub_steps.some((sub) => sub.id === ref.sub_step));
 }
 function compile(pattern, whole = false) {
@@ -19115,9 +19274,9 @@ function subject(toolInput2, root) {
   const path = raw && root && isAbsolute(raw) ? relative2(root, raw) : raw;
   return { ...command ? { command } : {}, ...path ? { path } : {} };
 }
-function inferStep(profile, toolName, toolInput2, root) {
+function inferStep(profile2, toolName, toolInput2, root) {
   const { command, path } = subject(toolInput2, root);
-  for (const rule of profile?.steps?.rules ?? []) {
+  for (const rule of profile2?.steps?.rules ?? []) {
     if (!compile(rule.tool, true)?.test(toolName)) continue;
     if (rule.command && !(command !== void 0 && compile(rule.command)?.test(command))) continue;
     if (rule.path && !(path !== void 0 && compile(rule.path)?.test(path))) continue;
@@ -19128,7 +19287,7 @@ function inferStep(profile, toolName, toolInput2, root) {
 
 // src/work/track.ts
 function explicitPath(ctx, repo) {
-  const id = createHash9("sha256").update(repo.key).digest("hex").slice(0, 32);
+  const id = createHash10("sha256").update(repo.key).digest("hex").slice(0, 32);
   return join25(ctx.tempaHome, "work", `${id}.json`);
 }
 function readExplicit(ctx, repo) {
@@ -19279,8 +19438,8 @@ var NotConnectedError = class extends Error {
     this.name = "NotConnectedError";
   }
 };
-function hasPerUser(profile) {
-  return !!profile?.mcp.some((m) => m.auth === "per-user");
+function hasPerUser(profile2) {
+  return !!profile2?.mcp.some((m) => m.auth === "per-user");
 }
 async function unconnected(ctx, login2, timeoutMs) {
   try {
@@ -19303,10 +19462,10 @@ function signInNotice(item) {
 }
 
 // src/policy/local.ts
-import { existsSync as existsSync7 } from "node:fs";
+import { existsSync as existsSync8 } from "node:fs";
 
 // src/policy/grammar.ts
-import { readFileSync as readFileSync13 } from "node:fs";
+import { readFileSync as readFileSync14 } from "node:fs";
 import { createRequire } from "node:module";
 import { gunzipSync } from "node:zlib";
 
@@ -20939,13 +21098,13 @@ async function Module2(moduleArg = {}) {
       }
       readAsync = /* @__PURE__ */ __name(async (url2) => {
         if (isFileURI(url2)) {
-          return new Promise((resolve14, reject) => {
+          return new Promise((resolve15, reject) => {
             var xhr = new XMLHttpRequest();
             xhr.open("GET", url2, true);
             xhr.responseType = "arraybuffer";
             xhr.onload = () => {
               if (xhr.status == 200 || xhr.status == 0 && xhr.response) {
-                resolve14(xhr.response);
+                resolve15(xhr.response);
                 return;
               }
               reject(xhr.status);
@@ -21141,9 +21300,9 @@ async function Module2(moduleArg = {}) {
     __name(receiveInstantiationResult, "receiveInstantiationResult");
     var info2 = getWasmImports();
     if (Module["instantiateWasm"]) {
-      return new Promise((resolve14, reject) => {
+      return new Promise((resolve15, reject) => {
         Module["instantiateWasm"](info2, (mod, inst) => {
-          resolve14(receiveInstance(mod, inst));
+          resolve15(receiveInstance(mod, inst));
         });
       });
     }
@@ -22476,8 +22635,8 @@ async function Module2(moduleArg = {}) {
   if (runtimeInitialized) {
     moduleRtn = Module;
   } else {
-    moduleRtn = new Promise((resolve14, reject) => {
-      readyPromiseResolve = resolve14;
+    moduleRtn = new Promise((resolve15, reject) => {
+      readyPromiseResolve = resolve15;
       readyPromiseReject = reject;
     });
   }
@@ -23360,7 +23519,7 @@ var EMBEDDED_WASM = { bash: "H4sIAAAAAAACA+y9e1wVV5r3W1Wrqja6wZBLpzNJz8yGZNL2JZ1
 var ready;
 function wasmBytes(embedded, module2) {
   if (embedded) return new Uint8Array(gunzipSync(Buffer.from(embedded, "base64")));
-  return new Uint8Array(readFileSync13(createRequire(import.meta.url).resolve(module2)));
+  return new Uint8Array(readFileSync14(createRequire(import.meta.url).resolve(module2)));
 }
 async function load() {
   const runtime = wasmBytes(EMBEDDED_WASM.runtime, "web-tree-sitter/web-tree-sitter.wasm");
@@ -23766,7 +23925,7 @@ var Parse = class {
     const bodyNode = node2.childForFieldName("body");
     const body2 = bodyNode ? kids(bodyNode).filter((c) => c.type !== "do" && c.type !== "done") : [];
     const statements = [];
-    const items = [];
+    const items2 = [];
     let literal2 = hasIn;
     const substitutions = [];
     for (const w of words2) {
@@ -23774,7 +23933,7 @@ var Parse = class {
       substitutions.push(...subs);
       const raw = slice(scope.original, w);
       if (expanded || [..."*?[{~"].some((c) => raw.includes(c))) literal2 = false;
-      if (value !== null) items.push(value);
+      if (value !== null) items2.push(value);
     }
     if (substitutions.length) {
       scope.spend();
@@ -23783,8 +23942,8 @@ var Parse = class {
     const bodyNames = assignedNames(body2, scope.original);
     const reassigned = bodyNames === null || bodyNames.has(variable);
     const inner = this.enterConditional(node2, scope);
-    if (literal2 && !reassigned && items.length > 0 && items.length <= MAX_FOR_ITEMS) {
-      for (const item of items) {
+    if (literal2 && !reassigned && items2.length > 0 && items2.length <= MAX_FOR_ITEMS) {
+      for (const item of items2) {
         inner.env.set(variable, item);
         statements.push(...this.sequence(body2, inner));
       }
@@ -23850,14 +24009,14 @@ var Parse = class {
   command(node2, scope, given) {
     scope.spend();
     const redirectNodes = node2 && given.length === 0 ? this.extraRedirects.get(node2.id) ?? [] : given;
-    const items = node2 ? commandParts(node2) : [];
-    for (const r of redirectNodes) items.push({ kind: "redirect", node: r });
+    const items2 = node2 ? commandParts(node2) : [];
+    for (const r of redirectNodes) items2.push({ kind: "redirect", node: r });
     const words2 = [];
     const redirects = [];
     const subs = [];
     const expanded = [];
     const assignments = [];
-    for (const part of items) {
+    for (const part of items2) {
       if (part.kind === "literal") words2.push(part.value);
       else if (part.kind === "word") {
         const w = this.word(part.node, scope);
@@ -24005,7 +24164,7 @@ function commandParts(node2) {
   const declaring = node2.type === "declaration_command" || node2.type === "unset_command";
   const parts2 = [];
   all.forEach((c, i2) => {
-    const field2 = node2.fieldNameForChild(i2);
+    const field3 = node2.fieldNameForChild(i2);
     if (c.type === "variable_assignment" && node2.type === "command")
       parts2.push({ kind: "assignment", node: c });
     else if (c.type === "command_name") parts2.push({ kind: "word", node: c.child(0) });
@@ -24013,7 +24172,7 @@ function commandParts(node2) {
     else if (!c.isNamed && declaring) parts2.push({ kind: "literal", value: c.type });
     else if (c.type === "variable_assignment" || c.type === "variable_name")
       parts2.push({ kind: "word", node: c });
-    else if (WORD_TYPES.has(c.type) && (field2 === "argument" || node2.type !== "command"))
+    else if (WORD_TYPES.has(c.type) && (field3 === "argument" || node2.type !== "command"))
       parts2.push({ kind: "word", node: c });
     else if (c.type !== "comment" && c.isNamed) throw new ParseError(`Unsupported part: ${c.type}`);
   });
@@ -24222,12 +24381,12 @@ function compareCodePoints(a, b) {
   return x.length - y.length;
 }
 function elements(value) {
-  let items;
-  if (Array.isArray(value)) items = value;
+  let items2;
+  if (Array.isArray(value)) items2 = value;
   else if (value && typeof value === "object")
-    items = Object.keys(value).map((k) => JSON.parse(k));
+    items2 = Object.keys(value).map((k) => JSON.parse(k));
   else return [];
-  return items.filter((i2) => !!i2 && typeof i2 === "object" && !Array.isArray(i2)).map((i2) => [pythonJson(i2), i2]).sort(([a], [b]) => compareCodePoints(a, b)).map(([, i2]) => i2);
+  return items2.filter((i2) => !!i2 && typeof i2 === "object" && !Array.isArray(i2)).map((i2) => [pythonJson(i2), i2]).sort(([a], [b]) => compareCodePoints(a, b)).map(([, i2]) => i2);
 }
 var ACTIONS = /* @__PURE__ */ new Set(["allow", "deny", "ask"]);
 var EvaluationError = class extends Error {
@@ -24508,7 +24667,7 @@ async function decideWithBytes(bytes3, request) {
 
 // src/policy/resident.ts
 import { spawn } from "node:child_process";
-import { chmodSync as chmodSync3, existsSync as existsSync6, mkdirSync as mkdirSync3, rmSync as rmSync13, statSync as statSync7, writeFileSync as writeFileSync3 } from "node:fs";
+import { chmodSync as chmodSync3, existsSync as existsSync7, mkdirSync as mkdirSync3, rmSync as rmSync14, statSync as statSync7, writeFileSync as writeFileSync3 } from "node:fs";
 import { createConnection, createServer } from "node:net";
 import { join as join27 } from "node:path";
 var RESIDENT_TIMEOUT_MS = 250;
@@ -24531,7 +24690,7 @@ function isResult(value) {
   return !!value && typeof value === "object" && typeof value.ok === "boolean";
 }
 function askResident(ctx, request, timeoutMs = RESIDENT_TIMEOUT_MS) {
-  return new Promise((resolve14) => {
+  return new Promise((resolve15) => {
     let buffer = "";
     let done = false;
     const finish = (result) => {
@@ -24539,7 +24698,7 @@ function askResident(ctx, request, timeoutMs = RESIDENT_TIMEOUT_MS) {
       done = true;
       clearTimeout(timer);
       socket.destroy();
-      resolve14(result);
+      resolve15(result);
     };
     const socket = createConnection(socketPath(ctx));
     const timer = setTimeout(() => finish(void 0), timeoutMs);
@@ -24588,8 +24747,8 @@ function ensureRunDir(ctx) {
   chmodSync3(runDir(ctx), 448);
 }
 function idleMs(ctx) {
-  const fromEnv = Number(ctx.env.TEMPA_EVALUATOR_IDLE_MS);
-  return Number.isFinite(fromEnv) && fromEnv > 0 ? fromEnv : DEFAULT_IDLE_MS;
+  const fromEnv2 = Number(ctx.env.TEMPA_EVALUATOR_IDLE_MS);
+  return Number.isFinite(fromEnv2) && fromEnv2 > 0 ? fromEnv2 : DEFAULT_IDLE_MS;
 }
 function handle2(ctx, socket, touch) {
   let buffer = "";
@@ -24621,21 +24780,21 @@ function handle2(ctx, socket, touch) {
   });
 }
 function alive(path) {
-  return new Promise((resolve14) => {
+  return new Promise((resolve15) => {
     const probe = createConnection(path);
     probe.on("connect", () => {
       probe.destroy();
-      resolve14(true);
+      resolve15(true);
     });
-    probe.on("error", () => resolve14(false));
+    probe.on("error", () => resolve15(false));
   });
 }
 function listen(server, path) {
-  return new Promise((resolve14, reject) => {
+  return new Promise((resolve15, reject) => {
     server.once("error", reject);
     server.listen(path, () => {
       server.off("error", reject);
-      resolve14();
+      resolve15();
     });
   });
 }
@@ -24648,16 +24807,16 @@ async function serve(ctx, onIdle = () => process.exit(0)) {
     await listen(server, path);
   } catch (err2) {
     if (err2.code !== "EADDRINUSE" || await alive(path)) return void 0;
-    rmSync13(path, { force: true });
+    rmSync14(path, { force: true });
     await listen(server, path);
   }
   chmodSync3(path, 384);
-  rmSync13(`${path}.starting`, { force: true });
+  rmSync14(`${path}.starting`, { force: true });
   const idle = idleMs(ctx);
-  const close = () => new Promise((resolve14) => {
+  const close = () => new Promise((resolve15) => {
     clearInterval(timer);
-    server.close(() => resolve14());
-    if (existsSync6(path)) rmSync13(path, { force: true });
+    server.close(() => resolve15());
+    if (existsSync7(path)) rmSync14(path, { force: true });
   });
   const timer = setInterval(
     () => {
@@ -24670,12 +24829,12 @@ async function serve(ctx, onIdle = () => process.exit(0)) {
 }
 
 // src/policy/local.ts
-function localEvaluationEnabled(ctx, profile) {
+function localEvaluationEnabled(ctx, profile2) {
   const env = ctx.env.TEMPA_LOCAL_EVALUATION?.trim().toLowerCase();
   if (env === "0" || env === "false" || env === "off") return false;
-  return profile.settings?.local_evaluation?.value !== false;
+  return profile2.settings?.local_evaluation?.value !== false;
 }
-function bashEvent(event2, profile) {
+function bashEvent(event2, profile2) {
   const input = event2.tool?.input ?? {};
   return {
     session_id: event2.session_id,
@@ -24683,24 +24842,24 @@ function bashEvent(event2, profile) {
     tool_name: "Bash",
     command: commandLine(input.command) ?? commandLine(input.cmd) ?? null,
     parameters: {},
-    enabled_bundles: profile.policies.bundles.map((b) => b.name),
+    enabled_bundles: profile2.policies.bundles.map((b) => b.name),
     // The server takes the event's cwd as the workspace root, and knows no home directory
     workspace_root: event2.cwd,
     cwd: event2.cwd,
     home: null
   };
 }
-async function localShellDecision(ctx, profile, event2) {
-  if (!localEvaluationEnabled(ctx, profile)) return { ok: false, fallback: "disabled" };
-  const wasm = profile.policies.wasm;
+async function localShellDecision(ctx, profile2, event2) {
+  if (!localEvaluationEnabled(ctx, profile2)) return { ok: false, fallback: "disabled" };
+  const wasm = profile2.policies.wasm;
   if (!wasm) return { ok: false, fallback: "no_module" };
   if (abiMajor(wasm.abi) !== SUPPORTED_ABI_MAJOR) return { ok: false, fallback: "abi", detail: wasm.abi };
-  if (!existsSync7(modulePath(ctx, wasm.sha256))) return { ok: false, fallback: "not_downloaded" };
+  if (!existsSync8(modulePath(ctx, wasm.sha256))) return { ok: false, fallback: "not_downloaded" };
   const request = {
     wasm,
-    event: bashEvent(event2, profile),
-    default_decision: profile.policies.default_decision,
-    bundle_version: profile.version
+    event: bashEvent(event2, profile2),
+    default_decision: profile2.policies.default_decision,
+    bundle_version: profile2.version
   };
   const resident = residentEnabled(ctx);
   if (resident) {
@@ -24749,22 +24908,22 @@ function waive(decision, exceptions, command) {
 import { join as join28 } from "node:path";
 var ANNOUNCED_FILE = "announced.json";
 var MAX_ITEMS = 12;
-function profileFacts(profile) {
+function profileFacts(profile2) {
   const assets = {};
   for (const [kind, list2] of [
-    ["skill", profile.skills],
-    ["command", profile.commands],
-    ["agent", profile.agents]
+    ["skill", profile2.skills],
+    ["command", profile2.commands],
+    ["agent", profile2.agents]
   ]) {
     for (const a of list2 ?? []) assets[`${kind} ${a.name}`] = a.content_hash;
   }
   const mcp2 = {};
-  for (const m of profile.mcp ?? []) mcp2[m.name] = `${m.url} ${m.tools ? m.tools.join(",") : "*"}`;
-  const p = profile.permissions ?? { allow: [], ask: [], deny: [] };
+  for (const m of profile2.mcp ?? []) mcp2[m.name] = `${m.url} ${m.tools ? m.tools.join(",") : "*"}`;
+  const p = profile2.permissions ?? { allow: [], ask: [], deny: [] };
   return {
     permissions: { allow: [...p.allow], ask: [...p.ask], deny: [...p.deny] },
-    default_decision: profile.policies.default_decision,
-    policies: profile.policies.bundles.map((b) => b.name),
+    default_decision: profile2.policies.default_decision,
+    policies: profile2.policies.bundles.map((b) => b.name),
     assets,
     mcp: mcp2
   };
@@ -24800,9 +24959,9 @@ function keyedChanges(before, after, show, changed, addedText) {
 function mcpUrl(facts, name2) {
   return (facts.mcp[name2] ?? "").split(" ")[0] ?? "";
 }
-function clipItems(items) {
-  if (items.length <= MAX_ITEMS) return items.join(", ");
-  return `${items.slice(0, MAX_ITEMS).join(", ")} and ${items.length - MAX_ITEMS} more`;
+function clipItems(items2) {
+  if (items2.length <= MAX_ITEMS) return items2.join(", ");
+  return `${items2.slice(0, MAX_ITEMS).join(", ")} and ${items2.length - MAX_ITEMS} more`;
 }
 function count(n, one, many) {
   return `${n} ${n === 1 ? one : many}`;
@@ -24836,22 +24995,25 @@ function describeProfileChanges(before, after) {
       )
     ]
   ];
-  return areas.filter(([, items]) => items.length).map(([area, items]) => `${area}: ${clipItems(items)}`);
+  return areas.filter(([, items2]) => items2.length).map(([area, items2]) => `${area}: ${clipItems(items2)}`);
 }
 function announcedPath(ctx, repoKey3) {
   return join28(cacheDir(ctx, repoKey3), ANNOUNCED_FILE);
 }
-function announceProfileChanges(ctx, repoKey3, repoName, profile) {
-  const facts = profileFacts(profile);
+function recordProfileChanges(ctx, repoKey3, profile2) {
+  const facts = profileFacts(profile2);
   const before = readJsonLenient(announcedPath(ctx, repoKey3));
   const known = before?.permissions ? before : void 0;
-  const lines = describeProfileChanges(known, facts);
   try {
     writeJsonAtomic(announcedPath(ctx, repoKey3), facts, { mode: 384, dirMode: 448 });
   } catch {
   }
+  return known ? describeProfileChanges(known, facts) : void 0;
+}
+function announceProfileChanges(ctx, repoKey3, repoName, profile2) {
+  const lines = recordProfileChanges(ctx, repoKey3, profile2);
   const where = repoName ?? "this directory";
-  if (!known) return `Tempa: first profile for ${where}: ${firstProfile(facts)}.`;
+  if (!lines) return `Tempa: first profile for ${where}: ${firstProfile(profileFacts(profile2))}.`;
   if (!lines.length) return void 0;
   return `Tempa profile changes for ${where} since the last sync: ${lines.join("; ")}.`;
 }
@@ -25021,28 +25183,28 @@ function loggedReason(reason) {
 
 // src/hook/rules.ts
 var sanitisedMcpName = (name2) => name2.replace(/[^A-Za-z0-9_]/g, "_");
-function profileMcp(mcp2, profile) {
-  if (!mcp2 || !profile || !TEMPA_MCP_SERVERS.has(mcp2.server) || !mcp2.endpoint) return mcp2;
-  if (profile.mcp.some((e) => e.name === mcp2.endpoint)) return mcp2;
-  const entry = profile.mcp.find((e) => sanitisedMcpName(e.name) === mcp2.endpoint);
+function profileMcp(mcp2, profile2) {
+  if (!mcp2 || !profile2 || !TEMPA_MCP_SERVERS.has(mcp2.server) || !mcp2.endpoint) return mcp2;
+  if (profile2.mcp.some((e) => e.name === mcp2.endpoint)) return mcp2;
+  const entry = profile2.mcp.find((e) => sanitisedMcpName(e.name) === mcp2.endpoint);
   if (!entry) return mcp2;
   const tool = entry.tools?.find((t) => t === mcp2.tool || sanitisedMcpName(t) === mcp2.tool) ?? mcp2.tool;
   return { ...mcp2, endpoint: entry.name, tool };
 }
-function checkMcp(mcp2, profile) {
+function checkMcp(mcp2, profile2) {
   if (!mcp2) return void 0;
   if (!TEMPA_MCP_SERVERS.has(mcp2.server)) {
-    if (!profile || profile.policies.allow_external_mcp) return void 0;
+    if (!profile2 || profile2.policies.allow_external_mcp) return void 0;
     return {
       decision: "deny",
       reason: `Tempa: MCP server '${mcp2.server}' is not allowed by your profile. Shared context comes through the 'tempa' MCP server.`
     };
   }
   const endpoint = mcp2.endpoint ?? null;
-  if (!profile || endpoint === null && TEMPA_OWN_TOOLS.has(mcp2.tool)) return void 0;
+  if (!profile2 || endpoint === null && TEMPA_OWN_TOOLS.has(mcp2.tool)) return void 0;
   const endpointName = endpoint ?? mcp2.tool;
   const toolPart = endpoint === null ? "" : mcp2.tool;
-  const entry = profile.mcp.find((e) => e.name === endpointName);
+  const entry = profile2.mcp.find((e) => e.name === endpointName);
   if (!entry) {
     return { decision: "deny", reason: `Tempa: MCP endpoint '${endpointName}' is not in your profile.` };
   }
@@ -25062,15 +25224,15 @@ var OFFLINE_WHY = {
   "server-error": "Tempa control plane failed on the decision request"
 };
 var OFFLINE_FIX = "Your organisation blocks what Tempa cannot check. Try again once the control plane answers; 'tempa doctor' says what is wrong.";
-function offlineDecision(profile, tool, table = CLAUDE_CODE_TOOLS, cause = "unreachable") {
-  const offline = profile.offline ?? { allow_tools: [], default_decision: "ask" };
+function offlineDecision(profile2, tool, table = CLAUDE_CODE_TOOLS, cause = "unreachable") {
+  const offline = profile2.offline ?? { allow_tools: [], default_decision: "ask" };
   const name2 = tool.name;
   const claudeName = table.claudeCodeNames?.[name2];
   const listed = offline.allow_tools.includes(name2) || !!claudeName && offline.allow_tools.includes(claudeName);
   if (listed || isReadOnly(table, tool)) {
     return { decision: "allow", reason: `Tempa offline: ${name2} is allowed by the cached profile` };
   }
-  const reason = `${OFFLINE_WHY[cause]}; offline rules of cached profile ${profile.version}`;
+  const reason = `${OFFLINE_WHY[cause]}; offline rules of cached profile ${profile2.version}`;
   switch (offline.default_decision) {
     case "allow":
       return { decision: "allow", reason };
@@ -25126,11 +25288,11 @@ function describe(asset) {
   const { frontmatter, body: body2 } = splitFrontmatter(asset.content);
   const desc = frontmatter?.find((l) => /^description\s*:/.test(l))?.replace(/^description\s*:\s*/, "");
   if (desc) return desc.replace(/^["']|["']$/g, "");
-  const heading = body2.split("\n").find((l) => /^#+\s/.test(l));
-  return heading ? heading.replace(/^#+\s*/, "") : "";
+  const heading2 = body2.split("\n").find((l) => /^#+\s/.test(l));
+  return heading2 ? heading2.replace(/^#+\s*/, "") : "";
 }
-function list(title, items) {
-  return items.length ? [title, ...items.map((i2) => `- ${i2}`)] : [];
+function list(title, items2) {
+  return items2.length ? [title, ...items2.map((i2) => `- ${i2}`)] : [];
 }
 function clip(text, max) {
   if (text.length <= max) return text;
@@ -25138,12 +25300,12 @@ function clip(text, max) {
   return text.slice(0, max - note.length) + note;
 }
 function profileSummary({
-  profile,
+  profile: profile2,
   rendered,
   offlineSince,
   layout = CLAUDE_CODE_LAYOUT
 }) {
-  const p = profile;
+  const p = profile2;
   const entry = (a, prefix) => {
     const d = describe(a);
     return `${prefix}${a.name}${d ? `: ${d}` : ""}`;
@@ -25240,8 +25402,8 @@ function decideTimeoutMs(ctx, fallback = DEFAULT_DECIDE_TIMEOUT_MS) {
   return Math.max(1, Math.min(wanted, ctx.deadlineAt - Date.now() - AFTER_DECIDE_MS));
 }
 function configuredDecideTimeoutMs(ctx, fallback) {
-  const fromEnv = Number(ctx.env.TEMPA_DECIDE_TIMEOUT_MS);
-  if (Number.isFinite(fromEnv) && fromEnv > 0) return fromEnv;
+  const fromEnv2 = Number(ctx.env.TEMPA_DECIDE_TIMEOUT_MS);
+  if (Number.isFinite(fromEnv2) && fromEnv2 > 0) return fromEnv2;
   try {
     const fromConfig = readUserConfig(ctx).decide_timeout_ms;
     if (typeof fromConfig === "number" && fromConfig > 0) return fromConfig;
@@ -25291,14 +25453,14 @@ function refreshVersion(ctx, binary2) {
   const checked = stamp ? Date.parse(stamp) : 0;
   const skip = ctx.env.TEMPA_SKIP_HARNESS_VERSION || ctx.env.TEMPA_SKIP_CLAUDE_VERSION;
   if (ctx.now() - checked < 864e5 || skip) return Promise.resolve();
-  return new Promise((resolve14) => {
+  return new Promise((resolve15) => {
     execFile2(binary2, ["--version"], { timeout: 1500 }, (err2, stdout) => {
       const version2 = err2 ? void 0 : /\d+\.\d+\.\d+/.exec(stdout)?.[0];
       updateState(ctx, {
         [`${binary2}_version_checked_at`]: new Date(ctx.now()).toISOString(),
         ...version2 ? { [`${binary2}_version`]: version2 } : {}
       });
-      resolve14();
+      resolve15();
     });
   });
 }
@@ -25314,19 +25476,19 @@ function cachedProfile(ctx, repo) {
     return void 0;
   }
 }
-function event(ctx, d, payload, repo, profile) {
+function event(ctx, d, payload, repo, profile2) {
   const e = toEvent(
     payload,
     {
       harnessVersion: d.version(ctx),
       repo: repo.repo,
       now: ctx.now(),
-      capturePrompt: profile?.telemetry.log_prompts ?? false,
-      captureToolResponse: profile?.telemetry.log_tool_details ?? false
+      capturePrompt: profile2?.telemetry.log_prompts ?? false,
+      captureToolResponse: profile2?.telemetry.log_tool_details ?? false
     },
     d.tools
   );
-  if (e.tool?.mcp) e.tool.mcp = profileMcp(e.tool.mcp, profile) ?? e.tool.mcp;
+  if (e.tool?.mcp) e.tool.mcp = profileMcp(e.tool.mcp, profile2) ?? e.tool.mcp;
   return e;
 }
 var DECISIONS2 = /* @__PURE__ */ new Set(["allow", "deny", "ask", "guidance", "defer"]);
@@ -25415,9 +25577,9 @@ function inClaudeCode(message) {
   );
 }
 var NO_ACCOUNT = { kind: "unknown", signal: "no_signal" };
-function accountCheck(ctx, state, account, profile, harness) {
+function accountCheck(ctx, state, account, profile2, harness) {
   rememberAccount(ctx, account);
-  const check2 = checkAccount(accountPolicy(profile), account, readAttestation(ctx), harness);
+  const check2 = checkAccount(accountPolicy(profile2), account, readAttestation(ctx), harness);
   if (check2.enforce) {
     const asked = state.account?.enforce === check2.enforce && state.account.asked;
     state.account = { enforce: check2.enforce, reason: toolReason(check2), ...asked ? { asked } : {} };
@@ -25430,6 +25592,7 @@ function accountCheck(ctx, state, account, profile, harness) {
 async function onSessionStart(ctx, d, payload) {
   pruneSessions(ctx);
   rememberRuntime(ctx);
+  if (d.harness === "claude-code") rememberClaudeConfig(ctx);
   const versionCheck = d.refreshVersion?.(ctx) ?? Promise.resolve();
   const detection = withDeadline(detectAccount(ctx, d.harness), 2e3).catch(() => NO_ACCOUNT);
   const repo = repoContext(payload.cwd);
@@ -25455,7 +25618,7 @@ async function onSessionStart(ctx, d, payload) {
       loginForRepo(ctx, repo.key),
       MODULE_DOWNLOAD_TIMEOUT_MS
     ).then(() => pruneModules(ctx)).catch(() => void 0);
-    const signIns = hasPerUser(result.profile) ? withDeadline(unconnected(ctx, loginForRepo(ctx, repo.key), SIGN_IN_CHECK_MS), SIGN_IN_CHECK_MS + 300).then((items) => items.map((item) => `Tempa: ${signInNotice(item)}`)).catch(() => []) : Promise.resolve([]);
+    const signIns = hasPerUser(result.profile) ? withDeadline(unconnected(ctx, loginForRepo(ctx, repo.key), SIGN_IN_CHECK_MS), SIGN_IN_CHECK_MS + 300).then((items2) => items2.map((item) => `Tempa: ${signInNotice(item)}`)).catch(() => []) : Promise.resolve([]);
     const report = d.renderer ? renderProfile(repo, result.profile, ctx.now, d.renderer, renderSession(ctx, d.harness)) : void 0;
     warnings.push(
       ...afterSync(ctx, {
@@ -25534,8 +25697,8 @@ function onUserPromptSubmit(ctx, d, payload) {
   });
   return void 0;
 }
-function withProfile(profile) {
-  return profile ? { profile } : {};
+function withProfile(profile2) {
+  return profile2 ? { profile: profile2 } : {};
 }
 function accountVerdict(ctx, d, payload) {
   const state = readSession(ctx, payload.session_id);
@@ -25571,9 +25734,9 @@ function webUrl(ctx, repo) {
     return void 0;
   }
 }
-function withNextStep(ctx, decision, repo, profile) {
+function withNextStep(ctx, decision, repo, profile2) {
   if (decision.decision !== "deny" && decision.decision !== "ask") return decision;
-  const where = { webUrl: webUrl(ctx, repo), node: profile?.node.id };
+  const where = { webUrl: webUrl(ctx, repo), node: profile2?.node.id };
   return { ...decision, next_step: nextStep2(decision.policy_ids, where) };
 }
 var TEMPA_HOME_REASON = "Tempa: Tempa's own folder (~/.tempa: your login tokens and settings) is off limits to the agent.";
@@ -25600,27 +25763,27 @@ async function onPreToolUse(ctx, d, payload) {
   }
   const started = Date.now();
   const repo = sessionRepo(ctx, payload);
-  const profile = cachedProfile(ctx, repo);
-  const local = checkMcp(profileMcp(tool.mcp, profile), profile);
+  const profile2 = cachedProfile(ctx, repo);
+  const local = checkMcp(profileMcp(tool.mcp, profile2), profile2);
   if (local) {
     decisionEvent(ctx, payload, repo, {
       decision: "deny",
       policy_ids: ["tempa/mcp-allowlist"],
-      bundle_version: profile?.version ?? "",
+      bundle_version: profile2?.version ?? "",
       started,
       source: "local"
     });
     return d.preToolUse("deny", local.reason);
   }
   const answer = (policies, attributes) => {
-    const decision2 = tool.kind === "shell" ? waive(policies, profile?.policies.exceptions, shellCommandOf(tool.input ?? {})) : policies;
-    const toolDetails = profile?.telemetry.log_tool_details ?? false;
+    const decision2 = tool.kind === "shell" ? waive(policies, profile2?.policies.exceptions, shellCommandOf(tool.input ?? {})) : policies;
+    const toolDetails = profile2?.telemetry.log_tool_details ?? false;
     decisionEvent(ctx, payload, repo, { ...decision2, started, toolDetails, ...attributes });
-    if (decision2.decision === "ask" && d.asksItself?.({ ctx, payload, tool, profile, repo }))
+    if (decision2.decision === "ask" && d.asksItself?.({ ctx, payload, tool, profile: profile2, repo }))
       return d.preToolUse(void 0, void 0, decision2.guidance);
-    return d.respond(withNextStep(ctx, decision2, repo, profile), "tool.pre");
+    return d.respond(withNextStep(ctx, decision2, repo, profile2), "tool.pre");
   };
-  const evaluated = profile && tool.kind === "shell" ? await localShellDecision(ctx, profile, event(ctx, d, payload, repo, profile)) : void 0;
+  const evaluated = profile2 && tool.kind === "shell" ? await localShellDecision(ctx, profile2, event(ctx, d, payload, repo, profile2)) : void 0;
   const fromModule = evaluated?.ok ? { source: "local", module: evaluated.module, evaluator: evaluated.evaluator } : void 0;
   if (evaluated?.ok && fromModule && !evaluated.needsServer) return answer(evaluated.decision, fromModule);
   const localFallback = evaluated ? evaluated.ok ? "needs_server" : evaluated.fallback : void 0;
@@ -25633,7 +25796,7 @@ async function onPreToolUse(ctx, d, payload) {
     failure3 = new RateLimited();
   } else {
     try {
-      const body2 = event(ctx, d, payload, repo, profile);
+      const body2 = event(ctx, d, payload, repo, profile2);
       const decision2 = await decide(ctx, body2, decideTimeoutMs(ctx, d.decideTimeoutMs), login2);
       return answer(decision2, { source: "remote", ...localFallback ? { localFallback } : {} });
     } catch (err2) {
@@ -25642,18 +25805,18 @@ async function onPreToolUse(ctx, d, payload) {
     }
   }
   if (evaluated?.ok && fromModule) return answer(evaluated.decision, fromModule);
-  if (profile) {
+  if (profile2) {
     recordOffline(ctx, state, "offline_cached", repo.repo, { cache_age_seconds: cacheAgeSeconds(ctx, repo) });
-    const offline = offlineDecision(profile, tool, d.tools, offlineCause(failure3));
+    const offline = offlineDecision(profile2, tool, d.tools, offlineCause(failure3));
     decisionEvent(ctx, payload, repo, {
       decision: offline.decision,
       policy_ids: ["tempa/offline"],
-      bundle_version: profile.version,
+      bundle_version: profile2.version,
       started,
       source: "offline",
       ...localFallback ? { localFallback } : {}
     });
-    if (offline.decision === "ask" && d.asksItself?.({ ctx, payload, tool, profile, repo }))
+    if (offline.decision === "ask" && d.asksItself?.({ ctx, payload, tool, profile: profile2, repo }))
       return d.preToolUse(void 0);
     return d.preToolUse(offline.decision, offline.reason);
   }
@@ -25675,13 +25838,13 @@ async function onPreToolUse(ctx, d, payload) {
     started,
     source: "offline"
   });
-  if (decision === "ask" && d.asksItself?.({ ctx, payload, tool, profile, repo }))
+  if (decision === "ask" && d.asksItself?.({ ctx, payload, tool, profile: profile2, repo }))
     return d.preToolUse(void 0);
   const reason = failure3 instanceof AuthError && failure3.kind !== "not-logged-in" ? `${NO_PROFILE_REASON} (${failure3.message})` : noProfileReason(offlineCause(failure3));
   return d.preToolUse(decision, noProfileMessage(reason, decision, call));
 }
-function withFailMode(failMode) {
-  return failMode ? { failMode } : {};
+function withFailMode(failMode2) {
+  return failMode2 ? { failMode: failMode2 } : {};
 }
 async function onPostToolUse(ctx, d, payload) {
   const classified = claudeTool(payload, d.tools);
@@ -25689,17 +25852,17 @@ async function onPostToolUse(ctx, d, payload) {
   const tool = classified.name;
   const repo = repoContext(payload.cwd);
   rememberSessionRepo(ctx, payload.session_id, repo);
-  const profile = cachedProfile(ctx, repo);
+  const profile2 = cachedProfile(ctx, repo);
   trackWork(ctx, {
     sessionId: payload.session_id,
     repo,
-    ...withProfile(profile),
+    ...withProfile(profile2),
     tool: { name: tool, input: payload.tool_input }
   });
   const login2 = loginForRepo(ctx, repo.key);
   if (!login2 || backingOff(ctx, readSession(ctx, payload.session_id))) return void 0;
   try {
-    const body2 = event(ctx, d, payload, repo, profile);
+    const body2 = event(ctx, d, payload, repo, profile2);
     return d.respond(await decide(ctx, body2, decideTimeoutMs(ctx, d.decideTimeoutMs), login2), "tool.post");
   } catch (err2) {
     if (isRateLimited(err2)) backOff(ctx, readSession(ctx, payload.session_id), err2);
@@ -25873,7 +26036,7 @@ var codexHome = (ctx) => ctx.env.CODEX_HOME || join31(ctx.home, ".codex");
 function codexTrustsProject(ctx, root) {
   let text;
   try {
-    text = readFileSync14(join31(codexHome(ctx), "config.toml"), "utf8");
+    text = readFileSync15(join31(codexHome(ctx), "config.toml"), "utf8");
   } catch {
     return false;
   }
@@ -25893,12 +26056,12 @@ function projectTrust(lines, path) {
   }
   return false;
 }
-function codexAsksItself({ ctx, payload, tool, profile, repo }) {
+function codexAsksItself({ ctx, payload, tool, profile: profile2, repo }) {
   const command = tool.input?.command;
-  if (tool.kind !== "shell" || typeof command !== "string" || !profile || !repo.git) return false;
+  if (tool.kind !== "shell" || typeof command !== "string" || !profile2 || !repo.git) return false;
   if (payload.permission_mode !== "default") return false;
-  if (!coveringRule(prefixRules(profile.permissions).rules, command, "prompt")) return false;
-  if (!existsSync8(join31(repo.git.root, CODEX_RULES_FILE))) return false;
+  if (!coveringRule(prefixRules(profile2.permissions).rules, command, "prompt")) return false;
+  if (!existsSync9(join31(repo.git.root, CODEX_RULES_FILE))) return false;
   return codexTrustsProject(ctx, repo.git.root);
 }
 var CODEX_HOOK = {
@@ -25931,7 +26094,7 @@ function codexEventKey(payload) {
   const id = own2 ? str(raw[own2]) : str(raw.turn_id) ?? payload.source ?? payload.reason ?? "";
   if (id === void 0) return void 0;
   const call = JSON.stringify([payload.tool_name ?? "", payload.tool_input ?? null, payload.prompt ?? null]);
-  const digest = createHash10("sha256").update(call).digest("hex").slice(0, 16);
+  const digest = createHash11("sha256").update(call).digest("hex").slice(0, 16);
   return JSON.stringify(["codex", payload.session_id, payload.hook_event_name, id, digest]);
 }
 function handleCodexHook(ctx, payload) {
@@ -25943,10 +26106,10 @@ function handleCodexHook(ctx, payload) {
 var ANTIGRAVITY_CLI_SETTINGS = ".gemini/antigravity-cli/settings.json";
 var TEMPA_MCP_ALLOW = "mcp(tempa_tempa/*)";
 var commandEntry = (rule) => `command(${rule.pattern.join(" ")})`;
-function antigravitySettings(profile) {
-  const { rules, skipped: left } = prefixRules(profile.permissions);
+function antigravitySettings(profile2) {
+  const { rules, skipped: left } = prefixRules(profile2.permissions);
   const skipped = left.map((s) => ({ asset: "permissions", reason: `${s.rule}: ${s.reason}` }));
-  if (profile.permissions?.allow.length)
+  if (profile2.permissions?.allow.length)
     skipped.push({
       asset: "permissions",
       reason: "allow rules are left to Antigravity's own permissions; Tempa's hook applies the policies"
@@ -25981,20 +26144,20 @@ function pathsOf(lines) {
   const index = lines.findIndex((l) => /^paths\s*:/.test(l));
   if (index === -1) return void 0;
   const inline = lines[index].replace(/^paths\s*:\s*/, "").trim();
-  let items;
+  let items2;
   if (inline.startsWith("[")) {
-    items = inline.replace(/^\[|\]$/g, "").split(",");
+    items2 = inline.replace(/^\[|\]$/g, "").split(",");
   } else if (inline) {
-    items = inline.split(",");
+    items2 = inline.split(",");
   } else {
-    items = [];
+    items2 = [];
     for (const line of lines.slice(index + 1)) {
       const item = /^\s+-\s*(.*)$/.exec(line);
       if (!item) break;
-      items.push(item[1]);
+      items2.push(item[1]);
     }
   }
-  const globs = items.map(unquote).filter(Boolean);
+  const globs = items2.map(unquote).filter(Boolean);
   return globs.length ? globs : void 0;
 }
 function instructionsMarkdown(asset, profileVersion) {
@@ -26039,19 +26202,19 @@ function valid3(assets, skipped) {
     return false;
   });
 }
-function planCopilot(profile, env) {
-  const v = profile.version;
+function planCopilot(profile2, env) {
+  const v = profile2.version;
   const files = [];
   const skipped = [];
   const add = (path, content, kind, asset) => files.push({ path, content, kind, asset });
-  for (const s of valid3(profile.standards ?? [], skipped))
+  for (const s of valid3(profile2.standards ?? [], skipped))
     add(
       `${COPILOT_DIRS.standard}/tempa-${s.name}.instructions.md`,
       instructionsMarkdown(s, v),
       "standard",
       s.name
     );
-  const skills = valid3(profile.skills ?? [], skipped);
+  const skills = valid3(profile2.skills ?? [], skipped);
   const claude = new Set(env?.claudeCodeFiles ?? []);
   for (const skill of skills) {
     const theirs = `.claude/skills/tempa-${skill.name}/SKILL.md`;
@@ -26059,16 +26222,16 @@ function planCopilot(profile, env) {
       skipped.push({ asset: skill.name, reason: `Copilot reads Claude Code's ${theirs}` });
     else addSkill(skill, v, files, skipped);
   }
-  const commands = commandsAsSkills(valid3(profile.commands ?? [], skipped), skills);
+  const commands = commandsAsSkills(valid3(profile2.commands ?? [], skipped), skills);
   skipped.push(...commands.skipped);
   for (const skill of commands.skills) addSkill(skill, v, files, skipped);
-  for (const agent of valid3(profile.agents ?? [], skipped)) {
+  for (const agent of valid3(profile2.agents ?? [], skipped)) {
     const { content, dropped } = agentMarkdown2(agent, v);
     add(`${COPILOT_DIRS.agent}/tempa-${agent.name}.agent.md`, content, "agent", agent.name);
     if (dropped.length)
       skipped.push({ asset: agent.name, reason: `as a Copilot agent without ${dropped.join(", ")}` });
   }
-  const p = profile.permissions;
+  const p = profile2.permissions;
   if (p && p.allow.length + p.ask.length + p.deny.length > 0)
     skipped.push({
       asset: "permissions",
@@ -26151,8 +26314,8 @@ function toolsOf2(lines) {
   const index = lines.findIndex((l) => /^tools\s*:/.test(l));
   if (index === -1) return void 0;
   const inline = lines[index].replace(/^tools\s*:\s*/, "").trim();
-  const items = inline ? inline.replace(/^\[|\]$/g, "").split(",") : lines.slice(index + 1).map((l) => /^\s+-\s*(.*)$/.exec(l)?.[1]).filter((t) => t !== void 0);
-  return items.map((t) => t.trim().replace(/^(["'])(.*)\1$/, "$2")).filter(Boolean);
+  const items2 = inline ? inline.replace(/^\[|\]$/g, "").split(",") : lines.slice(index + 1).map((l) => /^\s+-\s*(.*)$/.exec(l)?.[1]).filter((t) => t !== void 0);
+  return items2.map((t) => t.trim().replace(/^(["'])(.*)\1$/, "$2")).filter(Boolean);
 }
 function ruleFrontmatter(asset) {
   const lines = splitFrontmatter(asset.content).frontmatter ?? [];
@@ -26254,11 +26417,11 @@ function standardsFiles3(standards, v, env, skipped) {
   }
   return files;
 }
-function planAntigravity(profile, env) {
-  const v = profile.version;
+function planAntigravity(profile2, env) {
+  const v = profile2.version;
   const skipped = [];
   const handedOver = [];
-  const files = standardsFiles3(valid4(profile.standards ?? [], skipped), v, env, skipped);
+  const files = standardsFiles3(valid4(profile2.standards ?? [], skipped), v, env, skipped);
   const codex = new Set(env?.codexFiles ?? []);
   const addSkill2 = (skill) => {
     const rendered = skillFiles(ANTIGRAVITY_DIRS.skill, skill, v);
@@ -26271,12 +26434,12 @@ function planAntigravity(profile, env) {
     files.push(...rendered.files);
     skipped.push(...rendered.skipped);
   };
-  const skills = valid4(profile.skills ?? [], skipped);
+  const skills = valid4(profile2.skills ?? [], skipped);
   for (const skill of skills) addSkill2(skill);
-  const commands = commandsAsSkills(valid4(profile.commands ?? [], skipped), skills);
+  const commands = commandsAsSkills(valid4(profile2.commands ?? [], skipped), skills);
   skipped.push(...commands.skipped);
   for (const skill of commands.skills) addSkill2(skill);
-  for (const agent of valid4(profile.agents ?? [], skipped)) {
+  for (const agent of valid4(profile2.agents ?? [], skipped)) {
     const { content, dropped, droppedTools } = agentMarkdown3(agent, v);
     files.push({
       path: `${ANTIGRAVITY_DIRS.agent}/tempa-${agent.name}.md`,
@@ -26292,7 +26455,7 @@ function planAntigravity(profile, env) {
         reason: `tools without an Antigravity name left out: ${droppedTools.join(", ")}`
       });
   }
-  const permissions = antigravitySettings(profile);
+  const permissions = antigravitySettings(profile2);
   skipped.push(...permissions.skipped);
   return {
     harness: "antigravity",
@@ -26306,11 +26469,11 @@ function planAntigravity(profile, env) {
 var antigravityRenderer = { id: "antigravity", plan: planAntigravity };
 
 // src/harness/antigravity.ts
-import { createHash as createHash11 } from "node:crypto";
+import { createHash as createHash12 } from "node:crypto";
 import { homedir } from "node:os";
 
 // src/mcp/workspace.ts
-import { existsSync as existsSync9 } from "node:fs";
+import { existsSync as existsSync10 } from "node:fs";
 import { join as join32 } from "node:path";
 import { fileURLToPath } from "node:url";
 var HOOK_WORKSPACE = "antigravity-workspace.json";
@@ -26332,7 +26495,7 @@ function recordHookWorkspace(ctx, workspace) {
 }
 function startWorkspace(ctx) {
   const recorded2 = read2(ctx, HOOK_WORKSPACE)?.workspace;
-  if (recorded2 && existsSync9(recorded2)) return { dir: recorded2, source: "hook" };
+  if (recorded2 && existsSync10(recorded2)) return { dir: recorded2, source: "hook" };
   return { dir: ctx.cwd, source: "cwd" };
 }
 function rootDir(roots) {
@@ -26492,7 +26655,7 @@ function parseAntigravityPayload(text, hint = {}) {
   if (call !== void 0 && (!isObject3(call) || !str2(call.name)))
     throw new PayloadError("toolCall has no name");
   const index = num(value.stepIdx) ?? num(value.invocationNum) ?? num(value.executionNum);
-  const turn = createHash11("sha256").update(JSON.stringify([num(value.initialNumSteps) ?? null, str2(value.lastUserInput) ?? ""])).digest("hex").slice(0, 16);
+  const turn = createHash12("sha256").update(JSON.stringify([num(value.initialNumSteps) ?? null, str2(value.lastUserInput) ?? ""])).digest("hex").slice(0, 16);
   const error2 = str2(value.error);
   return {
     hook_event_name: eventName(event2, value),
@@ -26612,7 +26775,7 @@ function antigravityEventKey(payload) {
   const event2 = payload.antigravity_event;
   if (payload.antigravity_index === void 0 && event2 !== "SessionStart") return void 0;
   const call = JSON.stringify([payload.tool_name ?? "", payload.tool_input ?? null]);
-  const digest = createHash11("sha256").update(call).digest("hex").slice(0, 16);
+  const digest = createHash12("sha256").update(call).digest("hex").slice(0, 16);
   return JSON.stringify([
     "antigravity",
     payload.session_id,
@@ -26681,7 +26844,7 @@ async function answerAntigravityHook(ctx, payload) {
 }
 
 // src/harness/copilot.ts
-import { createHash as createHash12 } from "node:crypto";
+import { createHash as createHash13 } from "node:crypto";
 var COPILOT_EVENTS = {
   sessionStart: "SessionStart",
   userPromptSubmitted: "UserPromptSubmit",
@@ -26790,7 +26953,7 @@ function toolInput(value) {
   return parsed;
 }
 function fallbackSessionId(cwd) {
-  return `copilot-${createHash12("sha256").update(cwd).digest("hex").slice(0, 32)}`;
+  return `copilot-${createHash13("sha256").update(cwd).digest("hex").slice(0, 32)}`;
 }
 function optional(key, value) {
   return value === void 0 ? {} : { [key]: value };
@@ -26909,7 +27072,7 @@ function eventKey(payload) {
     hook2.tool_input ?? null,
     hook2.prompt ?? null
   ]);
-  return createHash12("sha256").update(text).digest("hex");
+  return createHash13("sha256").update(text).digest("hex");
 }
 function reshape(output, from, to, event2) {
   if (from === to || !output) return output;
@@ -26950,8 +27113,8 @@ function isCopilotPayload(raw) {
 }
 
 // src/harness/gemini.ts
-import { createHash as createHash13 } from "node:crypto";
-import { readFileSync as readFileSync15 } from "node:fs";
+import { createHash as createHash14 } from "node:crypto";
+import { readFileSync as readFileSync16 } from "node:fs";
 import { join as join33 } from "node:path";
 var str4 = (value) => typeof value === "string" ? value : void 0;
 var GEMINI_EVENTS = {
@@ -27043,16 +27206,16 @@ function geminiRespond(decision, on, asks = true) {
       return void 0;
   }
 }
-function geminiAsksItself({ ctx, tool, profile }) {
+function geminiAsksItself({ ctx, tool, profile: profile2 }) {
   const command = tool.input?.command;
-  if (tool.kind !== "shell" || typeof command !== "string" || !profile) return false;
+  if (tool.kind !== "shell" || typeof command !== "string" || !profile2) return false;
   let text;
   try {
-    text = readFileSync15(join33(ctx.home, GEMINI_USER_POLICY), "utf8");
+    text = readFileSync16(join33(ctx.home, GEMINI_USER_POLICY), "utf8");
   } catch {
     return false;
   }
-  return geminiPolicyAsks(profile, command, text);
+  return geminiPolicyAsks(profile2, command, text);
 }
 var GEMINI_DECIDE_TIMEOUT_MS = 2e3;
 function geminiLoginHint(message) {
@@ -27092,7 +27255,7 @@ function geminiEventKey(payload) {
   const at = str4(payload.timestamp);
   if (!at) return void 0;
   const call = JSON.stringify([payload.tool_name ?? "", payload.tool_input ?? null, payload.prompt ?? null]);
-  const digest = createHash13("sha256").update(call).digest("hex").slice(0, 16);
+  const digest = createHash14("sha256").update(call).digest("hex").slice(0, 16);
   return JSON.stringify(["gemini-cli", payload.session_id, payload.hook_event_name, at, digest]);
 }
 function handleGeminiHook(ctx, payload) {
@@ -27187,11 +27350,11 @@ function codexPluginDir(ctx) {
   const dir = join34(codexHome(ctx), "plugins", "cache", "devleaps", "tempa");
   let versions;
   try {
-    versions = readdirSync9(dir);
+    versions = readdirSync11(dir);
   } catch {
     return void 0;
   }
-  const installed = versions.filter((v) => existsSync10(join34(dir, v, "bin", "tempa-launch"))).sort((a, b) => a.localeCompare(b, "en", { numeric: true }));
+  const installed = versions.filter((v) => existsSync11(join34(dir, v, "bin", "tempa-launch"))).sort((a, b) => a.localeCompare(b, "en", { numeric: true }));
   const newest = installed.at(-1);
   return newest === void 0 ? void 0 : join34(dir, newest);
 }
@@ -27217,7 +27380,12 @@ var ANTIGRAVITY_INSTALL = [
   `https://github.com/Devleaps/tempa/tree/${ANTIGRAVITY_RELEASE_BRANCH}`
 ];
 async function claudePluginInstalled(ctx, exec) {
-  const list2 = await exec("claude", ["plugin", "list", "--json"], { timeoutMs: 2e4 });
+  const config3 = claudeConfig(ctx);
+  const env = claudeExecEnv(ctx, config3);
+  const list2 = await exec("claude", ["plugin", "list", "--json"], {
+    timeoutMs: 2e4,
+    ...env ? { env } : {}
+  });
   if (list2.code === 0) {
     try {
       const plugin = JSON.parse(list2.stdout).find(
@@ -27228,14 +27396,14 @@ async function claudePluginInstalled(ctx, exec) {
     }
   }
   const settings = readJsonLenient(
-    join34(home(ctx, "CLAUDE_CONFIG_DIR", ".claude"), "settings.json")
+    claudeSettingsFile(ctx, config3)
   );
   return settings?.enabledPlugins?.[PLUGIN_ID];
 }
 var INSTALLS = {
   "claude-code": {
     binary: "claude",
-    configDir: (ctx) => home(ctx, "CLAUDE_CONFIG_DIR", ".claude"),
+    configDir: (ctx) => claudeConfig(ctx).dir,
     install: [
       ["claude", "plugin", "marketplace", "add", CLAUDE_CODE_PLUGIN_REPO],
       ["claude", "plugin", "install", PLUGIN_ID]
@@ -27249,7 +27417,7 @@ var INSTALLS = {
       ["copilot", "plugin", "marketplace", "add", COPILOT_PLUGIN_REPO],
       ["copilot", "plugin", "install", PLUGIN_ID]
     ],
-    pluginInstalled: async (ctx) => existsSync10(join34(copilotPluginDir(ctx), "bin", "tempa-launch"))
+    pluginInstalled: async (ctx) => existsSync11(join34(copilotPluginDir(ctx), "bin", "tempa-launch"))
   },
   codex: {
     binary: "codex",
@@ -27269,7 +27437,7 @@ var INSTALLS = {
     // From the release branch, by git clone. --consent: `tempa setup --yes` cannot answer Gemini's
     // prompts (the install's own, and whether to clone when the repo has no GitHub release by that name).
     install: [[...GEMINI_INSTALL]],
-    pluginInstalled: async (ctx) => existsSync10(join34(geminiExtensionDir(ctx), "gemini-extension.json"))
+    pluginInstalled: async (ctx) => existsSync11(join34(geminiExtensionDir(ctx), "gemini-extension.json"))
   },
   antigravity: {
     binary: "agy",
@@ -27290,7 +27458,7 @@ var INSTALLS = {
         antigravityPluginDir(ctx)
       ]
     ],
-    pluginInstalled: async (ctx) => existsSync10(join34(antigravityPluginDir(ctx), "plugin.json"))
+    pluginInstalled: async (ctx) => existsSync11(join34(antigravityPluginDir(ctx), "plugin.json"))
   }
 };
 async function detectHarnesses(ctx, exec) {
@@ -27299,7 +27467,7 @@ async function detectHarnesses(ctx, exec) {
     const spec = INSTALLS[descriptor.id];
     const binary2 = onPath(ctx.env, spec.binary);
     const dir = spec.configDir(ctx);
-    const configDir = existsSync10(dir) ? dir : void 0;
+    const configDir = existsSync11(dir) ? dir : void 0;
     const found = Boolean(binary2 || configDir);
     const supported = descriptor.support === "supported";
     const released = supported && spec.install.length > 0;
@@ -27328,8 +27496,8 @@ function supportLine(d) {
     if (s.level === "none") return [`${c} advisory`];
     return [];
   });
-  const failMode = { closed: "fail closed", open: "fail open", "open-on-timeout": "fail open on a timeout" };
-  return `supported: ${native} of ${CAPABILITIES.length} capabilities native` + (gaps.length ? `, ${gaps.join(", ")}` : "") + `; hooks ${failMode[d.failMode]}`;
+  const failMode2 = { closed: "fail closed", open: "fail open", "open-on-timeout": "fail open on a timeout" };
+  return `supported: ${native} of ${CAPABILITIES.length} capabilities native` + (gaps.length ? `, ${gaps.join(", ")}` : "") + `; hooks ${failMode2[d.failMode]}`;
 }
 var shellLine = (argv) => argv.join(" ");
 function setupReport(detected) {
@@ -27376,12 +27544,12 @@ function antigravityAppPaths(ctx, platform = process.platform) {
 }
 function detectAntigravitySurfaces(ctx, platform = process.platform) {
   const cli = onPath(ctx.env, "agy", platform);
-  const app = antigravityAppPaths(ctx, platform).find((p) => existsSync11(p)) ?? (ctx.env.TEMPA_ANTIGRAVITY_APP === void 0 ? onPath(ctx.env, "antigravity", platform) : void 0);
+  const app = antigravityAppPaths(ctx, platform).find((p) => existsSync12(p)) ?? (ctx.env.TEMPA_ANTIGRAVITY_APP === void 0 ? onPath(ctx.env, "antigravity", platform) : void 0);
   const ide = join35(ctx.env.GEMINI_HOME || join35(ctx.home, ".gemini"), "antigravity-ide");
   return {
     ...cli ? { cli } : {},
     ...app ? { app } : {},
-    ...existsSync11(ide) ? { ide } : {}
+    ...existsSync12(ide) ? { ide } : {}
   };
 }
 var needsUserHooks = (s) => s.app !== void 0 || s.ide !== void 0;
@@ -27408,7 +27576,7 @@ function antigravityUserGroup(pluginHooks, launcher) {
 function readJson(path) {
   let text;
   try {
-    text = readFileSync16(path, "utf8");
+    text = readFileSync17(path, "utf8");
   } catch {
     return {};
   }
@@ -27620,7 +27788,7 @@ function createContext(overrides = {}) {
     platform,
     fetch: (input, init2) => fetch(input, init2),
     now: () => Date.now(),
-    sleep: (ms) => new Promise((resolve14) => setTimeout(resolve14, ms)),
+    sleep: (ms) => new Promise((resolve15) => setTimeout(resolve15, ms)),
     openUrl: (url2) => {
       if (env.TEMPA_NO_BROWSER) return;
       openInBrowser(url2, platform);
@@ -27635,7 +27803,7 @@ function createContext(overrides = {}) {
 }
 
 // src/doctor-codex.ts
-import { accessSync as accessSync2, closeSync as closeSync3, constants as constants2, openSync as openSync3, readFileSync as readFileSync17, readSync, realpathSync as realpathSync5 } from "node:fs";
+import { accessSync as accessSync2, closeSync as closeSync3, constants as constants2, openSync as openSync3, readFileSync as readFileSync18, readSync, realpathSync as realpathSync5 } from "node:fs";
 import { join as join37 } from "node:path";
 var KEY = String.raw`("(?:[^"\\]|\\.)*"|'[^']*')`;
 var TRUST_TABLE = new RegExp(String.raw`^\[\s*hooks\s*\.\s*state\s*\.\s*${KEY}\s*\]`);
@@ -27664,7 +27832,7 @@ var trustKeys = (source) => CODEX_HOOK_EVENTS.map(([event2]) => ({
 }));
 function readText2(path) {
   try {
-    return readFileSync17(path, "utf8");
+    return readFileSync18(path, "utf8");
   } catch {
     return "";
   }
@@ -27879,7 +28047,7 @@ async function status(ctx, args2) {
 }
 
 // src/doctor.ts
-var defaultExec = (command, args2, options = {}) => new Promise((resolve14) => {
+var defaultExec = (command, args2, options = {}) => new Promise((resolve15) => {
   execFile3(
     command,
     args2,
@@ -27887,7 +28055,7 @@ var defaultExec = (command, args2, options = {}) => new Promise((resolve14) => {
     (err2, stdout, stderr) => {
       const code2 = err2 ? typeof err2.code === "number" ? err2.code : null : 0;
       const why = err2 && !stderr && !stdout ? err2.killed ? `timed out (${err2.message})` : err2.message : "";
-      resolve14({ code: code2, stdout: String(stdout ?? ""), stderr: String(stderr || why) });
+      resolve15({ code: code2, stdout: String(stdout ?? ""), stderr: String(stderr || why) });
     }
   );
 });
@@ -27917,7 +28085,7 @@ function compareVersions(a, b) {
 }
 function readText3(path) {
   try {
-    return readFileSync18(path, "utf8");
+    return readFileSync19(path, "utf8");
   } catch {
     return "";
   }
@@ -27989,7 +28157,7 @@ function wrapperTelemetryCheck(ctx, enabled, w) {
   const name2 = `Telemetry (${w.name})`;
   if (!enabled) return { name: name2, status: "pass", detail: "turned off by your profile" };
   const fix = `add '. "$HOME/${w.script}"' to your shell profile, then open a new terminal`;
-  if (!existsSync12(join38(ctx.home, w.script)))
+  if (!existsSync13(join38(ctx.home, w.script)))
     return {
       name: name2,
       status: "warn",
@@ -27997,7 +28165,7 @@ function wrapperTelemetryCheck(ctx, enabled, w) {
       fix: `tempa sync --harness ${w.harness}`
     };
   const file = w.script.split("/").pop();
-  const loadedFrom = SHELL_PROFILES.find((profile) => readText3(join38(ctx.home, profile)).includes(file));
+  const loadedFrom = SHELL_PROFILES.find((profile2) => readText3(join38(ctx.home, profile2)).includes(file));
   if (!loadedFrom)
     return { name: name2, status: "warn", detail: `no shell profile loads the ${w.harness} wrapper`, fix };
   return { name: name2, status: "pass", detail: `${w.harness} wrapper loaded from ~/${loadedFrom}` };
@@ -28038,7 +28206,36 @@ async function launchCheck(ctx, deps, name2, launcher) {
     fix: "Run tempa doctor from a terminal where tempa works (it remembers node and tempa for the plugin), or set TEMPA_NODE"
   };
 }
-async function claudeChecks(ctx, deps, claudeVersion, enabledPlugins) {
+function claudeConfigCheck(ctx, config3) {
+  const name2 = "Claude config";
+  const { dir } = config3;
+  if (config3.source === "env" && config3.raw !== void 0 && !isAbsoluteConfigDir(ctx, config3.raw)) {
+    return {
+      name: name2,
+      status: "warn",
+      detail: `CLAUDE_CONFIG_DIR is "${config3.raw}": Tempa reads ${dir}, Claude Code may read another folder`,
+      fix: "Set CLAUDE_CONFIG_DIR to an absolute path (Claude Code does not expand ~)"
+    };
+  }
+  if (config3.source === "env") return { name: name2, status: "pass", detail: `${dir} (from CLAUDE_CONFIG_DIR)` };
+  if (config3.source === "hook") {
+    return {
+      name: name2,
+      status: "pass",
+      detail: `${dir}: CLAUDE_CONFIG_DIR is not set in this terminal, but Claude Code's Tempa hook last ran with this folder`
+    };
+  }
+  if (config3.source === "found") {
+    return {
+      name: name2,
+      status: "warn",
+      detail: `${dir}: CLAUDE_CONFIG_DIR is not set here and ${defaultClaudeConfigDir(ctx)} has no Tempa plugin, but this folder has`,
+      fix: `Set CLAUDE_CONFIG_DIR=${dir} in this terminal (PowerShell: $env:CLAUDE_CONFIG_DIR = "${dir}"), or start Claude Code once so Tempa's hook remembers the folder`
+    };
+  }
+  return { name: name2, status: "pass", detail: `${dir} (CLAUDE_CONFIG_DIR is not set)` };
+}
+async function claudeChecks(ctx, deps, claudeVersion, config3, enabledPlugins) {
   const results = [];
   const add = (r) => results.push(r);
   if (!claudeVersion) {
@@ -28058,9 +28255,14 @@ async function claudeChecks(ctx, deps, claudeVersion, enabledPlugins) {
   } else {
     add({ name: "Claude Code", status: "pass", detail: claudeVersion });
   }
+  add(claudeConfigCheck(ctx, config3));
   let plugin;
   if (claudeVersion) {
-    const list2 = await deps.exec("claude", ["plugin", "list", "--json"], { timeoutMs: 2e4 });
+    const env = claudeExecEnv(ctx, config3);
+    const list2 = await deps.exec("claude", ["plugin", "list", "--json"], {
+      timeoutMs: 2e4,
+      ...env ? { env } : {}
+    });
     try {
       plugin = JSON.parse(list2.stdout).find((p) => p.id === PLUGIN_ID);
     } catch {
@@ -28086,13 +28288,13 @@ async function claudeChecks(ctx, deps, claudeVersion, enabledPlugins) {
     });
   }
   const launcher = plugin?.installPath ? join38(plugin.installPath, "bin", "tempa-launch") : void 0;
-  if (launcher && existsSync12(launcher)) {
+  if (launcher && existsSync13(launcher)) {
     add(await launchCheck(ctx, deps, "Minimal PATH launch", launcher));
   } else {
     const node2 = readLine(nodePathFile(ctx));
     const cli = readLine(cliPathFile(ctx));
     add(
-      node2 && cli && existsSync12(node2) && existsSync12(cli) ? { name: "Minimal PATH launch", status: "pass", detail: `the launcher will use ${node2} and ${cli}` } : {
+      node2 && cli && existsSync13(node2) && existsSync13(cli) ? { name: "Minimal PATH launch", status: "pass", detail: `the launcher will use ${node2} and ${cli}` } : {
         name: "Minimal PATH launch",
         status: "warn",
         detail: "cannot check without the installed plugin, and no remembered node and tempa paths",
@@ -28198,9 +28400,9 @@ function codexUserHooksCheck(ctx) {
     detail: `~/${CODEX_USER_HOOKS} is Tempa's (whether Codex trusts it: Codex hook trust)`
   };
 }
-async function localEvaluationCheck(ctx, profile) {
+async function localEvaluationCheck(ctx, profile2) {
   const name2 = "Local policies";
-  if (!localEvaluationEnabled(ctx, profile))
+  if (!localEvaluationEnabled(ctx, profile2))
     return { name: name2, status: "pass", detail: "switched off: /v1/decide decides shell calls" };
   try {
     await bashParser();
@@ -28212,7 +28414,7 @@ async function localEvaluationCheck(ctx, profile) {
       fix: `Reinstall the plugin, which carries the CLI (${docsLink("install")})`
     };
   }
-  const wasm = profile.policies.wasm;
+  const wasm = profile2.policies.wasm;
   if (!wasm)
     return {
       name: name2,
@@ -28244,13 +28446,13 @@ async function localEvaluationCheck(ctx, profile) {
     detail: `policy module ${short} (OPA ${wasm.opa}): shell calls are decided here`
   };
 }
-function cliVersionCheck(discovery, remembered, version2) {
+function cliVersionCheck(discovery, remembered2, version2) {
   const name2 = "CLI version";
   if (isDevelopment(version2)) return { name: name2, status: "pass", detail: `${version2}, a development build` };
-  const latest = remembered?.latest ?? discovery?.cli?.latest_version ?? void 0;
-  const minimum = remembered?.minimum ?? discovery?.cli?.min_version ?? void 0;
+  const latest = remembered2?.latest ?? discovery?.cli?.latest_version ?? void 0;
+  const minimum = remembered2?.minimum ?? discovery?.cli?.min_version ?? void 0;
   const fromServer = cliStatus(version2, minimum, latest);
-  const status2 = remembered?.status === "unsupported" ? "unsupported" : fromServer;
+  const status2 = remembered2?.status === "unsupported" ? "unsupported" : fromServer;
   const range = [minimum ? `minimum ${minimum}` : "", latest ? `latest ${latest}` : ""].filter(Boolean);
   const detail = `${version2}${range.length ? ` (${range.join(", ")})` : ""}`;
   const fix = `Update the plugin, which carries the CLI: ${updateCommand("claude-code")} (other harnesses: ${docsLink("install", "updates")})`;
@@ -28263,7 +28465,7 @@ function cliVersionCheck(discovery, remembered, version2) {
     };
   if (status2 === "outdated")
     return { name: name2, status: "warn", detail: `${detail}: an update is available`, fix };
-  return { name: name2, status: "pass", detail: discovery || remembered ? `${detail}, supported` : version2 };
+  return { name: name2, status: "pass", detail: discovery || remembered2 ? `${detail}, supported` : version2 };
 }
 async function runChecks(ctx, deps) {
   const results = [];
@@ -28297,9 +28499,11 @@ async function runChecks(ctx, deps) {
   const claude = await deps.exec("claude", ["--version"], { timeoutMs: 1e4 });
   const claudeVersion = claude.code === 0 ? /\d+\.\d+\.\d+/.exec(claude.stdout)?.[0] : void 0;
   const claudeInUse = Boolean(claudeVersion) || !others.some((h) => h.descriptor.support === "supported");
-  const settings = readJsonLenient(join38(ctx.home, ".claude", "settings.json"));
+  const config3 = claudeConfigForChecks(ctx);
+  const settingsPath = claudeSettingsFile(ctx, config3);
+  const settings = readJsonLenient(settingsPath);
   if (claudeInUse) {
-    results.push(...await claudeChecks(ctx, deps, claudeVersion, settings?.enabledPlugins));
+    results.push(...await claudeChecks(ctx, deps, claudeVersion, config3, settings?.enabledPlugins));
   } else {
     add({ name: "Claude Code", status: "pass", detail: "not installed; nothing to check" });
   }
@@ -28423,7 +28627,7 @@ async function runChecks(ctx, deps) {
     add({
       name: "Telemetry",
       status: "fail",
-      detail: "the Tempa env block or otelHeadersHelper is missing from ~/.claude/settings.json",
+      detail: `the Tempa env block or otelHeadersHelper is missing from ${settingsPath}`,
       fix: "tempa sync (then restart Claude Code)"
     });
   } else if (login2.state !== "logged-in") {
@@ -28488,18 +28692,18 @@ import { resolve as resolve10 } from "node:path";
 import { setFlagsFromString } from "node:v8";
 
 // src/cloud-agent/hook.ts
-import { existsSync as existsSync13, readFileSync as readFileSync19 } from "node:fs";
+import { existsSync as existsSync14, readFileSync as readFileSync20 } from "node:fs";
 import { dirname as dirname5, isAbsolute as isAbsolute3, join as join39, relative as relative5, resolve as resolve9, sep as sep4 } from "node:path";
 function sessionBundleDir(ctx, sessionId) {
   return join39(ctx.tempaHome, "cloud-agent", sha256Hex(new TextEncoder().encode(sessionId)));
 }
 function readVerified(dir, key) {
-  const text = readFileSync19(join39(dir, "bundle.json"), "utf8");
+  const text = readFileSync20(join39(dir, "bundle.json"), "utf8");
   const bundle = parseBundle(text);
   verifyBundle(bundle, key);
   let module2;
   try {
-    const bytes3 = new Uint8Array(readFileSync19(join39(dir, "policy.wasm")));
+    const bytes3 = new Uint8Array(readFileSync20(join39(dir, "policy.wasm")));
     module2 = sha256Hex(bytes3) === bundle.policies.wasm.sha256 ? bytes3 : void 0;
   } catch {
     module2 = void 0;
@@ -28509,10 +28713,10 @@ function readVerified(dir, key) {
 function loadBundle(ctx, dir, key, sessionId) {
   const root = resolve9(dir, "..", "..");
   const kept = sessionBundleDir(ctx, sessionId);
-  if (existsSync13(join39(kept, "bundle.json"))) return { ...readVerified(kept, key), root };
+  if (existsSync14(join39(kept, "bundle.json"))) return { ...readVerified(kept, key), root };
   const loaded = readVerified(dir, key);
   try {
-    writeFileAtomic(join39(kept, "bundle.json"), readFileSync19(join39(dir, "bundle.json")), { dirMode: 448 });
+    writeFileAtomic(join39(kept, "bundle.json"), readFileSync20(join39(dir, "bundle.json")), { dirMode: 448 });
     if (loaded.module) writeFileAtomic(join39(kept, "policy.wasm"), loaded.module, { dirMode: 448 });
   } catch {
   }
@@ -28615,6 +28819,7 @@ async function hook(ctx, args2) {
   const started = ctx.startedAt ?? Date.now();
   const fail2 = bundle === void 0 ? entry.adapter?.fail : void 0;
   let out2;
+  let neutralAnswer = false;
   try {
     const stdin = await ctx.readStdin();
     let output;
@@ -28638,6 +28843,7 @@ async function hook(ctx, args2) {
       if (!adapter) throw new HarnessNotSupported(entry.descriptor);
       const payload = adapter.parsePayload(stdin, event2 ? { event: event2 } : {});
       const deadline = hookDeadline(entry.descriptor.id, adapter.hookEvent(payload));
+      neutralAnswer = entry.descriptor.id === "claude-code" && GATES.has(adapter.hookEvent(payload));
       output = await inTime(ctx, started, deadline, (c) => adapter.handle(c, payload));
     }
     out2 = output === void 0 ? void 0 : JSON.stringify(output);
@@ -28653,12 +28859,13 @@ async function hook(ctx, args2) {
     ctx.io.stdout(JSON.stringify(fail2(message, event2 ? { event: event2 } : {})));
     return 0;
   }
+  if (out2 === void 0 && neutralAnswer) out2 = "{}";
   if (out2 !== void 0) ctx.io.stdout(out2);
   return 0;
 }
 
 // src/commands/library.ts
-import { existsSync as existsSync14, statSync as statSync8 } from "node:fs";
+import { existsSync as existsSync15, statSync as statSync8 } from "node:fs";
 import { join as join40, resolve as resolve11 } from "node:path";
 var USAGE3 = "Usage: tempa library publish <dir> [--endpoint URL] [--visibility public|private] [--forbid a,b]\n       tempa library publish --partner <dir> [--endpoint URL] [--tenant ID] [--visibility partner_clients|private] [--forbid a,b]";
 var OPERATOR_TOKEN_ENV = "TEMPA_OPERATOR_TOKEN";
@@ -28684,7 +28891,7 @@ async function library(ctx, args2) {
     return 1;
   }
   const root = resolve11(ctx.cwd, dir);
-  if (!existsSync14(root) || !statSync8(root).isDirectory() || !existsSync14(join40(root, "pack.yaml"))) {
+  if (!existsSync15(root) || !statSync8(root).isDirectory() || !existsSync15(join40(root, "pack.yaml"))) {
     ctx.io.stderr(`tempa: ${dir} is not a pack folder (no pack.yaml)`);
     return 1;
   }
@@ -28742,7 +28949,7 @@ async function library(ctx, args2) {
 
 // src/commands/lockdown.ts
 import { mkdirSync as mkdirSync4 } from "node:fs";
-import { dirname as dirname6, isAbsolute as isAbsolute4, join as join41, resolve as resolve12, win32 } from "node:path";
+import { dirname as dirname6, isAbsolute as isAbsolute4, join as join41, resolve as resolve12, win32 as win322 } from "node:path";
 
 // src/lockdown/antigravity.ts
 var ANTIGRAVITY_LOCKDOWN_GROUP = "tempa-lockdown";
@@ -29507,7 +29714,7 @@ function lockdownClaudeCode(ctx, args2, tempaPath, out2) {
       "--only-tempa-mcp is not in Claude Code's pack: how allowedMcpServers matches a plugin's server is not documented; add allowManagedMcpServersOnly and allowedMcpServers yourself"
     );
   const windows = stringOption(args2, "tempa-path-windows");
-  if (windows !== void 0 && (!win32.isAbsolute(windows) || /["$`%]/.test(windows)))
+  if (windows !== void 0 && (!win322.isAbsolute(windows) || /["$`%]/.test(windows)))
     throw new UsageError(
       "--tempa-path-windows needs the absolute Windows path of tempa, without quotes, $, ` or %, for example C:\\Tools\\tempa.exe"
     );
@@ -29602,8 +29809,8 @@ function lockdownAntigravity(ctx, args2, tempaPath, asked, out2) {
       throw new UsageError(
         `--${option} is not for Antigravity: its plugins and MCP servers are allowed in the Gemini Enterprise console (gemini-enterprise-mcp.json lists Tempa's server; --allow-mcp adds the tenant's)`
       );
-  const profile = ctx.env.USERPROFILE;
-  const homes = [join41(ctx.home, ".gemini"), ctx.env.GEMINI_HOME, profile && join41(profile, ".gemini")].filter(
+  const profile2 = ctx.env.USERPROFILE;
+  const homes = [join41(ctx.home, ".gemini"), ctx.env.GEMINI_HOME, profile2 && join41(profile2, ".gemini")].filter(
     (dir) => Boolean(dir)
   );
   if (isSystemDir(out2, homes) || isSystemDir(asked, homes))
@@ -29611,7 +29818,7 @@ function lockdownAntigravity(ctx, args2, tempaPath, asked, out2) {
       `${out2} is a developer's own Antigravity folder; write the pack elsewhere and let your MDM run install.sh`
     );
   const windows = stringOption(args2, "tempa-path-windows");
-  if (windows !== void 0 && !win32.isAbsolute(windows))
+  if (windows !== void 0 && !win322.isAbsolute(windows))
     throw new UsageError(
       "--tempa-path-windows needs the absolute Windows path of tempa, for example C:\\Tools\\tempa.exe"
     );
@@ -29665,14 +29872,14 @@ function lockdownGemini(ctx, args2, tempaPath, out2) {
     strictExtensions: args2.options["strict-extensions"] === true
   });
   writePack(out2, files);
-  const { darwin, linux, win32: win322 } = GEMINI_SYSTEM_DIRS;
+  const { darwin, linux, win32: win323 } = GEMINI_SYSTEM_DIRS;
   ctx.io.stdout(`Wrote the Gemini CLI lock-down pack to ${out2}:`);
   for (const file of files) ctx.io.stdout(`  ${file.path}`);
   ctx.io.stdout("Deploy settings.json and policies/tempa-lockdown.toml into Gemini's system folder:");
   ctx.io.stdout(`  macOS: ${darwin}/settings.json and ${darwin}/policies/`);
   ctx.io.stdout(`  Linux: ${linux}/settings.json and ${linux}/policies/`);
   ctx.io.stdout(
-    `  Windows: ${win322}\\settings.json (from windows/settings.json) and ${win322}\\policies, with no write access for standard users`
+    `  Windows: ${win323}\\settings.json (from windows/settings.json) and ${win323}\\policies, with no write access for standard users`
   );
   ctx.io.stdout(
     "  install.sh does it on macOS and Linux; run it as root (sh install.sh): Gemini reads the policies only when root owns them and nobody else may write them."
@@ -29761,7 +29968,7 @@ async function listOtherTenants(ctx, endpoint, tenant) {
 }
 
 // src/commands/clean.ts
-import { existsSync as existsSync15, rmSync as rmSync14 } from "node:fs";
+import { existsSync as existsSync16, rmSync as rmSync15 } from "node:fs";
 async function clean(ctx, args2) {
   rejectUnknown(args2, ["repo", "all", "dry-run"]);
   const dryRun = args2.options["dry-run"] === true;
@@ -29806,15 +30013,18 @@ function describe2(root, results, verb) {
   return lines;
 }
 function machineLevel(ctx, dryRun) {
-  const backup = `${claudeSettingsPath(ctx)}.tempa-backup`;
+  const files = ownedClaudeSettingsFiles(ctx);
+  const backups = files.map((path) => `${path}.tempa-backup`).filter((backup) => existsSync16(backup));
   if (dryRun) {
-    ctx.io.stdout("Would take Tempa's telemetry keys out of ~/.claude/settings.json");
-    if (existsSync15(backup)) ctx.io.stdout(`Would remove ${backup}`);
+    for (const path of files.filter((p) => ownsKeys(readOwned(ctx, p)))) {
+      ctx.io.stdout(`Would take Tempa's telemetry keys out of ${path}`);
+    }
+    for (const backup of backups) ctx.io.stdout(`Would remove ${backup}`);
     return;
   }
-  if (removeClaudeSettings(ctx)) ctx.io.stdout("Took Tempa's telemetry keys out of ~/.claude/settings.json");
-  if (existsSync15(backup)) {
-    rmSync14(backup, { force: true });
+  for (const path of removeClaudeSettings(ctx)) ctx.io.stdout(`Took Tempa's telemetry keys out of ${path}`);
+  for (const backup of backups) {
+    rmSync15(backup, { force: true });
     ctx.io.stdout(`Removed ${backup}`);
   }
 }
@@ -29838,8 +30048,8 @@ async function logout(ctx, args2) {
   clearTelemetryTokens(ctx);
   forgetRepoTenants(ctx, tenant, endpoint);
   try {
-    if (removeClaudeSettings(ctx))
-      ctx.io.stdout("Removed Tempa's telemetry settings from ~/.claude/settings.json.");
+    for (const path of removeClaudeSettings(ctx))
+      ctx.io.stdout(`Removed Tempa's telemetry settings from ${path}.`);
   } catch (err2) {
     ctx.io.stderr(`tempa: ${err2.message}`);
   }
@@ -32343,14 +32553,14 @@ var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
     const shape = zod.def.shape;
     const propValues = {};
     for (const key in shape) {
-      const field2 = shape[key]._zod;
-      if (field2.values) {
+      const field3 = shape[key]._zod;
+      if (field3.values) {
         if (!Object.prototype.hasOwnProperty.call(propValues, key)) {
           assignProp(propValues, key, /* @__PURE__ */ new Set());
         }
-        for (const v of field2.values)
+        for (const v of field3.values)
           propValues[key].add(v);
-        if (field2.optin !== void 0)
+        if (field3.optin !== void 0)
           propValues[key].add(void 0);
       }
     }
@@ -33270,7 +33480,7 @@ var recursive = /* @__PURE__ */ new WeakMap();
 var NONE = 0;
 var ASSUMED = 1;
 var PROVEN = 2;
-function isRecursive(inst, stack, resolve14) {
+function isRecursive(inst, stack, resolve15) {
   const cached2 = recursive.get(inst);
   if (cached2 !== void 0)
     return cached2 ? PROVEN : NONE;
@@ -33280,7 +33490,7 @@ function isRecursive(inst, stack, resolve14) {
   let result = NONE;
   const check2 = (child) => {
     if (result !== PROVEN && child?._zod) {
-      const answer = isRecursive(child, stack, resolve14);
+      const answer = isRecursive(child, stack, resolve15);
       if (answer > result)
         result = answer;
     }
@@ -33291,7 +33501,7 @@ function isRecursive(inst, stack, resolve14) {
       const desc = Object.getOwnPropertyDescriptor(sh, key);
       if (spread && !desc.enumerable)
         continue;
-      const child = desc.get ? ASSUMED : desc.value?._zod ? isRecursive(desc.value, stack, resolve14) : NONE;
+      const child = desc.get ? ASSUMED : desc.value?._zod ? isRecursive(desc.value, stack, resolve15) : NONE;
       if (child > answer)
         answer = child;
     }
@@ -33355,7 +33565,7 @@ function isRecursive(inst, stack, resolve14) {
       break;
     // `$ZodLazy` caches its inner on the def, so a resolved edge is followed exactly
     case "lazy": {
-      const inner = def._cachedInner ?? (resolve14 ? inst._zod.innerType : void 0);
+      const inner = def._cachedInner ?? (resolve15 ? inst._zod.innerType : void 0);
       merge2(inner ? isRecursive(inner, stack, false) : ASSUMED);
       break;
     }
@@ -35095,8 +35305,8 @@ var objectProcessor = (schema, ctx, _json, params) => {
   }
   const requiredKeys = [];
   for (const key of Object.keys(shape)) {
-    const field2 = def.shape[key];
-    if (ctx.io === "input" ? inputOptin(field2) === void 0 : field2._zod.optout === void 0) {
+    const field3 = def.shape[key];
+    if (ctx.io === "input" ? inputOptin(field3) === void 0 : field3._zod.optout === void 0) {
       requiredKeys.push(key);
     }
   }
@@ -38101,12 +38311,12 @@ var StdioServerTransport = class {
     this.onclose?.();
   }
   send(message) {
-    return new Promise((resolve14) => {
+    return new Promise((resolve15) => {
       const json2 = serializeMessage(message);
       if (this._stdout.write(json2)) {
-        resolve14();
+        resolve15();
       } else {
-        this._stdout.once("drain", resolve14);
+        this._stdout.once("drain", resolve15);
       }
     });
   }
@@ -38729,7 +38939,7 @@ var Protocol = class {
           return;
         }
         const pollInterval = task2.pollInterval ?? this._options?.defaultTaskPollInterval ?? 1e3;
-        await new Promise((resolve14) => setTimeout(resolve14, pollInterval));
+        await new Promise((resolve15) => setTimeout(resolve15, pollInterval));
         options?.signal?.throwIfAborted();
       }
     } catch (error2) {
@@ -38746,7 +38956,7 @@ var Protocol = class {
    */
   request(request, resultSchema, options) {
     const { relatedRequestId, resumptionToken, onresumptiontoken, task, relatedTask } = options ?? {};
-    return new Promise((resolve14, reject) => {
+    return new Promise((resolve15, reject) => {
       const earlyReject = (error2) => {
         reject(error2);
       };
@@ -38824,7 +39034,7 @@ var Protocol = class {
           if (!parseResult.success) {
             reject(parseResult.error);
           } else {
-            resolve14(parseResult.data);
+            resolve15(parseResult.data);
           }
         } catch (error2) {
           reject(error2);
@@ -39086,12 +39296,12 @@ var Protocol = class {
       }
     } catch {
     }
-    return new Promise((resolve14, reject) => {
+    return new Promise((resolve15, reject) => {
       if (signal.aborted) {
         reject(new McpError(ErrorCode.InvalidRequest, "Request cancelled"));
         return;
       }
-      const timeoutId = setTimeout(resolve14, interval);
+      const timeoutId = setTimeout(resolve15, interval);
       signal.addEventListener("abort", () => {
         clearTimeout(timeoutId);
         reject(new McpError(ErrorCode.InvalidRequest, "Request cancelled"));
@@ -40510,8 +40720,8 @@ var Client = class extends Protocol {
         return;
       }
       try {
-        const items = await fetcher();
-        onChanged(null, items);
+        const items2 = await fetcher();
+        onChanged(null, items2);
       } catch (e) {
         const error2 = e instanceof Error ? e : new Error(String(e));
         onChanged(error2, null);
@@ -41665,11 +41875,11 @@ ${value2}`, dataLines++;
       processField(line, "", line);
       return;
     }
-    const field2 = line.slice(0, fieldSeparatorIndex), offset = line.charCodeAt(fieldSeparatorIndex + 1) === SPACE ? 2 : 1, value = line.slice(fieldSeparatorIndex + offset);
-    processField(field2, value, line);
+    const field3 = line.slice(0, fieldSeparatorIndex), offset = line.charCodeAt(fieldSeparatorIndex + 1) === SPACE ? 2 : 1, value = line.slice(fieldSeparatorIndex + offset);
+    processField(field3, value, line);
   }
-  function processField(field2, value, line) {
-    switch (field2) {
+  function processField(field3, value, line) {
+    switch (field3) {
       case "event":
         eventType = value || void 0;
         break;
@@ -41692,8 +41902,8 @@ ${value}`, dataLines++;
       default:
         onError(
           new ParseError2(
-            `Unknown field "${field2.length > 20 ? `${field2.slice(0, 20)}\u2026` : field2}"`,
-            { type: "unknown-field", field: field2, value, line }
+            `Unknown field "${field3.length > 20 ? `${field3.slice(0, 20)}\u2026` : field3}"`,
+            { type: "unknown-field", field: field3, value, line }
           )
         );
         break;
@@ -42261,8 +42471,8 @@ var WORK_ITEM_TOOL = {
     required: ["ref"]
   }
 };
-function workStepTool(profile) {
-  const names = stepNames(profile);
+function workStepTool(profile2) {
+  const names = stepNames(profile2);
   return {
     name: "work_step",
     description: "Tell Tempa which step of the development process the current work is in, each time it moves on (the skills say when), so the team's work board shows it." + (names.length ? ` Steps: ${names.join(", ")}.` : ""),
@@ -42341,15 +42551,15 @@ var McpProxy = class {
   /** Requests wait for this: the workspace from the client's MCP roots. */
   ready = Promise.resolve();
   addUpstreams() {
-    const { profile, repo, upstreamFetch, harness } = this.options;
-    for (const endpoint of profile?.mcp ?? [])
+    const { profile: profile2, repo, upstreamFetch, harness } = this.options;
+    for (const endpoint of profile2?.mcp ?? [])
       this.upstreams.set(endpoint.name, new Upstream(this.ctx, endpoint, repo, upstreamFetch, harness));
   }
   /** Answer requests only once `until` settles, or after `ms` at the latest. */
   holdUntil(until, ms) {
     let timer;
-    const deadline = new Promise((resolve14) => {
-      timer = setTimeout(resolve14, ms);
+    const deadline = new Promise((resolve15) => {
+      timer = setTimeout(resolve15, ms);
       timer.unref();
     });
     const settled = until.then(
@@ -42534,9 +42744,9 @@ var McpProxy = class {
   workStep(repo, args2) {
     const raw = typeof args2.step === "string" ? args2.step.trim() : "";
     const ref = parseStep(raw);
-    const profile = this.options.profile;
-    if (!raw || profile?.steps && !knownStep(profile, ref)) {
-      const names = stepNames(profile);
+    const profile2 = this.options.profile;
+    if (!raw || profile2?.steps && !knownStep(profile2, ref)) {
+      const names = stepNames(profile2);
       return {
         isError: true,
         content: [{ type: "text", text: `'${raw}' is not a step. Steps: ${names.join(", ") || "none"}` }]
@@ -42594,7 +42804,7 @@ async function followRoots(ctx, proxy2, harness, current3) {
 function watchRoots(ctx, proxy2, harness, start2) {
   let workspace = start2;
   let rootsRead = () => void 0;
-  proxy2.holdUntil(new Promise((resolve14) => rootsRead = resolve14), ROOTS_TIMEOUT_MS + 1e3);
+  proxy2.holdUntil(new Promise((resolve15) => rootsRead = resolve15), ROOTS_TIMEOUT_MS + 1e3);
   const follow = () => followRoots(ctx, proxy2, harness, workspace).then((w) => workspace = w).catch(() => void 0);
   proxy2.server.oninitialized = () => void follow().finally(rootsRead);
   proxy2.server.setNotificationHandler(RootsListChangedNotificationSchema, async () => {
@@ -42611,10 +42821,10 @@ async function mcp(ctx, args2) {
   if (harness === "antigravity") watchRoots(ctx, proxy2, "antigravity", start2);
   const transport = new StdioServerTransport();
   await proxy2.server.connect(transport);
-  const closed = new Promise((resolve14) => {
-    proxy2.server.onclose = () => resolve14();
-    process.stdin.on("end", () => resolve14());
-    process.stdin.on("close", () => resolve14());
+  const closed = new Promise((resolve15) => {
+    proxy2.server.onclose = () => resolve15();
+    process.stdin.on("end", () => resolve15());
+    process.stdin.on("close", () => resolve15());
   });
   await closed;
   await proxy2.close().catch(() => void 0);
@@ -42665,7 +42875,7 @@ function codexOtelLines(token2) {
 
 // src/telemetry/copilot-session.ts
 import { execFileSync as execFileSync3 } from "node:child_process";
-import { existsSync as existsSync16, readdirSync as readdirSync10, rmSync as rmSync15 } from "node:fs";
+import { existsSync as existsSync17, readdirSync as readdirSync12, rmSync as rmSync16 } from "node:fs";
 import { join as join42 } from "node:path";
 var copilotSessionsDir = (ctx) => join42(ctx.tempaHome, "copilot-sessions");
 var MAX_ANCESTORS = 4;
@@ -42684,17 +42894,17 @@ function recordCopilotSession(ctx, pid, repoDir) {
       { dir: repoDir, at: new Date(ctx.now()).toISOString() },
       { dirMode: 448 }
     );
-    for (const name2 of readdirSync10(copilotSessionsDir(ctx))) {
+    for (const name2 of readdirSync12(copilotSessionsDir(ctx))) {
       const other = Number(name2.replace(/\.json$/, ""));
       if (other !== pid && Number.isInteger(other) && other > 0 && !alive2(other))
-        rmSync15(join42(copilotSessionsDir(ctx), name2), { force: true });
+        rmSync16(join42(copilotSessionsDir(ctx), name2), { force: true });
     }
   } catch {
   }
 }
 function recorded(ctx, pid) {
   const record2 = readJsonLenient(join42(copilotSessionsDir(ctx), `${pid}.json`));
-  return typeof record2?.dir === "string" && existsSync16(record2.dir) ? record2.dir : void 0;
+  return typeof record2?.dir === "string" && existsSync17(record2.dir) ? record2.dir : void 0;
 }
 function ancestors(pid, platform, max = MAX_ANCESTORS) {
   if (platform === "win32") return [];
@@ -42842,6 +43052,270 @@ async function policy(ctx, args2) {
   return 0;
 }
 
+// src/commands/profile.ts
+import { existsSync as existsSync18 } from "node:fs";
+import { resolve as resolve14 } from "node:path";
+
+// src/profile-view.ts
+var TENANT_REASON = {
+  "only-login": "your only login",
+  registered: "the repo is registered there",
+  ambiguous: "registered in several of your tenants",
+  default: "your default tenant: no tenant registered this repo",
+  chosen: "chosen with --tenant",
+  unregistered: "strict mode: its top-level rules only"
+};
+var ROOT_MATCH = "root";
+function plural(n, one, many = `${one}s`) {
+  return `${n} ${n === 1 ? one : many}`;
+}
+var MINUTE = 6e4;
+var HOUR = 60 * MINUTE;
+var DAY = 24 * HOUR;
+function duration3(ms) {
+  if (ms >= DAY) return plural(Math.floor(ms / DAY), "day");
+  if (ms >= HOUR) return plural(Math.floor(ms / HOUR), "hour");
+  return plural(Math.floor(ms / MINUTE), "minute");
+}
+function ago2(iso, now) {
+  const ms = now - Date.parse(iso);
+  return Number.isNaN(ms) || ms < MINUTE ? "just now" : `${duration3(ms)} ago`;
+}
+function validFor(iso, now) {
+  const ms = Date.parse(iso) - now;
+  if (ms < MINUTE) return "expired";
+  const [count2, unit] = duration3(ms).split(" ");
+  return `valid for ${count2} more ${unit}`;
+}
+function nodeName(path) {
+  return path.split(".").at(-1) ?? path;
+}
+function profileCounts(profile2) {
+  const parts2 = [plural(profile2.standards.length, "standard"), plural(profile2.skills.length, "skill")];
+  if (profile2.commands.length) parts2.push(plural(profile2.commands.length, "command"));
+  if (profile2.agents.length) parts2.push(plural(profile2.agents.length, "agent"));
+  parts2.push(plural(profile2.policies.bundles.length, "policy", "policies"));
+  parts2.push(plural(profile2.mcp.length, "MCP server"));
+  return parts2.join(", ");
+}
+function teamPhrase(profile2, matchedBy) {
+  const id = profile2.node.id;
+  switch (matchedBy) {
+    case ROOT_MATCH:
+      return `only the top-level rules of tenant ${profile2.tenant.id} (strict mode)`;
+    case "repo":
+      return `${id}, the team this repo belongs to`;
+    case "default_team":
+      return `${id}, your default team`;
+    case "tenant_default":
+      return `${id}, the organisation's default team`;
+    case "tenant":
+      return `${id}, the organisation's profile`;
+    default:
+      return id;
+  }
+}
+function matchedByNote(matchedBy, repo, node2) {
+  const where = repo ? `In ${repo}` : "Outside a repo";
+  switch (matchedBy) {
+    case "repo":
+      return `This repo belongs to ${node2}, so your agent gets that team's profile.`;
+    case "default_team":
+      return repo ? `${repo} does not belong to a team of yours, so your agent gets your default team's profile (${node2}).` : `Outside a repo your agent gets your default team's profile (${node2}).`;
+    case "tenant_default":
+      return `${where} you have no team of your own, so your agent gets the organisation's default team (${node2}).`;
+    case "tenant":
+      return `${where} you have no team of your own, so your agent gets the organisation's profile (${node2}).`;
+    default:
+      return void 0;
+  }
+}
+var LABEL2 = 11;
+var TOP = LABEL2 + 2;
+function field2(label, value, indent = "  ") {
+  return `${indent}${label.padEnd(indent ? LABEL2 : TOP)}${value}`;
+}
+function setBy(why) {
+  return `set by ${nodeName(why.node)} (${why.mode})`;
+}
+function items(title, list2, detail) {
+  const lines = [`${title} (${list2.length})`];
+  if (!list2.length) return [...lines, "  none"];
+  const width = Math.max(...list2.map((i2) => i2.name.length));
+  return [...lines, ...list2.map((i2) => `  ${i2.name.padEnd(width)}  ${detail(i2)}`)];
+}
+var MCP_AUTH = {
+  "tempa-device": "your Tempa login",
+  "per-user": "you sign in yourself",
+  none: "no sign-in"
+};
+function mcpDetail(m) {
+  const tools = m.tools ? `tools ${m.tools.join(", ")}` : "all tools";
+  return `${m.url}, ${MCP_AUTH[m.auth ?? "tempa-device"]}, ${tools}; ${setBy(m.why)}`;
+}
+function heading(view) {
+  if (view.repo) return `Tempa profile for ${view.repo}`;
+  return view.git ? "Tempa profile for this git repo (no remote)" : "Tempa profile outside a git repo";
+}
+function cachedLine(view) {
+  if (view.source !== "cache") return [];
+  const when = `as of ${ago2(view.fetchedAt, view.now)}`;
+  return view.remoteError ? [field2("Cached", `${when}: no fresh profile could be fetched, so this is the one your agent uses now`)] : [field2("Cached", `${when} (--offline)`)];
+}
+function teamLines(view) {
+  const { profile: profile2 } = view;
+  if (view.matchedBy === ROOT_MATCH) {
+    const notice = rootRuleNotice(view.repo ?? "This directory", view.tenant);
+    return [
+      field2("Team", `none: strict mode, so only the top-level rules of tenant ${profile2.tenant.id} apply`),
+      ...notice ? [" ".repeat(TOP) + notice] : []
+    ];
+  }
+  const { id, path } = profile2.node;
+  const note = matchedByNote(view.matchedBy, view.repo, id);
+  return [field2("Team", path === id ? id : `${id} (${path})`), ...note ? [" ".repeat(TOP) + note] : []];
+}
+function tenantLine(view) {
+  const { id, name: name2 } = view.profile.tenant;
+  const tenant = name2 === id ? id : `${name2} (${id})`;
+  const how = view.tenant && view.tenant.how !== "only-login" ? ` (${TENANT_REASON[view.tenant.how]})` : "";
+  return field2("Tenant", `${tenant}${how}`);
+}
+function guardrails(profile2) {
+  const { bundles, default_decision, exceptions, allow_external_mcp } = profile2.policies;
+  const policies = bundles.length ? bundles.map((b) => `${b.name} (set by ${nodeName(b.why.node)}, ${b.why.mode})`).join(", ") : "none";
+  const lines = ["Guardrails", field2("Policies", policies), field2("No match", default_decision)];
+  const rules = profile2.permissions;
+  if (rules.allow.length) lines.push(field2("Allow", rules.allow.join(", ")));
+  if (rules.ask.length) lines.push(field2("Ask", rules.ask.join(", ")));
+  if (rules.deny.length) lines.push(field2("Deny", rules.deny.join(", ")));
+  for (const e of exceptions ?? []) {
+    const reason = e.reason ? `: ${e.reason}` : "";
+    lines.push(field2("Exception", `${e.command} (waives ${e.waives.join(", ")}${reason})`));
+  }
+  if (allow_external_mcp) lines.push("  Other MCP servers are left to your harness's own permissions");
+  return lines;
+}
+function telemetryLine(profile2) {
+  const t = profile2.telemetry;
+  if (!t.enabled) return field2("Telemetry", "off", "");
+  const onOff = (on) => on ? "on" : "off";
+  return field2(
+    "Telemetry",
+    `on (prompt text ${onOff(t.log_prompts)}, tool details ${onOff(t.log_tool_details)})`,
+    ""
+  );
+}
+function failMode(profile2) {
+  return profile2.offline.default_decision === "deny" ? "closed" : "ask";
+}
+function failModeLine(profile2) {
+  const reads = profile2.offline.allow_tools;
+  const stay = reads.length ? ` (${reads.join(", ")} ${reads.length === 1 ? "stays" : "stay"} allowed)` : "";
+  const what = failMode(profile2) === "closed" ? "closed: when Tempa cannot decide, the call is blocked" : "ask: when Tempa cannot decide, your agent asks first";
+  return field2("Fail mode", `${what}${stay}`, "");
+}
+function describeProfile(view) {
+  const { profile: profile2 } = view;
+  const asset = (a) => setBy(a.why);
+  return [
+    heading(view),
+    ...cachedLine(view),
+    ...teamLines(view),
+    tenantLine(view),
+    field2(
+      "Version",
+      `${profile2.version}, fetched ${ago2(view.fetchedAt, view.now)}, ${validFor(profile2.expires_at, view.now)}`
+    ),
+    "",
+    ...items("Standards", profile2.standards, asset),
+    ...items("Skills", profile2.skills, asset),
+    ...profile2.commands.length ? items("Commands", profile2.commands, asset) : [],
+    ...profile2.agents.length ? items("Agents", profile2.agents, asset) : [],
+    ...guardrails(profile2),
+    ...items("MCP endpoints", profile2.mcp, mcpDetail),
+    telemetryLine(profile2),
+    failModeLine(profile2)
+  ];
+}
+function assetJson(a) {
+  return { name: a.name, description: a.description ?? null, why: a.why };
+}
+function profileJson(view) {
+  const { profile: profile2 } = view;
+  return {
+    repo: view.repo,
+    tenant: { id: profile2.tenant.id, name: profile2.tenant.name, choice: view.tenant?.how ?? null },
+    node: profile2.node,
+    matched_by: view.matchedBy,
+    strict_mode: view.matchedBy === ROOT_MATCH,
+    version: profile2.version,
+    source: view.source,
+    fetched_at: view.fetchedAt,
+    expires_at: profile2.expires_at,
+    standards: profile2.standards.map(assetJson),
+    skills: profile2.skills.map(assetJson),
+    commands: profile2.commands.map(assetJson),
+    agents: profile2.agents.map(assetJson),
+    policies: {
+      bundles: profile2.policies.bundles,
+      default_decision: profile2.policies.default_decision,
+      allow_external_mcp: profile2.policies.allow_external_mcp ?? false,
+      exceptions: profile2.policies.exceptions ?? []
+    },
+    permissions: profile2.permissions,
+    mcp: profile2.mcp.map((m) => ({
+      name: m.name,
+      description: m.description ?? null,
+      url: m.url,
+      auth: m.auth ?? "tempa-device",
+      tools: m.tools ?? null,
+      why: m.why
+    })),
+    telemetry: profile2.telemetry,
+    fail_mode: failMode(profile2),
+    offline: profile2.offline
+  };
+}
+
+// src/commands/profile.ts
+var TIMEOUT_MS = 1e4;
+function profileRepo(ctx, value) {
+  if (value === void 0) return repoContext(ctx.cwd);
+  const dir = resolve14(ctx.cwd, value);
+  if (existsSync18(dir)) return repoContext(dir);
+  const repo = normalizeRemote(value);
+  if (!repo) throw new UsageError(`--repo: not a folder or a git remote: ${value}`);
+  return { dir: ctx.cwd, remote: value, repo, key: repoKey(repo) };
+}
+async function profile(ctx, args2) {
+  rejectUnknown(args2, ["repo", "json", "offline"]);
+  const repo = profileRepo(ctx, stringOption(args2, "repo"));
+  const offline = args2.options.offline === true;
+  const result = await syncProfile(ctx, repo, { offline, timeoutMs: TIMEOUT_MS }).catch((err2) => {
+    if (err2 instanceof NoProfileError)
+      throw new NoProfileError(
+        `${err2.message}. Run 'tempa sync' in the repo when the control plane is reachable.`
+      );
+    throw err2;
+  });
+  const view = {
+    profile: result.profile,
+    repo: repo.repo,
+    git: repo.git !== void 0,
+    matchedBy: result.meta.matched_by,
+    fetchedAt: result.meta.fetched_at,
+    source: result.source,
+    ...result.remoteError ? { remoteError: result.remoteError } : {},
+    ...result.tenant ? { tenant: result.tenant } : {},
+    now: ctx.now()
+  };
+  if (args2.options.json === true) ctx.io.stdout(JSON.stringify(profileJson(view), null, 2));
+  else for (const line of describeProfile(view)) ctx.io.stdout(line);
+  if (result.remoteError) ctx.io.stderr(`tempa: no fresh profile: ${result.remoteError.message}`);
+  return 0;
+}
+
 // src/commands/setup.ts
 function antigravityStep(ctx, h, write3) {
   if (!h?.found || h.descriptor.support !== "supported") return [];
@@ -42919,14 +43393,11 @@ function setupCommand(deps = {}) {
 var setup = setupCommand();
 
 // src/commands/sync.ts
-var TENANT_REASON = {
-  "only-login": "your only login",
-  registered: "the repo is registered there",
-  ambiguous: "registered in several of your tenants",
-  default: "your default tenant: no tenant registered this repo",
-  chosen: "chosen with --tenant",
-  unregistered: "strict mode: its top-level rules only"
-};
+function changeLines(changes) {
+  if (!changes) return ["First sync for this repo."];
+  if (!changes.length) return ["No changes to guardrails, skills or MCP servers since the last sync."];
+  return ["Changes since the last sync:", ...changes.map((line) => `  ${line}`)];
+}
 function rendererFor(args2) {
   const id = stringOption(args2, "harness") ?? "claude-code";
   const renderers = supportedHarnessIds().filter((h) => lookupHarness(h)?.adapter?.renderer);
@@ -42935,14 +43406,14 @@ function rendererFor(args2) {
     throw new UsageError(`tempa sync cannot render for ${id} (it can for: ${renderers.join(", ")})`);
   return renderer;
 }
-async function syncModule(ctx, key, profile) {
-  const wasm = profile.policies.wasm;
+async function syncModule(ctx, key, profile2) {
+  const wasm = profile2.policies.wasm;
   if (!wasm) return;
   try {
-    const status2 = await ensureModule(ctx, profile, loginForRepo(ctx, key), 1e4);
+    const status2 = await ensureModule(ctx, profile2, loginForRepo(ctx, key), 1e4);
     pruneModules(ctx);
     const how = status2 === "downloaded" ? "downloaded" : "cached";
-    ctx.io.stdout(`Policy module ${wasm.sha256.slice(0, 12)} ${how}: shell calls are decided locally`);
+    ctx.io.stdout(`Shell calls are decided on this device (policy module ${how}).`);
   } catch (err2) {
     ctx.io.stderr(
       `tempa: policy module not downloaded (${err2.message}); shell calls ask the control plane`
@@ -42962,10 +43433,10 @@ async function sync(ctx, args2) {
     ...tenant ? { tenant } : {},
     ...endpoint ? { endpoint } : {}
   });
-  const { profile, meta: meta2 } = result;
-  const where = repo.repo ?? (repo.git ? "git repo without a remote" : "not a git repo");
-  const how = meta2.matched_by ? `, matched by ${meta2.matched_by}` : "";
-  ctx.io.stdout(`Profile ${profile.version} for ${profile.node.path}${how} (${where})`);
+  const { profile: profile2, meta: meta2 } = result;
+  const where = repo.repo ?? (repo.git ? "this git repo (no remote)" : "this directory (not a git repo)");
+  ctx.io.stdout(`Synced ${where} for ${teamPhrase(profile2, meta2.matched_by)}`);
+  ctx.io.stdout(profileCounts(profile2));
   if (result.tenant && result.tenant.how !== "only-login") {
     ctx.io.stdout(`Tenant ${result.tenant.tenant} (${TENANT_REASON[result.tenant.how]})`);
   }
@@ -42974,17 +43445,15 @@ async function sync(ctx, args2) {
   if (rootRule) ctx.io.stdout(rootRule);
   const ambiguous = ambiguityWarning(repo.repo ?? "This repo", result.tenant);
   if (ambiguous) ctx.io.stderr(`tempa: ${ambiguous}`);
-  ctx.io.stdout(`Signed with ${profile.signature?.key_id}, valid until ${profile.expires_at}`);
-  const changes = announceProfileChanges(ctx, repo.key, repo.repo, profile);
-  if (changes) ctx.io.stdout(changes);
-  const report = renderProfile(repo, profile, ctx.now, renderer, renderSession(ctx, renderer.id));
+  for (const line of changeLines(recordProfileChanges(ctx, repo.key, profile2))) ctx.io.stdout(line);
+  const report = renderProfile(repo, profile2, ctx.now, renderer, renderSession(ctx, renderer.id));
   if (report) for (const line of describeRender(report)) ctx.io.stdout(line);
   else
     ctx.io.stdout(
       "Not a git repo: nothing rendered; standards reach the harness through the session context."
     );
-  await syncModule(ctx, repo.key, profile);
-  if (hasPerUser(profile)) {
+  await syncModule(ctx, repo.key, profile2);
+  if (hasPerUser(profile2)) {
     const signIns = await unconnected(ctx, loginForRepo(ctx, repo.key), 5e3).catch(() => []);
     for (const item of signIns) ctx.io.stderr(`tempa: ${signInNotice(item)}`);
   }
@@ -42999,7 +43468,8 @@ async function sync(ctx, args2) {
   }
   await flush(ctx).catch(() => void 0);
   if (result.source === "cache") {
-    ctx.io.stderr(`tempa: using the cached profile from ${meta2.fetched_at}: ${result.remoteError?.message}`);
+    const when = ago2(meta2.fetched_at, ctx.now());
+    ctx.io.stderr(`tempa: using the cached profile from ${when}: ${result.remoteError?.message}`);
     return 1;
   }
   return 0;
@@ -43043,10 +43513,10 @@ async function work(ctx, args2) {
   }
   if (action === "step") {
     const raw = rest.join(" ").trim();
-    const profile = cachedProfile2(ctx, repo);
+    const profile2 = cachedProfile2(ctx, repo);
     const ref = parseStep(raw);
-    if (!raw || profile?.steps && !knownStep(profile, ref)) {
-      throw new UsageError(`'${raw}' is not a step. Steps: ${stepNames(profile).join(", ") || "none"}`);
+    if (!raw || profile2?.steps && !knownStep(profile2, ref)) {
+      throw new UsageError(`'${raw}' is not a step. Steps: ${stepNames(profile2).join(", ") || "none"}`);
     }
     reportStep(ctx, repo, ref);
     ctx.io.stdout(`Step ${stepLabel(ref)}; sessions in this repo follow at their next hook`);
@@ -43075,6 +43545,9 @@ Commands:
   sync [--repo PATH] [--endpoint URL] [--tenant ID] [--harness claude-code|copilot]
                                Fetch, verify, cache and render the profile for a repo (the flags pin
                                the repo to that login; --harness picks the layout, default claude-code)
+  profile [--repo PATH|URL] [--json] [--offline]
+                               Show what your agent gets in a repo and why: team, standards, skills,
+                               guardrails, MCP servers, telemetry, fail mode (--offline: the cached one)
   setup [--yes] [--harness ID] Find the coding harnesses on this machine, show what Tempa supports in
                                each and the commands that install its plugin (--yes runs them)
   doctor [--repo PATH]         Check the setup, per harness; every failure comes with a fix
@@ -43125,7 +43598,7 @@ Commands:
                                Forget this device's tokens and cached profiles (of one endpoint or tenant)
   clean [--repo PATH] [--all] [--dry-run]
                                Remove what Tempa rendered into this repo (--all: every repo it rendered
-                               into, and its keys and backup of ~/.claude/settings.json) and its
+                               into, and its keys and backup of Claude Code's settings.json) and its
                                .git/info/exclude blocks; files you changed are kept
   --version                    Print the version
   help                         Show this help`;
@@ -43135,6 +43608,7 @@ var COMMANDS = {
   logout: { run: logout, valued: ["endpoint", "tenant"] },
   clean: { run: clean, valued: ["repo"] },
   sync: { run: sync, valued: ["repo", "endpoint", "tenant", "harness"] },
+  profile: { run: profile, valued: ["repo"] },
   hook: { run: hook, valued: ["harness", "event", "bundle", "bundle-key"] },
   copilot: { run: copilot, valued: ["repo", "base", "branch", "cli"] },
   mcp: { run: mcp, valued: ["harness"] },
@@ -43187,10 +43661,43 @@ ${USAGE5}`);
   }
 }
 
+// src/exit.ts
+import { writeSync as writeSync2 } from "node:fs";
+var nodeProcess = {
+  setExitCode: (code2) => {
+    process.exitCode = code2;
+  },
+  exit: (code2) => {
+    writeSync2(2, "tempa: something still held the event loop at exit; exiting at once\n");
+    process.exit(code2);
+  }
+};
+var END_TIMING = { refreshSettleMs: 1e3, closeMs: 200, hardExitMs: 1300 };
+function fetchDispatcher() {
+  const value = globalThis[Symbol.for("undici.globalDispatcher.1")];
+  if (value && typeof value.destroy === "function") return value;
+  return void 0;
+}
+async function closeConnections(withinMs) {
+  const dispatcher = fetchDispatcher();
+  if (!dispatcher) return;
+  let timer;
+  const gaveUp = new Promise((resolve15) => {
+    timer = setTimeout(resolve15, withinMs);
+  });
+  await Promise.race([dispatcher.destroy().catch(() => void 0), gaveUp]);
+  clearTimeout(timer);
+}
+async function endProcess(code2, end = nodeProcess, timing = END_TIMING) {
+  setTimeout(() => end.exit(code2), timing.hardExitMs).unref();
+  await settleRefreshes(timing.refreshSettleMs);
+  await Promise.all([abortRequests(timing.closeMs), closeConnections(timing.closeMs)]);
+  end.setExitCode(code2);
+}
+
 // src/main.ts
-var REFRESH_SETTLE_MS = 1e3;
 async function main(argv) {
-  const exitWhenDone = argv[0] === "hook" || argv[0] === "mcp";
+  const endWhenDone = argv[0] === "hook" || argv[0] === "mcp";
   let code2;
   try {
     code2 = await run2(argv, createContext());
@@ -43199,9 +43706,9 @@ async function main(argv) {
 `);
     code2 = 2;
   }
-  if (exitWhenDone) {
-    await settleRefreshes(REFRESH_SETTLE_MS);
-    process.exit(code2);
+  if (endWhenDone) {
+    await endProcess(code2);
+    return;
   }
   process.exitCode = code2;
 }
