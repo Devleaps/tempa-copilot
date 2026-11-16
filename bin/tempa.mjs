@@ -13752,7 +13752,7 @@ function credentialsFromTokens(ctx, tokens, base) {
 import { join as join4 } from "node:path";
 
 // src/version.ts
-var VERSION = true ? "0.1.8" : "0.0.0-dev";
+var VERSION = true ? "0.1.9" : "0.0.0-dev";
 
 // src/cli-version.ts
 var CLI_VERSION_HEADER = "x-tempa-cli-version";
@@ -15435,24 +15435,50 @@ function endorsedKey(discovery, pins, keyId) {
 // src/repo.ts
 var SCP = /^(?:[\w.-]+@)?(?<host>[\w.-]+):(?<path>[^/].*)$/;
 var URL_FORM = /^[a-z][a-z0-9+.-]*:\/\/(?:[^@/]+@)?(?<host>[^/:]+)(?::\d+)?\/(?<path>.+)$/;
-var NORMALISED = /^[\w.-]+\.[a-z]{2,}\/[\w.-]+\/[\w.-]+$/i;
+var NORMALISED = /^[a-z0-9.-]+\.[a-z]{2,}(?:\/[A-Za-z0-9_.%-]+){2,8}$/i;
+var AZURE_SSH = /* @__PURE__ */ new Set(["ssh.dev.azure.com", "vs-ssh.visualstudio.com"]);
+var VISUALSTUDIO = ".visualstudio.com";
 function stripSlashes(value) {
   return value.replace(/^\/+|\/+$/g, "");
 }
 function removeSuffix(value, suffix) {
   return value.endsWith(suffix) ? value.slice(0, -suffix.length) : value;
 }
+function azureRepo(org, parts2) {
+  const [first, second] = parts2;
+  const full = parts2.length === 2 && first?.toLowerCase() === "_git" && second ? [second, ...parts2] : parts2;
+  if (full.length !== 3 || full[1]?.toLowerCase() !== "_git" || !org) return null;
+  return ["dev.azure.com", org, full[0], "_git", full[2]].join("/");
+}
+function azure(host, parts2) {
+  if (AZURE_SSH.has(host)) {
+    const [v3, org, project, repo] = parts2;
+    return parts2.length === 4 && v3?.toLowerCase() === "v3" && org && project && repo ? azureRepo(org, [project, "_git", repo]) : null;
+  }
+  if (host === "dev.azure.com" && parts2.length > 0) return azureRepo(parts2[0] ?? "", parts2.slice(1));
+  if (host.endsWith(VISUALSTUDIO)) {
+    const rest = parts2[0]?.toLowerCase() === "defaultcollection" ? parts2.slice(1) : parts2;
+    return azureRepo(removeSuffix(host, VISUALSTUDIO), rest);
+  }
+  return null;
+}
+function canonical(host, path) {
+  const lower = host.toLowerCase();
+  const parts2 = removeSuffix(stripSlashes(path), ".git").split("/");
+  return azure(lower, parts2) ?? [lower, ...parts2].join("/");
+}
 function normalizeRemote(remote) {
   if (!remote) return null;
   const value = remote.trim();
   const match = URL_FORM.exec(value) ?? SCP.exec(value);
   if (!match?.groups) {
-    if (NORMALISED.test(value)) return removeSuffix(value.toLowerCase(), ".git");
-    return null;
+    if (!NORMALISED.test(removeSuffix(value, ".git"))) return null;
+    const slash = value.indexOf("/");
+    return canonical(value.slice(0, slash), value.slice(slash + 1)).toLowerCase();
   }
   const path = removeSuffix(stripSlashes(match.groups.path ?? ""), ".git");
   if (!path) return null;
-  return `${match.groups.host}/${path}`.toLowerCase();
+  return canonical(match.groups.host ?? "", path).toLowerCase();
 }
 
 // src/tenants.ts
@@ -27053,10 +27079,10 @@ function isHandledCopilotEvent(payload) {
   return isKnownEvent(payload.hook.hook_event_name);
 }
 var DUPLICATE_WINDOW_MS = 1e4;
-function canonical(value) {
-  if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
+function canonical2(value) {
+  if (Array.isArray(value)) return `[${value.map(canonical2).join(",")}]`;
   if (value && typeof value === "object")
-    return `{${Object.keys(value).sort().map((k) => `${JSON.stringify(k)}:${canonical(value[k])}`).join(",")}}`;
+    return `{${Object.keys(value).sort().map((k) => `${JSON.stringify(k)}:${canonical2(value[k])}`).join(",")}}`;
   return JSON.stringify(value ?? null);
 }
 function eventKey(payload) {
@@ -27065,7 +27091,7 @@ function eventKey(payload) {
   const tools = copilotTools(payload.shape);
   const tool = normaliseTool(tools, hook2.tool_name ?? "", hook2.tool_input ?? {});
   const name2 = tool.mcp ? `mcp:${tool.mcp.server}/${tool.mcp.endpoint ?? ""}/${tool.mcp.tool}` : tools.claudeCodeNames?.[tool.name] ?? tool.name;
-  const text = canonical([
+  const text = canonical2([
     payload.at,
     hook2.hook_event_name,
     name2,
