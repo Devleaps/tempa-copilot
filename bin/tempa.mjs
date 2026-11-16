@@ -13396,47 +13396,6 @@ var require_content_type = __commonJS({
   }
 });
 
-// src/args.ts
-var UsageError = class extends Error {
-};
-function parseArgs(argv, valued = []) {
-  const positionals = [];
-  const options = {};
-  for (let i2 = 0; i2 < argv.length; i2++) {
-    const arg = argv[i2];
-    if (arg === "--") {
-      positionals.push(...argv.slice(i2 + 1));
-      break;
-    }
-    if (!arg.startsWith("--")) {
-      positionals.push(arg);
-      continue;
-    }
-    const eq = arg.indexOf("=");
-    const name2 = arg.slice(2, eq === -1 ? void 0 : eq);
-    if (eq !== -1) {
-      options[name2] = arg.slice(eq + 1);
-    } else if (valued.includes(name2)) {
-      const value = argv[i2 + 1];
-      if (value === void 0 || value.startsWith("--")) throw new UsageError(`--${name2} needs a value`);
-      options[name2] = value;
-      i2++;
-    } else {
-      options[name2] = true;
-    }
-  }
-  return { positionals, options };
-}
-function stringOption(args2, name2) {
-  const value = args2.options[name2];
-  if (value === true) throw new UsageError(`--${name2} needs a value`);
-  return value;
-}
-function rejectUnknown(args2, known) {
-  const unknown2 = Object.keys(args2.options).filter((k) => !known.includes(k));
-  if (unknown2.length) throw new UsageError(`Unknown option: --${unknown2[0]}`);
-}
-
 // src/auth.ts
 import { closeSync, openSync, rmSync as rmSync2, statSync as statSync2 } from "node:fs";
 import { hostname } from "node:os";
@@ -13752,7 +13711,7 @@ function credentialsFromTokens(ctx, tokens, base) {
 import { join as join4 } from "node:path";
 
 // src/version.ts
-var VERSION = true ? "0.1.6" : "0.0.0-dev";
+var VERSION = true ? "0.1.7" : "0.0.0-dev";
 
 // src/cli-version.ts
 var CLI_VERSION_HEADER = "x-tempa-cli-version";
@@ -14030,11 +13989,25 @@ async function withRefreshLock(ctx, fn) {
       await new Promise((resolve14) => setTimeout(resolve14, 50));
     }
   }
+  const work2 = fn();
+  underLock.set(lock, work2);
   try {
-    return await fn();
+    return await work2;
   } finally {
+    underLock.delete(lock);
     rmSync2(lock, { force: true });
   }
+}
+var underLock = /* @__PURE__ */ new Map();
+async function settleRefreshes(withinMs) {
+  if (underLock.size === 0) return;
+  let timer;
+  const gaveUp = new Promise((resolve14) => {
+    timer = setTimeout(resolve14, withinMs);
+  });
+  await Promise.race([Promise.allSettled(underLock.values()), gaveUp]);
+  clearTimeout(timer);
+  for (const lock of underLock.keys()) rmSync2(lock, { force: true });
 }
 function needsRefresh(ctx, creds) {
   return Date.parse(creds.expires_at) - ctx.now() < REFRESH_MARGIN_MS;
@@ -14108,6 +14081,47 @@ async function withDeviceToken(ctx, pathOrUrl, options, send2) {
       creds = await refreshTokens(ctx, creds);
     }
   }
+}
+
+// src/args.ts
+var UsageError = class extends Error {
+};
+function parseArgs(argv, valued = []) {
+  const positionals = [];
+  const options = {};
+  for (let i2 = 0; i2 < argv.length; i2++) {
+    const arg = argv[i2];
+    if (arg === "--") {
+      positionals.push(...argv.slice(i2 + 1));
+      break;
+    }
+    if (!arg.startsWith("--")) {
+      positionals.push(arg);
+      continue;
+    }
+    const eq = arg.indexOf("=");
+    const name2 = arg.slice(2, eq === -1 ? void 0 : eq);
+    if (eq !== -1) {
+      options[name2] = arg.slice(eq + 1);
+    } else if (valued.includes(name2)) {
+      const value = argv[i2 + 1];
+      if (value === void 0 || value.startsWith("--")) throw new UsageError(`--${name2} needs a value`);
+      options[name2] = value;
+      i2++;
+    } else {
+      options[name2] = true;
+    }
+  }
+  return { positionals, options };
+}
+function stringOption(args2, name2) {
+  const value = args2.options[name2];
+  if (value === true) throw new UsageError(`--${name2} needs a value`);
+  return value;
+}
+function rejectUnknown(args2, known) {
+  const unknown2 = Object.keys(args2.options).filter((k) => !known.includes(k));
+  if (unknown2.length) throw new UsageError(`Unknown option: --${unknown2[0]}`);
 }
 
 // src/account/detect.ts
@@ -15235,12 +15249,21 @@ import { resolve as resolve4 } from "node:path";
 import { execFileSync } from "node:child_process";
 import { realpathSync } from "node:fs";
 import { resolve as resolve3 } from "node:path";
+var GIT_TIMEOUT_MS = 5e3;
+var hookEndBy;
+function setGitDeadline(endBy) {
+  hookEndBy = endBy;
+}
+function gitTimeout() {
+  if (hookEndBy === void 0) return GIT_TIMEOUT_MS;
+  return Math.max(1, Math.min(GIT_TIMEOUT_MS, hookEndBy - Date.now()));
+}
 function git(cwd, args2) {
   try {
     return execFileSync("git", ["-C", cwd, ...args2], {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
-      timeout: 5e3,
+      timeout: gitTimeout(),
       env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" }
     });
   } catch {
@@ -15324,7 +15347,7 @@ var NO_PROFILE_FIX = "Run 'tempa sync' when the control plane is reachable again
 function noProfileMessage(reason, decision, call) {
   if (decision === "ask")
     return `${reason}: Tempa asks before every such call until a profile is synced. ${NO_PROFILE_FIX}`;
-  const why = call.failMode ? "your organisation blocks tool calls while Tempa cannot check them" : "this login never had a profile, so shell commands are blocked";
+  const why = call.failMode ? "your organisation blocks tool calls while Tempa cannot check them (fail mode closed)" : "this login never had a profile, so shell commands are blocked";
   return `${reason}: ${why}. ${NO_PROFILE_FIX}`;
 }
 
@@ -15396,6 +15419,10 @@ function normalizeRemote(remote) {
 // src/tenants.ts
 import { join as join14 } from "node:path";
 var RESOLVE_MAX_AGE_MS = 24 * 36e5;
+var ROOT_ONLY_HEADER = "X-Tempa-Root-Only";
+function rootOnlyHeaders(login2) {
+  return login2?.rootOnly ? { [ROOT_ONLY_HEADER]: "1" } : {};
+}
 function mapPath(ctx) {
   return join14(ctx.tempaHome, "repo-tenants.json");
 }
@@ -15412,17 +15439,53 @@ function writeMap(ctx, map) {
 function remoteKey(remote) {
   return repoKey(normalizeRemote(remote) ?? remote);
 }
-function pickTenant(registered, fallback) {
+function pickTenant(registered, fallback, strict = false) {
   const sorted = [...new Set(registered)].sort();
-  if (sorted.length === 0) return { tenant: fallback, how: "default" };
   if (sorted.length === 1) return { tenant: sorted[0], how: "registered" };
+  if (strict)
+    return sorted.length ? { tenant: fallback, how: "unregistered", candidates: sorted } : { tenant: fallback, how: "unregistered" };
+  if (sorted.length === 0) return { tenant: fallback, how: "default" };
   return {
     tenant: sorted.includes(fallback) ? fallback : sorted[0],
     how: "ambiguous",
     candidates: sorted
   };
 }
-function loginForRepo(ctx, key) {
+function strictPath(ctx) {
+  return join14(ctx.tempaHome, "strict-tenants.json");
+}
+function readStrict(ctx) {
+  const map = readJsonLenient(strictPath(ctx));
+  return map && typeof map === "object" ? map : {};
+}
+function rememberStrict(ctx, endpoint, answers) {
+  const map = readStrict(ctx);
+  const next = { ...map };
+  for (const { tenant, strict } of answers) {
+    if (strict) next[loginKey(endpoint, tenant)] = true;
+    else delete next[loginKey(endpoint, tenant)];
+  }
+  if (JSON.stringify(next) === JSON.stringify(map)) return;
+  try {
+    writeJsonAtomic(strictPath(ctx), next, { dirMode: 448 });
+  } catch {
+  }
+}
+function knownStrict(ctx, endpoint, tenants) {
+  const map = readStrict(ctx);
+  return [...tenants].some((tenant) => map[loginKey(endpoint, tenant)] === true);
+}
+function underStrict(answer, strict, fallback) {
+  if (!strict || answer.how !== "default" && answer.how !== "ambiguous") return answer;
+  const { candidates, resolved_at } = answer;
+  return {
+    tenant: fallback ?? answer.tenant,
+    how: "unregistered",
+    ...candidates ? { candidates } : {},
+    resolved_at
+  };
+}
+function repoAccess(ctx, key) {
   const cached2 = readMap(ctx)[key];
   if (cached2?.endpoint !== void 0 && readStore(ctx, cached2.endpoint).logins[cached2.tenant]) {
     return { endpoint: cached2.endpoint, tenant: cached2.tenant };
@@ -15430,10 +15493,40 @@ function loginForRepo(ctx, key) {
   const endpoint = defaultEndpoint(ctx);
   if (endpoint === void 0) return void 0;
   const store = readStore(ctx, endpoint);
-  if (cached2 && cached2.endpoint === void 0 && store.logins[cached2.tenant]) {
-    return { endpoint, tenant: cached2.tenant };
-  }
+  const tenants = Object.keys(store.logins);
+  const several = tenants.length > 1;
+  const strict = several && knownStrict(ctx, endpoint, tenants);
+  const home2 = cached2 && cached2.endpoint === void 0 ? underStrict(cached2, strict, store.default) : void 0;
+  const root = several && (home2 ? home2.how === "unregistered" : strict);
+  if (root)
+    return store.default !== void 0 ? { endpoint, tenant: store.default, rootOnly: true } : void 0;
+  if (home2 && store.logins[home2.tenant]) return { endpoint, tenant: home2.tenant };
   return store.default !== void 0 ? { endpoint, tenant: store.default } : void 0;
+}
+function loginForRepo(ctx, key) {
+  return repoAccess(ctx, key);
+}
+function isRootOnly(ctx, key) {
+  return repoAccess(ctx, key)?.rootOnly === true;
+}
+var RootOnlyError = class extends Error {
+  constructor(repo) {
+    super(
+      `${repo} is not registered in the tenant whose top-level rules apply (strict mode): no MCP tools or telemetry for it.`
+    );
+  }
+};
+function rootRuleNotice(repo, choice) {
+  if (choice?.how !== "unregistered") return void 0;
+  const applies = `strict mode is on, so only the top-level rules of ${choice.tenant} apply here (its standards, guardrails and settings; no team's, no MCP tools, no telemetry).`;
+  if (choice.candidates?.length)
+    return `${repo} is registered in several of your tenants (${choice.candidates.join(", ")}) and ${applies} Run 'tempa sync --tenant <id>' in the repo to choose.`;
+  return `${repo} is not registered in any of your tenants and ${applies} Ask the platform team of the tenant it belongs to to register it, then run 'tempa sync'.`;
+}
+function requireLoginForRemote(ctx, remote) {
+  const login2 = repoAccess(ctx, remoteKey(remote));
+  if (login2?.rootOnly) throw new RootOnlyError(normalizeRemote(remote) ?? remote ?? "This directory");
+  return login2;
 }
 function repoEndpoint(ctx, key) {
   return loginForRepo(ctx, key)?.endpoint ?? resolveEndpoint(ctx).endpoint;
@@ -15459,27 +15552,37 @@ function forgetRepoTenants(ctx, tenant, endpoint) {
   const gone = (v) => {
     if (tenant === void 0 && endpoint === void 0) return v.how !== "chosen";
     if (tenant === void 0) return on(v);
-    return on(v) && v.tenant === tenant;
+    return on(v) && (v.tenant === tenant || v.how === "unregistered");
   };
   const kept = Object.fromEntries(Object.entries(map).filter(([, v]) => !gone(v)));
   if (Object.keys(kept).length !== Object.keys(map).length) writeMap(ctx, kept);
+  const where = endpoint ?? home2;
+  if (tenant !== void 0 && where !== void 0) rememberStrict(ctx, where, [{ tenant, strict: false }]);
 }
 async function resolveRepoTenant(ctx, repo, options = {}) {
   const pinned = readMap(ctx)[repo.key];
   if (pinned?.endpoint !== void 0 && readStore(ctx, pinned.endpoint).logins[pinned.tenant]) return pinned;
   const logins = listLogins(ctx);
   const fallback = defaultTenant(ctx);
-  if (!logins.length || fallback === void 0) return void 0;
+  const endpoint = defaultEndpoint(ctx);
+  if (!logins.length || fallback === void 0 || endpoint === void 0) return void 0;
   const now = new Date(ctx.now()).toISOString();
   if (logins.length === 1) return { tenant: tenantOf(logins[0]), how: "only-login", resolved_at: now };
   const tenants = new Set(logins.map(tenantOf));
+  const strictBefore = knownStrict(ctx, endpoint, tenants);
+  const held = { tenant: fallback, how: "unregistered", resolved_at: now };
   const map = readMap(ctx);
   const cached2 = map[repo.key];
-  const usable2 = cached2 && cached2.endpoint === void 0 && tenants.has(cached2.tenant) ? cached2 : void 0;
+  const known = cached2 && cached2.endpoint === void 0 ? underStrict(cached2, strictBefore, fallback) : void 0;
+  const usable2 = known?.how === "unregistered" ? { ...known, tenant: fallback } : known && tenants.has(known.tenant) ? known : void 0;
   if (usable2?.how === "chosen") return usable2;
   const fresh = usable2 && ctx.now() - Date.parse(usable2.resolved_at) < RESOLVE_MAX_AGE_MS;
   if (usable2 && (options.offline || fresh && !options.refresh)) return usable2;
-  if (!repo.remote || options.offline) return { tenant: fallback, how: "default", resolved_at: now };
+  if (!repo.remote || options.offline) {
+    if (!strictBefore) return { tenant: fallback, how: "default", resolved_at: now };
+    if (!repo.remote) writeMap(ctx, { ...map, [repo.key]: held });
+    return held;
+  }
   const query = new URLSearchParams({ remote: repo.remote });
   const answers = await Promise.allSettled(
     [...tenants].map(async (tenant) => {
@@ -15488,20 +15591,23 @@ async function resolveRepoTenant(ctx, repo, options = {}) {
           tenant,
           timeoutMs: options.timeoutMs ?? 3e3
         });
-        return { tenant, registered: body2?.registered === true };
+        return { tenant, registered: body2?.registered === true, strict: body2?.strict_repos === true };
       } catch (err2) {
-        if (err2 instanceof HttpError && err2.status === 404) return { tenant, registered: false };
+        if (err2 instanceof HttpError && err2.status === 404)
+          return { tenant, registered: false, strict: false };
         throw err2;
       }
     })
   );
-  const registered = answers.flatMap(
-    (a) => a.status === "fulfilled" && a.value.registered ? [a.value.tenant] : []
-  );
-  const complete = answers.every((a) => a.status === "fulfilled");
+  const answered = answers.flatMap((a) => a.status === "fulfilled" ? [a.value] : []);
+  const registered = answered.flatMap((a) => a.registered ? [a.tenant] : []);
+  const complete = answered.length === answers.length;
+  rememberStrict(ctx, endpoint, answered);
+  const silent = [...tenants].filter((tenant) => !answered.some((a) => a.tenant === tenant));
+  const strict = answered.some((a) => a.strict) || knownStrict(ctx, endpoint, silent);
   if (!complete && !registered.length)
-    return usable2 ?? { tenant: fallback, how: "default", resolved_at: now };
-  const answer = { ...pickTenant(registered, fallback), resolved_at: now };
+    return strict ? held : usable2 ?? { tenant: fallback, how: "default", resolved_at: now };
+  const answer = { ...pickTenant(registered, fallback, strict), resolved_at: now };
   if (complete) writeMap(ctx, { ...map, [repo.key]: answer });
   return answer;
 }
@@ -15533,10 +15639,11 @@ function parseDuration(value) {
 function syncIntervalMs(profile) {
   return parseDuration(profile.settings?.sync_interval?.value) ?? DEFAULT_SYNC_INTERVAL_MS;
 }
-function loadVerifiedCache(ctx, endpoint, key, tenant) {
+function loadVerifiedCache(ctx, endpoint, key, tenant, rootOnly = isRootOnly(ctx, key)) {
   const cached2 = readCachedProfile(ctx, key);
   if (!cached2 || cached2.meta.endpoint !== endpoint || isExpired(ctx, cached2.profile)) return void 0;
   if (tenant !== void 0 && cached2.meta.tenant && cached2.meta.tenant !== tenant) return void 0;
+  if (rootOnly && cached2.meta.matched_by !== "root") return void 0;
   const keys = pinnedKeys(ctx, endpoint) ?? cachedDiscovery(ctx, endpoint)?.document.signing_keys;
   if (!keys) return void 0;
   try {
@@ -15571,7 +15678,7 @@ function checkBinding(profile, tenant, repo) {
   if (asked && signed && asked !== signed)
     throw new SignatureError(`The profile is signed for ${profile.repo}, not ${repo.repo}`);
 }
-async function fetchProfile(ctx, endpoint, repo, timeoutMs, tenant) {
+async function fetchProfile(ctx, endpoint, repo, timeoutMs, tenant, rootOnly = false) {
   const creds = loadCredentials(ctx, tenant, endpoint);
   if (!creds) {
     const others = listEndpoints(ctx).filter((e) => e !== endpoint);
@@ -15582,7 +15689,14 @@ async function fetchProfile(ctx, endpoint, repo, timeoutMs, tenant) {
   }
   const query = new URLSearchParams({ harness: HARNESS });
   if (repo.remote) query.set("repo", repo.remote);
-  const res = await authedRequest(ctx, `/profile?${query}`, { timeoutMs, tenant, endpoint });
+  const res = await authedRequest(ctx, `/profile?${query}`, {
+    timeoutMs,
+    tenant,
+    endpoint,
+    headers: rootOnly ? { [ROOT_ONLY_HEADER]: "1" } : {}
+  });
+  if (rootOnly && res.headers.get("x-tempa-matched-by") !== "root")
+    throw new SignatureError("The control plane did not apply the root rule; update tempa-api");
   const profile = res.body;
   if (!profile || typeof profile !== "object" || typeof profile.version !== "string") {
     throw new SignatureError("The control plane returned something that is not a profile");
@@ -15609,10 +15723,11 @@ async function fetchProfile(ctx, endpoint, repo, timeoutMs, tenant) {
 }
 async function syncProfile(ctx, repo, options = {}) {
   const choice = await repoTenant(ctx, repo, options);
+  const rootOnly = choice ? choice.how === "unregistered" : isRootOnly(ctx, repo.key);
   const endpoint = choice?.endpoint ?? resolveEndpoint(ctx).endpoint;
   const tenant = choice?.tenant;
   const withTenant = choice ? { tenant: choice } : {};
-  const cached2 = loadVerifiedCache(ctx, endpoint, repo.key, tenant);
+  const cached2 = loadVerifiedCache(ctx, endpoint, repo.key, tenant, rootOnly);
   if (cached2) {
     const age = ctx.now() - Date.parse(cached2.meta.fetched_at);
     if (options.offline || options.maxAgeMs !== void 0 && age >= 0 && age < options.maxAgeMs) {
@@ -15622,7 +15737,7 @@ async function syncProfile(ctx, repo, options = {}) {
     throw new NoProfileError("No valid cached profile for this repo");
   }
   try {
-    const fresh = await fetchProfile(ctx, endpoint, repo, options.timeoutMs, tenant);
+    const fresh = await fetchProfile(ctx, endpoint, repo, options.timeoutMs, tenant, rootOnly);
     return { ...fresh, source: "remote", repo, ...withTenant };
   } catch (err2) {
     if (cached2) return { ...cached2, source: "cache", repo, remoteError: err2, ...withTenant };
@@ -15944,8 +16059,79 @@ var CAPABILITIES = [
 ];
 
 // src/harness/codex.ts
+import { createHash as createHash10 } from "node:crypto";
 import { existsSync as existsSync8, readFileSync as readFileSync14 } from "node:fs";
 import { dirname as dirname4, join as join31 } from "node:path";
+
+// src/hook/deadline.ts
+var HOOK_TIMEOUTS_MS = {
+  "claude-code": {
+    SessionStart: 15e3,
+    UserPromptSubmit: 5e3,
+    PreToolUse: 5e3,
+    PostToolUse: 5e3,
+    Stop: 5e3
+  },
+  codex: {
+    SessionStart: 15e3,
+    UserPromptSubmit: 5e3,
+    PreToolUse: 1e4,
+    PostToolUse: 5e3,
+    Stop: 5e3,
+    SessionEnd: 3e3
+  },
+  "gemini-cli": {
+    SessionStart: 15e3,
+    UserPromptSubmit: 5e3,
+    PreToolUse: 1e4,
+    PostToolUse: 5e3,
+    Stop: 5e3,
+    SessionEnd: 5e3
+  },
+  // The plugin's hooks and the Copilot cloud agent's preToolUse (cloud-agent/bundle.ts).
+  copilot: {
+    SessionStart: 15e3,
+    UserPromptSubmit: 1e4,
+    PreToolUse: 1e4,
+    PostToolUse: 1e4,
+    Stop: 1e4,
+    SessionEnd: 1e4
+  },
+  antigravity: {
+    SessionStart: 15e3,
+    UserPromptSubmit: 5e3,
+    "Antigravity:PreInvocation": 5e3,
+    PreToolUse: 1e4,
+    PostToolUse: 5e3,
+    Stop: 5e3
+  }
+};
+var DEADLINE_SHARE = 0.7;
+var GATES = /* @__PURE__ */ new Set(["PreToolUse", "UserPromptSubmit"]);
+function hookDeadline(harness, event2) {
+  const timeout = HOOK_TIMEOUTS_MS[harness][event2];
+  if (timeout === void 0) return void 0;
+  return { ms: Math.floor(timeout * DEADLINE_SHARE), gate: GATES.has(event2) };
+}
+var HookDeadlineError = class extends Error {
+  constructor(ms, gate) {
+    super(`no answer within ${ms} ms of the hook's start`);
+    this.gate = gate;
+  }
+};
+async function byDeadline(work2, endBy, deadline) {
+  const left = endBy - Date.now();
+  if (left <= 0 && deadline.gate) throw new HookDeadlineError(deadline.ms, true);
+  let timer;
+  const late = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new HookDeadlineError(deadline.ms, deadline.gate)), Math.max(0, left));
+  });
+  try {
+    return await Promise.race([work2(), late]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 // src/hook/handler.ts
 import { execFile as execFile2 } from "node:child_process";
@@ -16537,7 +16723,10 @@ function preToolUse(decision, reason, additionalContext) {
 }
 function decisionReason(decision, fallback) {
   const ids = decision.policy_ids?.length ? ` (${decision.policy_ids.join(", ")})` : "";
-  return `Tempa${ids}: ${decision.reason || fallback}`;
+  const said = `Tempa${ids}: ${decision.reason || fallback}`;
+  const next = decision.decision === "deny" || decision.decision === "ask" ? decision.next_step : void 0;
+  return next ? `${said}
+${next}` : said;
 }
 function decisionToPreToolUse(decision) {
   switch (decision.decision) {
@@ -16580,6 +16769,134 @@ function sessionStart(additionalContext, systemMessage2) {
 }
 function blockPrompt(reason) {
   return { decision: "block", reason, suppressOriginalPrompt: true };
+}
+
+// src/telemetry/claude-settings.ts
+import { copyFileSync, existsSync as existsSync2, readFileSync as readFileSync7, rmSync as rmSync7 } from "node:fs";
+import { join as join17 } from "node:path";
+
+// src/shell.ts
+function shellQuote(value) {
+  return /^[\w@%+=:,./-]+$/.test(value) ? value : `'${value.replace(/'/g, "'\\''")}'`;
+}
+
+// src/telemetry/claude-settings.ts
+function otlpEnv(otelEndpoint) {
+  return {
+    CLAUDE_CODE_ENABLE_TELEMETRY: "1",
+    OTEL_METRICS_EXPORTER: "otlp",
+    OTEL_LOGS_EXPORTER: "otlp",
+    // http/protobuf: otelHeadersHelper applies only to the HTTP protocols, not grpc.
+    OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf",
+    OTEL_EXPORTER_OTLP_ENDPOINT: otelEndpoint,
+    OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "delta"
+  };
+}
+var CONTENT_VARIABLES = {
+  OTEL_LOG_USER_PROMPTS: "log_prompts",
+  OTEL_LOG_TOOL_DETAILS: "log_tool_details",
+  OTEL_LOG_TOOL_CONTENT: "log_tool_details"
+};
+var OFF_VALUES = /* @__PURE__ */ new Set(["", "0", "false", "no", "off"]);
+function contentVariablesOn(settings) {
+  const env = settings.env && typeof settings.env === "object" ? settings.env : {};
+  return Object.keys(CONTENT_VARIABLES).filter((name2) => {
+    const value = env[name2];
+    return value !== void 0 && value !== null && !OFF_VALUES.has(String(value).trim().toLowerCase());
+  });
+}
+function desiredEnv(inputs) {
+  if (!inputs.telemetry.enabled) return {};
+  return {
+    ...otlpEnv(inputs.otelEndpoint),
+    OTEL_RESOURCE_ATTRIBUTES: `tempa.device=${inputs.deviceId}`
+  };
+}
+function mergeSettings(current3, previous, env, helper) {
+  const before = JSON.stringify(current3);
+  const settings = { ...current3 };
+  const nextEnv = {
+    ...current3.env && typeof current3.env === "object" ? current3.env : {}
+  };
+  for (const key of previous.env_keys) if (!(key in env)) delete nextEnv[key];
+  Object.assign(nextEnv, env);
+  if (Object.keys(nextEnv).length) settings.env = nextEnv;
+  else delete settings.env;
+  if (helper) settings.otelHeadersHelper = helper;
+  else if (previous.otel_headers_helper && current3.otelHeadersHelper === previous.otel_headers_helper) {
+    delete settings.otelHeadersHelper;
+  }
+  return {
+    settings,
+    owned: { env_keys: Object.keys(env), otel_headers_helper: helper },
+    changed: JSON.stringify(settings) !== before
+  };
+}
+function claudeSettingsPath(ctx) {
+  return join17(ctx.home, ".claude", "settings.json");
+}
+function ownedPath(ctx) {
+  return join17(ctx.tempaHome, "claude-settings.json");
+}
+function readOwned(ctx) {
+  return readJsonLenient(ownedPath(ctx)) ?? { env_keys: [], otel_headers_helper: null };
+}
+var SettingsError = class extends Error {
+};
+function readSettings(path) {
+  let text;
+  try {
+    text = readFileSync7(path, "utf8");
+  } catch {
+    return {};
+  }
+  try {
+    const value = JSON.parse(text);
+    if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("not an object");
+    return value;
+  } catch (err2) {
+    throw new SettingsError(`${path} is not valid JSON (${err2.message}); Tempa left it alone`);
+  }
+}
+function write(ctx, merge2) {
+  const path = claudeSettingsPath(ctx);
+  if (merge2.changed) {
+    const backup = `${path}.tempa-backup`;
+    if (existsSync2(path) && !existsSync2(backup)) copyFileSync(path, backup);
+    writeFileAtomic(path, `${JSON.stringify(merge2.settings, null, 2)}
+`);
+  }
+  if (merge2.owned.env_keys.length || merge2.owned.otel_headers_helper) {
+    writeJsonAtomic(ownedPath(ctx), merge2.owned, { mode: 384, dirMode: 448 });
+  } else {
+    rmSync7(ownedPath(ctx), { force: true });
+  }
+  return merge2.changed;
+}
+function userContentVariables(ctx) {
+  try {
+    return contentVariablesOn(readSettings(claudeSettingsPath(ctx)));
+  } catch {
+    return [];
+  }
+}
+function applyClaudeSettings(ctx, inputs) {
+  const env = desiredEnv(inputs);
+  const helper = Object.keys(env).length ? inputs.helper : null;
+  return write(ctx, mergeSettings(readSettings(claudeSettingsPath(ctx)), readOwned(ctx), env, helper));
+}
+function removeClaudeSettings(ctx) {
+  const owned = readOwned(ctx);
+  if (!owned.env_keys.length && !owned.otel_headers_helper) return false;
+  return write(ctx, mergeSettings(readSettings(claudeSettingsPath(ctx)), owned, {}, null));
+}
+function cliCommand(ctx) {
+  const runtime = ctx.runtime;
+  if (runtime?.cli) return `${shellQuote(runtime.node)} ${shellQuote(runtime.cli)}`;
+  return "tempa";
+}
+function helperCommand(ctx) {
+  return `${cliCommand(ctx)} otel-headers`;
 }
 
 // src/render/plan.ts
@@ -16701,8 +17018,20 @@ function permissionsMerge(rules) {
     }))
   };
 }
+function contentOffValues(profile, userContentOn = []) {
+  const off = {};
+  for (const name2 of userContentOn) {
+    const covered = CONTENT_VARIABLES[name2];
+    if (covered && !profile.telemetry[covered]) off[name2] = "0";
+  }
+  return off;
+}
+function contentMerge(profile, userContentOn) {
+  const off = contentOffValues(profile, userContentOn);
+  return Object.keys(off).length ? { values: [{ key: ["env"], values: off }] } : {};
+}
 var ALLOW_RULES_SKIPPED = "allow rules are left to Claude Code's own permission settings; Tempa's hook applies the policies";
-function planClaudeCode(profile) {
+function planClaudeCode(profile, env) {
   const files = [];
   const skipped = [];
   const v = profile.version;
@@ -16744,7 +17073,7 @@ ${text}` : text;
     harness: "claude-code",
     profileVersion: v,
     files,
-    settings: [permissionsMerge(permissions)],
+    settings: [{ ...permissionsMerge(permissions), ...contentMerge(profile, env?.userContentOn) }],
     skipped
   };
 }
@@ -16753,110 +17082,6 @@ var claudeCodeRenderer = { id: "claude-code", plan: planClaudeCode };
 // src/render/index.ts
 import { existsSync as existsSync4, readFileSync as readFileSync9, realpathSync as realpathSync2 } from "node:fs";
 import { join as join19 } from "node:path";
-
-// src/telemetry/claude-settings.ts
-import { copyFileSync, existsSync as existsSync2, readFileSync as readFileSync7, rmSync as rmSync7 } from "node:fs";
-import { join as join17 } from "node:path";
-
-// src/shell.ts
-function shellQuote(value) {
-  return /^[\w@%+=:,./-]+$/.test(value) ? value : `'${value.replace(/'/g, "'\\''")}'`;
-}
-
-// src/telemetry/claude-settings.ts
-function desiredEnv(inputs) {
-  if (!inputs.telemetry.enabled) return {};
-  return {
-    CLAUDE_CODE_ENABLE_TELEMETRY: "1",
-    OTEL_METRICS_EXPORTER: "otlp",
-    OTEL_LOGS_EXPORTER: "otlp",
-    OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf",
-    OTEL_EXPORTER_OTLP_ENDPOINT: inputs.otelEndpoint,
-    OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: "delta",
-    OTEL_RESOURCE_ATTRIBUTES: `tempa.device=${inputs.deviceId}`,
-    ...inputs.telemetry.log_prompts ? { OTEL_LOG_USER_PROMPTS: "1" } : {},
-    ...inputs.telemetry.log_tool_details ? { OTEL_LOG_TOOL_DETAILS: "1" } : {}
-  };
-}
-function mergeSettings(current3, previous, env, helper) {
-  const before = JSON.stringify(current3);
-  const settings = { ...current3 };
-  const nextEnv = {
-    ...current3.env && typeof current3.env === "object" ? current3.env : {}
-  };
-  for (const key of previous.env_keys) if (!(key in env)) delete nextEnv[key];
-  Object.assign(nextEnv, env);
-  if (Object.keys(nextEnv).length) settings.env = nextEnv;
-  else delete settings.env;
-  if (helper) settings.otelHeadersHelper = helper;
-  else if (previous.otel_headers_helper && current3.otelHeadersHelper === previous.otel_headers_helper) {
-    delete settings.otelHeadersHelper;
-  }
-  return {
-    settings,
-    owned: { env_keys: Object.keys(env), otel_headers_helper: helper },
-    changed: JSON.stringify(settings) !== before
-  };
-}
-function claudeSettingsPath(ctx) {
-  return join17(ctx.home, ".claude", "settings.json");
-}
-function ownedPath(ctx) {
-  return join17(ctx.tempaHome, "claude-settings.json");
-}
-function readOwned(ctx) {
-  return readJsonLenient(ownedPath(ctx)) ?? { env_keys: [], otel_headers_helper: null };
-}
-var SettingsError = class extends Error {
-};
-function readSettings(path) {
-  let text;
-  try {
-    text = readFileSync7(path, "utf8");
-  } catch {
-    return {};
-  }
-  try {
-    const value = JSON.parse(text);
-    if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("not an object");
-    return value;
-  } catch (err2) {
-    throw new SettingsError(`${path} is not valid JSON (${err2.message}); Tempa left it alone`);
-  }
-}
-function write(ctx, merge2) {
-  const path = claudeSettingsPath(ctx);
-  if (merge2.changed) {
-    const backup = `${path}.tempa-backup`;
-    if (existsSync2(path) && !existsSync2(backup)) copyFileSync(path, backup);
-    writeFileAtomic(path, `${JSON.stringify(merge2.settings, null, 2)}
-`);
-  }
-  if (merge2.owned.env_keys.length || merge2.owned.otel_headers_helper) {
-    writeJsonAtomic(ownedPath(ctx), merge2.owned, { mode: 384, dirMode: 448 });
-  } else {
-    rmSync7(ownedPath(ctx), { force: true });
-  }
-  return merge2.changed;
-}
-function applyClaudeSettings(ctx, inputs) {
-  const env = desiredEnv(inputs);
-  const helper = Object.keys(env).length ? inputs.helper : null;
-  return write(ctx, mergeSettings(readSettings(claudeSettingsPath(ctx)), readOwned(ctx), env, helper));
-}
-function removeClaudeSettings(ctx) {
-  const owned = readOwned(ctx);
-  if (!owned.env_keys.length && !owned.otel_headers_helper) return false;
-  return write(ctx, mergeSettings(readSettings(claudeSettingsPath(ctx)), owned, {}, null));
-}
-function cliCommand(ctx) {
-  const runtime = ctx.runtime;
-  if (runtime?.cli) return `${shellQuote(runtime.node)} ${shellQuote(runtime.cli)}`;
-  return "tempa";
-}
-function helperCommand(ctx) {
-  return `${cliCommand(ctx)} otel-headers`;
-}
 
 // src/render/apply.ts
 import {
@@ -18168,7 +18393,7 @@ function renderProfile(repo, profile, now, renderer = claudeCodeRenderer, sessio
   };
   return applyRender(repo.git, renderer.plan(profile, env), {
     ...now ? { now } : {},
-    ...session ? { user: session.user } : {}
+    ...session?.user ? { user: session.user } : {}
   });
 }
 function committedAgentsMd(root) {
@@ -18233,7 +18458,7 @@ function codexMcpTempa(ctx) {
   }
 }
 function renderSession(ctx, harness) {
-  if (harness === "claude-code") return void 0;
+  if (harness === "claude-code") return { env: { userContentOn: userContentVariables(ctx) } };
   const tempaPath = harness === "codex" ? codexMcpTempa(ctx) : void 0;
   const trust = harness === "codex" ? codexHookTrust(ctx) : void 0;
   const tempaHome = ctx.tempaHome !== join19(ctx.home, ".tempa") ? ctx.tempaHome : void 0;
@@ -18323,6 +18548,7 @@ import { join as join23 } from "node:path";
 import { createHash as createHash7 } from "node:crypto";
 import { appendFileSync, readFileSync as readFileSync10, readdirSync as readdirSync6, rmSync as rmSync10, statSync as statSync5, writeFileSync as writeFileSync2 } from "node:fs";
 import { join as join21 } from "node:path";
+import { setTimeout as sleep } from "node:timers/promises";
 function sessionFile(ctx, sessionId) {
   const safe = /^[A-Za-z0-9_-]{1,128}$/.test(sessionId) ? sessionId : createHash7("sha256").update(sessionId).digest("hex");
   return join21(ctx.tempaHome, "sessions", `${safe}.json`);
@@ -18371,7 +18597,7 @@ function writeLastEvent(ctx, sessionId, event2) {
 var CLAIM_WINDOW_MS = 1e4;
 function claimEvent(ctx, key) {
   const dir = join21(ctx.tempaHome, "sessions");
-  const path = join21(dir, `${createHash7("sha256").update(key).digest("hex")}.claim`);
+  const path = claimFile(ctx, key);
   const take = () => writeFileSync2(path, `${new Date(ctx.now()).toISOString()}
 `, { flag: "wx", mode: 384 });
   try {
@@ -18384,11 +18610,50 @@ function claimEvent(ctx, key) {
   }
   try {
     if (Date.now() - statSync5(path).mtimeMs <= CLAIM_WINDOW_MS) return false;
+    rmSync10(answerFile(ctx, key), { force: true });
     rmSync10(path, { force: true });
     take();
     return true;
   } catch {
     return false;
+  }
+}
+function claimFile(ctx, key) {
+  return join21(ctx.tempaHome, "sessions", `${createHash7("sha256").update(key).digest("hex")}.claim`);
+}
+function answerFile(ctx, key) {
+  return claimFile(ctx, key).replace(/\.claim$/, ".answer");
+}
+var ANSWER_POLL_MS = 20;
+async function answerOnce(ctx, once, answer) {
+  if (once.key === void 0) return answer();
+  const key = once.key;
+  if (!claimEvent(ctx, key)) return once.gate ? winnersAnswer(ctx, key) : once.lost;
+  let output;
+  try {
+    output = await answer();
+  } catch (err2) {
+    recordAnswer(ctx, key, { output: null, failed: err2.message });
+    throw err2;
+  }
+  recordAnswer(ctx, key, { output: output ?? null });
+  return output;
+}
+function recordAnswer(ctx, key, answer) {
+  try {
+    writeJsonAtomic(answerFile(ctx, key), answer, { mode: 384, dirMode: 448 });
+  } catch {
+  }
+}
+async function winnersAnswer(ctx, key) {
+  const giveUpAt = ctx.deadlineAt ?? Date.now() + CLAIM_WINDOW_MS;
+  for (; ; ) {
+    const answer = readJsonLenient(answerFile(ctx, key));
+    if (answer?.failed !== void 0)
+      throw new Error(`the Tempa hook that took this event failed: ${answer.failed}`);
+    if (answer) return answer.output ?? void 0;
+    if (Date.now() >= giveUpAt) throw new Error("the Tempa hook that took this event did not answer in time");
+    await sleep(ANSWER_POLL_MS);
   }
 }
 function pruneSessions(ctx, maxAgeMs = 7 * 864e5) {
@@ -18444,7 +18709,7 @@ function remaining(ctx, token2) {
   return Date.parse(token2.expires_at) - ctx.now();
 }
 async function telemetryToken(ctx, repo, options = {}) {
-  const login2 = loginForRemote(ctx, repo);
+  const login2 = requireLoginForRemote(ctx, repo);
   const home2 = !login2 || login2.endpoint === defaultEndpoint(ctx);
   const tenant = login2?.tenant;
   const owner = home2 ? tenant === defaultTenant(ctx) ? void 0 : tenant : `${tenant}@${login2?.endpoint}`;
@@ -18605,6 +18870,10 @@ async function flush(ctx, options = {}) {
   }
   const unsent = [];
   for (const [repo, records] of groups) {
+    if (isRootOnly(ctx, remoteKey(repo || null))) {
+      result.dropped += records.length;
+      continue;
+    }
     let sentInGroup = 0;
     try {
       const token2 = await telemetryToken(ctx, repo || null, { timeoutMs: options.timeoutMs ?? 3e3 });
@@ -18675,6 +18944,7 @@ function afterSync(ctx, info2) {
   if (report?.restored.length) {
     emit(ctx, "render.drift", { files: report.restored.length, repo: repo.repo ?? "" }, options);
   }
+  if (result.tenant?.how === "unregistered") return [];
   const warning = configureClaude(ctx, result.profile);
   return warning ? [warning] : [];
 }
@@ -23927,6 +24197,11 @@ function pypiPackage(parsed) {
   if (parsed.executable === "pip" && parsed.subcommand === "install") return firstArgument;
   return void 0;
 }
+function packageBaseName(requirement) {
+  const unquoted = requirement.trim().replace(/["']/g, "");
+  return unquoted.split(/[[=<>!~;@\s]/, 1)[0] ?? "";
+}
+var pypiUnreachableReason = (pkg) => `Tempa could not reach PyPI to check the age of package '${pkg}'. Try again later.`;
 function pythonJson(value) {
   if (Array.isArray(value)) return `[${value.map(pythonJson).join(", ")}]`;
   if (value && typeof value === "object") {
@@ -24024,8 +24299,10 @@ var Run = class {
   }
   needsServer = false;
   input(parsed, locations) {
-    if (pypiPackage(parsed)) this.needsServer = true;
-    return buildInput(this.event, parsed, locations);
+    const input = buildInput(this.event, parsed, locations);
+    if (!pypiPackage(parsed)) return input;
+    this.needsServer = true;
+    return { ...input, pypi_metadata: null };
   }
   /** A command is only as allowed as its least-decided segment. */
   evaluate(parsed) {
@@ -24067,6 +24344,12 @@ var Run = class {
     } else {
       const input = this.input(parsed, locations);
       let decisions = this.evaluator.bundleDecisions(this.event.enabled_bundles, input);
+      const pkg = pypiPackage(parsed);
+      if (pkg)
+        decisions = [
+          ...decisions.filter((d) => d.action !== "allow"),
+          { action: "deny", reason: pypiUnreachableReason(packageBaseName(pkg)) }
+        ];
       if (parsed.executable !== "cd" && locations.some((l) => l.outside))
         decisions = decisions.filter((d) => d.action !== "allow");
       if (parsed.sensitive_assignment) decisions = decisions.filter((d) => d.action !== "allow");
@@ -24715,6 +24998,27 @@ function blockReason(findings) {
   return `Tempa blocked this prompt: it looks like it contains ${what}. Remove it (use an environment variable or a secret store for credentials, and leave personal data out) and send the prompt again.`;
 }
 
+// src/hook/when-denied.ts
+var WAIVABLE_POLICY = /^(tempa\/default-decision|[a-z0-9][a-z0-9_-]*)$/;
+var waivable = (policyIds) => policyIds.length > 0 && policyIds.every((id) => WAIVABLE_POLICY.test(id));
+function nextStep2(policyIds, where) {
+  const who = where.node ? `the Tempa admins of ${where.node}` : "your Tempa admins";
+  const web = where.webUrl && isSecureUrl(where.webUrl) ? where.webUrl.replace(/\/+$/, "") : void 0;
+  if (waivable(policyIds)) {
+    return web ? `Blocks legitimate work? Ask for an exception at ${web}/me/decisions (${who} decide).` : `Blocks legitimate work? Ask ${who} for an exception.`;
+  }
+  return web ? `Questions? Ask ${who}, or read ${web}/docs/when-tempa-says-no.` : `Questions? Ask ${who}.`;
+}
+var MAX_LOGGED_REASON = 200;
+var GONE = "\u2026";
+function loggedReason(reason) {
+  const text = (reason ?? "").trim();
+  if (!text || findSecrets(text).length) return void 0;
+  const kept = text.replace(/\b[a-z][a-z0-9+.-]*:\/\/\S+/gi, GONE).replace(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g, GONE).replace(/"[^"\n]*"|`[^`\n]*`|(?<!\w)'[^'\n]*'(?!\w)/g, GONE).replace(/[^\s…()<>,;]*[/\\][^\s…()<>,;:]*/g, GONE).replace(/\s+/g, " ").trim();
+  if (!kept) return void 0;
+  return kept.length > MAX_LOGGED_REASON ? `${kept.slice(0, MAX_LOGGED_REASON - 1)}${GONE}` : kept;
+}
+
 // src/hook/rules.ts
 var sanitisedMcpName = (name2) => name2.replace(/[^A-Za-z0-9_]/g, "_");
 function profileMcp(mcp2, profile) {
@@ -24757,6 +25061,7 @@ var OFFLINE_WHY = {
   rejected: "Tempa control plane rejected the decision request (it may be older than this CLI)",
   "server-error": "Tempa control plane failed on the decision request"
 };
+var OFFLINE_FIX = "Your organisation blocks what Tempa cannot check. Try again once the control plane answers; 'tempa doctor' says what is wrong.";
 function offlineDecision(profile, tool, table = CLAUDE_CODE_TOOLS, cause = "unreachable") {
   const offline = profile.offline ?? { allow_tools: [], default_decision: "ask" };
   const name2 = tool.name;
@@ -24770,7 +25075,7 @@ function offlineDecision(profile, tool, table = CLAUDE_CODE_TOOLS, cause = "unre
     case "allow":
       return { decision: "allow", reason };
     case "deny":
-      return { decision: "deny", reason: `${reason} block ${name2}` };
+      return { decision: "deny", reason: `${reason}: ${name2} is blocked (fail mode closed). ${OFFLINE_FIX}` };
     default:
       return { decision: "ask", reason: `${reason}: confirm ${name2}` };
   }
@@ -24928,7 +25233,13 @@ var SESSION_START_TIMEOUT_MS = 3e3;
 var MODULE_DOWNLOAD_TIMEOUT_MS = 2e3;
 var SIGN_IN_CHECK_MS = 1500;
 var HEARTBEAT_EVERY_MS = 10 * 6e4;
+var AFTER_DECIDE_MS = 300;
 function decideTimeoutMs(ctx, fallback = DEFAULT_DECIDE_TIMEOUT_MS) {
+  const wanted = configuredDecideTimeoutMs(ctx, fallback);
+  if (ctx.deadlineAt === void 0) return wanted;
+  return Math.max(1, Math.min(wanted, ctx.deadlineAt - Date.now() - AFTER_DECIDE_MS));
+}
+function configuredDecideTimeoutMs(ctx, fallback) {
   const fromEnv = Number(ctx.env.TEMPA_DECIDE_TIMEOUT_MS);
   if (Number.isFinite(fromEnv) && fromEnv > 0) return fromEnv;
   try {
@@ -25022,7 +25333,8 @@ var DECISIONS2 = /* @__PURE__ */ new Set(["allow", "deny", "ask", "guidance", "d
 async function decide(ctx, body2, timeoutMs, login2) {
   const request = authedRequest(ctx, "/decide", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    // Strict mode's root rule: decided with the tenant's root profile, as the session's profile is.
+    headers: { "content-type": "application/json", ...rootOnlyHeaders(login2) },
     body: JSON.stringify(body2),
     timeoutMs,
     ...login2 ? { tenant: login2.tenant, endpoint: login2.endpoint } : {}
@@ -25069,11 +25381,14 @@ function cacheAgeSeconds(ctx, repo) {
   }
 }
 function decisionEvent(ctx, payload, repo, attributes) {
+  const said = attributes.decision === "deny" || attributes.decision === "ask";
+  const reason = said && attributes.toolDetails ? loggedReason(attributes.reason) : void 0;
   emit(
     ctx,
     "policy.decision",
     {
       decision: attributes.decision,
+      ...reason ? { decision_reason: reason } : {},
       policy_ids: attributes.policy_ids,
       bundle_version: attributes.bundle_version,
       tool_name: payload.tool_name ?? "",
@@ -25156,6 +25471,8 @@ async function onSessionStart(ctx, d, payload) {
     if (changes) warnings.push(changes);
     const ambiguous = ambiguityWarning(repo.repo ?? "This repo", result.tenant);
     if (ambiguous) warnings.push(`Tempa: ${ambiguous}`);
+    const rootRule = rootRuleNotice(repo.repo ?? "This directory", result.tenant);
+    if (rootRule) warnings.push(`Tempa: ${rootRule} 'tempa doctor' says more.`);
     const update = rememberedCliUpdate(ctx, loginKey(result.meta.endpoint, result.meta.tenant));
     if (update) warnings.push(updateNotice(update, d.harness));
     const conflicts = report?.conflicts ?? [];
@@ -25247,6 +25564,18 @@ function fileReach(ctx, payload, tool) {
   const paths = toolPaths(tool.name, tool.input ?? {});
   return pathReach(paths, { cwd, roots, home: ctx.home, tempaHome: ctx.tempaHome });
 }
+function webUrl(ctx, repo) {
+  try {
+    return cachedDiscovery(ctx, repoEndpoint(ctx, repo.key))?.document.web_url;
+  } catch {
+    return void 0;
+  }
+}
+function withNextStep(ctx, decision, repo, profile) {
+  if (decision.decision !== "deny" && decision.decision !== "ask") return decision;
+  const where = { webUrl: webUrl(ctx, repo), node: profile?.node.id };
+  return { ...decision, next_step: nextStep2(decision.policy_ids, where) };
+}
 var TEMPA_HOME_REASON = "Tempa: Tempa's own folder (~/.tempa: your login tokens and settings) is off limits to the agent.";
 function tempaHomeDenied(ctx, d, payload, tool) {
   const repo = sessionRepo(ctx, payload);
@@ -25285,10 +25614,11 @@ async function onPreToolUse(ctx, d, payload) {
   }
   const answer = (policies, attributes) => {
     const decision2 = tool.kind === "shell" ? waive(policies, profile?.policies.exceptions, shellCommandOf(tool.input ?? {})) : policies;
-    decisionEvent(ctx, payload, repo, { ...decision2, started, ...attributes });
+    const toolDetails = profile?.telemetry.log_tool_details ?? false;
+    decisionEvent(ctx, payload, repo, { ...decision2, started, toolDetails, ...attributes });
     if (decision2.decision === "ask" && d.asksItself?.({ ctx, payload, tool, profile, repo }))
       return d.preToolUse(void 0, void 0, decision2.guidance);
-    return d.respond(decision2, "tool.pre");
+    return d.respond(withNextStep(ctx, decision2, repo, profile), "tool.pre");
   };
   const evaluated = profile && tool.kind === "shell" ? await localShellDecision(ctx, profile, event(ctx, d, payload, repo, profile)) : void 0;
   const fromModule = evaluated?.ok ? { source: "local", module: evaluated.module, evaluator: evaluated.evaluator } : void 0;
@@ -25590,14 +25920,23 @@ var CODEX_HOOK = {
   layout: CODEX_LAYOUT,
   asksItself: codexAsksItself
 };
+var PER_CALL = {
+  PreToolUse: "tool_use_id",
+  PostToolUse: "tool_use_id",
+  UserPromptSubmit: "turn_id"
+};
 function codexEventKey(payload) {
   const raw = payload;
-  const id = str(raw.tool_use_id) ?? str(raw.turn_id) ?? payload.source ?? payload.reason ?? "";
-  return JSON.stringify(["codex", payload.session_id, payload.hook_event_name, id]);
+  const own2 = PER_CALL[payload.hook_event_name];
+  const id = own2 ? str(raw[own2]) : str(raw.turn_id) ?? payload.source ?? payload.reason ?? "";
+  if (id === void 0) return void 0;
+  const call = JSON.stringify([payload.tool_name ?? "", payload.tool_input ?? null, payload.prompt ?? null]);
+  const digest = createHash10("sha256").update(call).digest("hex").slice(0, 16);
+  return JSON.stringify(["codex", payload.session_id, payload.hook_event_name, id, digest]);
 }
 function handleCodexHook(ctx, payload) {
-  if (!claimEvent(ctx, codexEventKey(payload))) return Promise.resolve(void 0);
-  return handleHook(ctx, payload, CODEX_HOOK);
+  const once = { key: codexEventKey(payload), gate: GATES.has(payload.hook_event_name), lost: void 0 };
+  return answerOnce(ctx, once, () => handleHook(ctx, payload, CODEX_HOOK));
 }
 
 // src/harness/antigravity-rules.ts
@@ -25967,7 +26306,7 @@ function planAntigravity(profile, env) {
 var antigravityRenderer = { id: "antigravity", plan: planAntigravity };
 
 // src/harness/antigravity.ts
-import { createHash as createHash10 } from "node:crypto";
+import { createHash as createHash11 } from "node:crypto";
 import { homedir } from "node:os";
 
 // src/mcp/workspace.ts
@@ -26153,7 +26492,7 @@ function parseAntigravityPayload(text, hint = {}) {
   if (call !== void 0 && (!isObject3(call) || !str2(call.name)))
     throw new PayloadError("toolCall has no name");
   const index = num(value.stepIdx) ?? num(value.invocationNum) ?? num(value.executionNum);
-  const turn = createHash10("sha256").update(JSON.stringify([num(value.initialNumSteps) ?? null, str2(value.lastUserInput) ?? ""])).digest("hex").slice(0, 16);
+  const turn = createHash11("sha256").update(JSON.stringify([num(value.initialNumSteps) ?? null, str2(value.lastUserInput) ?? ""])).digest("hex").slice(0, 16);
   const error2 = str2(value.error);
   return {
     hook_event_name: eventName(event2, value),
@@ -26273,7 +26612,7 @@ function antigravityEventKey(payload) {
   const event2 = payload.antigravity_event;
   if (payload.antigravity_index === void 0 && event2 !== "SessionStart") return void 0;
   const call = JSON.stringify([payload.tool_name ?? "", payload.tool_input ?? null]);
-  const digest = createHash10("sha256").update(call).digest("hex").slice(0, 16);
+  const digest = createHash11("sha256").update(call).digest("hex").slice(0, 16);
   return JSON.stringify([
     "antigravity",
     payload.session_id,
@@ -26313,13 +26652,18 @@ async function handleAntigravityHook(ctx, payload) {
   if ((event2 === "SessionStart" || event2 === "PreInvocation") && payload.antigravity_workspace)
     recordHookWorkspace(ctx, payload.antigravity_workspace);
   if (event2 === "SessionStart") recordAntigravityHook(ctx, payload.session_id);
-  const key = antigravityEventKey(payload);
-  if (key && !claimEvent(ctx, key)) return noObjection(event2);
-  const answered = event2 === "PreToolUse" || event2 === "PreInvocation";
-  if (!answered) reportAntigravityTelemetry(ctx, payload, {}, antigravityVersion(ctx));
-  const answer = await answerAntigravityHook(ctx, payload);
-  if (answered) reportAntigravityTelemetry(ctx, payload, answer, antigravityVersion(ctx));
-  return answer;
+  const once = {
+    key: antigravityEventKey(payload),
+    gate: GATES.has(payload.hook_event_name),
+    lost: noObjection(event2)
+  };
+  return answerOnce(ctx, once, async () => {
+    const answered = event2 === "PreToolUse" || event2 === "PreInvocation";
+    if (!answered) reportAntigravityTelemetry(ctx, payload, {}, antigravityVersion(ctx));
+    const answer = await answerAntigravityHook(ctx, payload);
+    if (answered) reportAntigravityTelemetry(ctx, payload, answer, antigravityVersion(ctx));
+    return answer;
+  });
 }
 async function answerAntigravityHook(ctx, payload) {
   const event2 = payload.antigravity_event;
@@ -26337,7 +26681,7 @@ async function answerAntigravityHook(ctx, payload) {
 }
 
 // src/harness/copilot.ts
-import { createHash as createHash11 } from "node:crypto";
+import { createHash as createHash12 } from "node:crypto";
 var COPILOT_EVENTS = {
   sessionStart: "SessionStart",
   userPromptSubmitted: "UserPromptSubmit",
@@ -26446,7 +26790,7 @@ function toolInput(value) {
   return parsed;
 }
 function fallbackSessionId(cwd) {
-  return `copilot-${createHash11("sha256").update(cwd).digest("hex").slice(0, 32)}`;
+  return `copilot-${createHash12("sha256").update(cwd).digest("hex").slice(0, 32)}`;
 }
 function optional(key, value) {
   return value === void 0 ? {} : { [key]: value };
@@ -26565,7 +26909,7 @@ function eventKey(payload) {
     hook2.tool_input ?? null,
     hook2.prompt ?? null
   ]);
-  return createHash11("sha256").update(text).digest("hex");
+  return createHash12("sha256").update(text).digest("hex");
 }
 function reshape(output, from, to, event2) {
   if (from === to || !output) return output;
@@ -26606,7 +26950,7 @@ function isCopilotPayload(raw) {
 }
 
 // src/harness/gemini.ts
-import { createHash as createHash12 } from "node:crypto";
+import { createHash as createHash13 } from "node:crypto";
 import { readFileSync as readFileSync15 } from "node:fs";
 import { join as join33 } from "node:path";
 var str4 = (value) => typeof value === "string" ? value : void 0;
@@ -26747,20 +27091,24 @@ function geminiDialect(version2, headless = false) {
 function geminiEventKey(payload) {
   const at = str4(payload.timestamp);
   if (!at) return void 0;
-  const call = JSON.stringify([payload.tool_name ?? "", payload.tool_input ?? null]);
-  const digest = createHash12("sha256").update(call).digest("hex").slice(0, 16);
+  const call = JSON.stringify([payload.tool_name ?? "", payload.tool_input ?? null, payload.prompt ?? null]);
+  const digest = createHash13("sha256").update(call).digest("hex").slice(0, 16);
   return JSON.stringify(["gemini-cli", payload.session_id, payload.hook_event_name, at, digest]);
 }
 function handleGeminiHook(ctx, payload) {
-  const key = geminiEventKey(payload);
-  if (key && !claimEvent(ctx, key)) return Promise.resolve(void 0);
-  return handleHook(ctx, payload, geminiDialect(geminiVersion(ctx), geminiHeadless(ctx)));
+  const once = { key: geminiEventKey(payload), gate: GATES.has(payload.hook_event_name), lost: void 0 };
+  return answerOnce(
+    ctx,
+    once,
+    () => handleHook(ctx, payload, geminiDialect(geminiVersion(ctx), geminiHeadless(ctx)))
+  );
 }
 
 // src/harness/registry.ts
 var claudeCodeAdapter = {
   descriptor: CLAUDE_CODE,
   parsePayload,
+  hookEvent: (payload) => payload.hook_event_name,
   toEvent: (payload, ctx) => isKnownEvent(payload.hook_event_name) ? toEvent(payload, ctx) : void 0,
   respond,
   // Copilot also runs hooks from `.claude/settings*.json`: such a run answers as Copilot, once.
@@ -26770,6 +27118,7 @@ var claudeCodeAdapter = {
 var copilotAdapter = {
   descriptor: COPILOT,
   parsePayload: parseCopilotPayload,
+  hookEvent: (payload) => payload.hook.hook_event_name,
   toEvent: (payload, ctx) => isHandledCopilotEvent(payload) ? toEvent(payload.hook, ctx, copilotTools(payload.shape)) : void 0,
   respond: (decision, on) => copilotRespond("camel", decision, on),
   handle: handleCopilotHook,
@@ -26778,6 +27127,7 @@ var copilotAdapter = {
 var codexAdapter = {
   descriptor: CODEX,
   parsePayload: parseCodexPayload,
+  hookEvent: (payload) => payload.hook_event_name,
   toEvent: (payload, ctx) => isKnownEvent(payload.hook_event_name) ? toEvent(payload, ctx, CODEX_TOOLS) : void 0,
   respond: codexRespond,
   handle: handleCodexHook,
@@ -26786,6 +27136,7 @@ var codexAdapter = {
 var geminiAdapter = {
   descriptor: GEMINI_CLI,
   parsePayload: parseGeminiPayload,
+  hookEvent: (payload) => payload.hook_event_name,
   toEvent: (payload, ctx) => isKnownEvent(payload.hook_event_name) ? toEvent(payload, ctx, GEMINI_CLI_TOOLS) : void 0,
   respond: geminiRespond,
   handle: handleGeminiHook,
@@ -26794,6 +27145,7 @@ var geminiAdapter = {
 var antigravityAdapter = {
   descriptor: ANTIGRAVITY,
   parsePayload: parseAntigravityPayload,
+  hookEvent: (payload) => payload.hook_event_name,
   toEvent: (payload, ctx) => isKnownEvent(payload.hook_event_name) ? toEvent(payload, ctx, ANTIGRAVITY_TOOLS) : void 0,
   respond: antigravityRespond,
   handle: handleAntigravityHook,
@@ -27277,6 +27629,7 @@ function createContext(overrides = {}) {
     runtime: currentRuntime(),
     parentPid: process.ppid,
     hasTerminal: () => controllingTerminal(platform),
+    startedAt: Math.round(performance.timeOrigin),
     ...overrides
   };
 }
@@ -27995,6 +28348,15 @@ async function runChecks(ctx, deps) {
   );
   const cached2 = readCachedProfile(ctx, repo.key);
   const where = repo.repo ?? (repo.git ? "this repo (no remote)" : "this directory");
+  const rootOnly = repoLogin?.rootOnly === true;
+  if (rootOnly) {
+    add({
+      name: "Tenant",
+      status: "warn",
+      detail: `${where} is not registered in any of your tenants (or in several, and you did not choose); strict mode applies only the top-level rules of ${repoLogin?.tenant} here: no team's, no MCP tools, no telemetry`,
+      fix: "ask the platform team of its tenant to register it, then run 'tempa sync'; registered in several: 'tempa sync --tenant <id>' in the repo"
+    });
+  }
   if (!cached2 || cached2.meta.endpoint !== endpoint) {
     add({ name: "Profile", status: "fail", detail: `no cached profile for ${where}`, fix: "tempa sync" });
   } else {
@@ -28069,6 +28431,12 @@ async function runChecks(ctx, deps) {
       name: "Telemetry",
       status: "warn",
       detail: `configured for ${env.OTEL_EXPORTER_OTLP_ENDPOINT}, token not checked`
+    });
+  } else if (rootOnly) {
+    add({
+      name: "Telemetry",
+      status: "pass",
+      detail: "none for this repo: strict mode's root rule sends none"
     });
   } else {
     try {
@@ -28222,6 +28590,16 @@ async function handleCloudAgentHook(ctx, payload, loaded) {
 }
 
 // src/commands/hook.ts
+async function inTime(ctx, started, deadline, answer) {
+  if (!deadline) return answer(ctx);
+  const endBy = started + deadline.ms;
+  setGitDeadline(endBy);
+  try {
+    return await byDeadline(() => answer({ ...ctx, deadlineAt: endBy }), endBy, deadline);
+  } finally {
+    if (Date.now() < endBy) setGitDeadline(void 0);
+  }
+}
 async function hook(ctx, args2) {
   rejectUnknown(args2, ["harness", "event", "bundle", "bundle-key"]);
   setFlagsFromString("--liftoff-only");
@@ -28234,6 +28612,8 @@ async function hook(ctx, args2) {
   if (!entry) throw new UsageError(`Unknown harness: ${harness} (known: ${known})`);
   if (bundle !== void 0 && harness !== "copilot")
     throw new UsageError("tempa hook --bundle is for the Copilot cloud agent (--harness copilot)");
+  const started = ctx.startedAt ?? Date.now();
+  const fail2 = bundle === void 0 ? entry.adapter?.fail : void 0;
   let out2;
   try {
     const stdin = await ctx.readStdin();
@@ -28251,17 +28631,24 @@ async function hook(ctx, args2) {
         parseBundleKey(pinned),
         payload.hook.session_id
       );
-      output = await handleCloudAgentHook(ctx, payload, loaded);
+      const deadline = hookDeadline("copilot", payload.hook.hook_event_name);
+      output = await inTime(ctx, started, deadline, (c) => handleCloudAgentHook(c, payload, loaded));
     } else {
       const adapter = entry.adapter;
       if (!adapter) throw new HarnessNotSupported(entry.descriptor);
-      output = await adapter.handle(ctx, adapter.parsePayload(stdin, event2 ? { event: event2 } : {}));
+      const payload = adapter.parsePayload(stdin, event2 ? { event: event2 } : {});
+      const deadline = hookDeadline(entry.descriptor.id, adapter.hookEvent(payload));
+      output = await inTime(ctx, started, deadline, (c) => adapter.handle(c, payload));
     }
     out2 = output === void 0 ? void 0 : JSON.stringify(output);
   } catch (err2) {
+    if (err2 instanceof HookDeadlineError && !err2.gate) {
+      ctx.io.stderr(`tempa: hook gave up (${err2.message})`);
+      if (fail2) ctx.io.stdout("{}");
+      return 0;
+    }
     const message = `hook failed (${err2.message}); blocking (fail closed)`;
     ctx.io.stderr(`tempa: ${message}`);
-    const fail2 = bundle === void 0 ? entry.adapter?.fail : void 0;
     if (!fail2) return 2;
     ctx.io.stdout(JSON.stringify(fail2(message, event2 ? { event: event2 } : {})));
     return 0;
@@ -28582,6 +28969,93 @@ function antigravityLockdownPack(o) {
   ];
 }
 
+// src/lockdown/claude-code.ts
+var CLAUDE_MANAGED_DIRS = {
+  darwin: "/Library/Application Support/ClaudeCode",
+  linux: "/etc/claude-code",
+  win32: "C:\\Program Files\\ClaudeCode"
+};
+var CLAUDE_MDM_DOMAIN = "com.anthropic.claudecode";
+var CLAUDE_REGISTRY_KEY = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\ClaudeCode";
+var CLAUDE_REGISTRY_VALUE = "Settings";
+function helperLine(tempaPath, windows) {
+  return windows ? `"${tempaPath}" otel-headers` : `${shellQuote(tempaPath)} otel-headers`;
+}
+function claudeManagedSettings(o, windows = false) {
+  const id = `${o.plugin}@${o.marketplace}`;
+  const source = { source: "github", repo: o.marketplaceRepo };
+  const onWindows = windows && o.tempaPathWindows !== void 0;
+  const tempaPath = onWindows ? o.tempaPathWindows : o.tempaPath;
+  const endpoint = o.otelEndpoint;
+  return {
+    // Only hooks the organisation deploys run: the force-enabled plugin's are among them.
+    ...o.managedHooksOnly ? { allowManagedHooksOnly: true } : {},
+    // No mode that runs tools without asking past Tempa's guardrails.
+    permissions: { disableBypassPermissionsMode: "disable" },
+    // Force-enabled: installed at session start, and a developer's own `false` does not stop it loading.
+    enabledPlugins: { [id]: true },
+    extraKnownMarketplaces: { [o.marketplace]: { source, autoUpdate: true } },
+    ...o.strictMarketplaces ? { strictKnownMarketplaces: [source] } : {},
+    ...o.orgUuids.length ? { forceLoginOrgUUID: o.orgUuids } : {},
+    // Telemetry to Tempa that a developer cannot point elsewhere; the headers helper needs tempa on the machine.
+    ...endpoint !== void 0 && tempaPath !== void 0 ? { env: otlpEnv(endpoint), otelHeadersHelper: helperLine(tempaPath, onWindows) } : {}
+  };
+}
+function xml(value) {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function plistValue(value, indent) {
+  if (typeof value === "boolean") return [`${indent}<${value}/>`];
+  if (typeof value === "string") return [`${indent}<string>${xml(value)}</string>`];
+  if (Array.isArray(value))
+    return [
+      `${indent}<array>`,
+      ...value.flatMap((item) => plistValue(item, `${indent}	`)),
+      `${indent}</array>`
+    ];
+  if (value && typeof value === "object") {
+    const entries = Object.entries(value).flatMap(([key, inner]) => [
+      `${indent}	<key>${xml(key)}</key>`,
+      ...plistValue(inner, `${indent}	`)
+    ]);
+    return [`${indent}<dict>`, ...entries, `${indent}</dict>`];
+  }
+  throw new Error(`no plist form for ${String(value)}`);
+}
+function claudePlist(settings) {
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">',
+    '<plist version="1.0">',
+    ...plistValue(settings, ""),
+    "</plist>",
+    ""
+  ].join("\n");
+}
+function claudeReg(settings) {
+  const quote2 = (value) => `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+  return [
+    "Windows Registry Editor Version 5.00",
+    "",
+    `[${CLAUDE_REGISTRY_KEY}]`,
+    `${quote2(CLAUDE_REGISTRY_VALUE)}=${quote2(JSON.stringify(settings))}`,
+    ""
+  ].join("\r\n");
+}
+function claudeLockdownPack(o) {
+  const settings = claudeManagedSettings(o);
+  const windows = claudeManagedSettings(o, true);
+  const json2 = (value) => `${JSON.stringify(value, null, 2)}
+`;
+  const differs = json2(windows) !== json2(settings);
+  return [
+    { path: "managed-settings.json", content: json2(settings) },
+    ...differs ? [{ path: "windows/managed-settings.json", content: json2(windows) }] : [],
+    { path: `mdm/${CLAUDE_MDM_DOMAIN}.plist`, content: claudePlist(settings) },
+    { path: "mdm/ClaudeCode.reg", content: claudeReg(windows) }
+  ];
+}
+
 // src/lockdown/codex.ts
 var CODEX_REQUIREMENTS_PATHS = {
   posix: "/etc/codex/requirements.toml",
@@ -28631,7 +29105,7 @@ function codexRequirements(o) {
   return `${lines.join("\n").replace(/\n+$/, "")}
 `;
 }
-function xml(value) {
+function xml2(value) {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 function codexPlist(requirements) {
@@ -28641,7 +29115,7 @@ function codexPlist(requirements) {
     '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">',
     '<plist version="1.0">',
     "<dict>",
-    `	<key>${xml(CODEX_MDM_KEY)}</key>`,
+    `	<key>${xml2(CODEX_MDM_KEY)}</key>`,
     `	<string>${encoded}</string>`,
     "</dict>",
     "</plist>",
@@ -28733,12 +29207,12 @@ function mdmValues(settings) {
   }
   return out2;
 }
-function xml2(value) {
+function xml3(value) {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 function macosPlist(settings) {
-  const entries = mdmValues(settings).map(([key, value]) => `	<key>${xml2(key)}</key>
-	<string>${xml2(value)}</string>`).join("\n");
+  const entries = mdmValues(settings).map(([key, value]) => `	<key>${xml3(key)}</key>
+	<string>${xml3(value)}</string>`).join("\n");
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">',
@@ -28905,6 +29379,9 @@ function geminiLockdownPack(o) {
 
 // src/commands/lockdown.ts
 var SYSTEM_DIRS = [
+  CLAUDE_MANAGED_DIRS.darwin,
+  CLAUDE_MANAGED_DIRS.linux,
+  CLAUDE_MANAGED_DIRS.win32,
   "/etc/github-copilot",
   "/Library/Application Support/GitHubCopilot",
   "/Library/Managed Preferences",
@@ -28917,6 +29394,7 @@ var SYSTEM_DIRS = [
   GEMINI_SYSTEM_DIRS.win32
 ];
 var NAMES = {
+  "claude-code": "Claude Code",
   copilot: "Copilot",
   codex: "Codex",
   gemini: "Gemini CLI",
@@ -28940,19 +29418,25 @@ async function lockdown(ctx, args2) {
     "strict-marketplaces",
     "only-tempa-mcp",
     "strict-extensions",
-    "allow-mcp"
+    "allow-mcp",
+    "org-uuid",
+    "allow-other-hooks"
   ]);
   const [harness] = args2.positionals;
   if (!isHarness(harness))
-    throw new UsageError("tempa lockdown supports copilot, codex, gemini and antigravity");
+    throw new UsageError("tempa lockdown supports claude-code, copilot, codex, gemini and antigravity");
   if (harness !== "gemini" && args2.options["strict-extensions"] !== void 0)
     throw new UsageError("--strict-extensions is for tempa lockdown gemini; use --strict-marketplaces");
   if (harness !== "antigravity" && args2.options["allow-mcp"] !== void 0)
     throw new UsageError("--allow-mcp is for tempa lockdown antigravity; use --only-tempa-mcp");
+  for (const option of ["org-uuid", "allow-other-hooks"])
+    if (harness !== "claude-code" && args2.options[option] !== void 0)
+      throw new UsageError(`--${option} is for tempa lockdown claude-code`);
   const tempaPath = stringOption(args2, "tempa-path");
-  if (!tempaPath || !isAbsolute4(tempaPath))
+  const optional3 = harness === "claude-code" && args2.options["no-telemetry"] === true && tempaPath === void 0;
+  if (!optional3 && (!tempaPath || !isAbsolute4(tempaPath)))
     throw new UsageError(
-      `tempa lockdown ${harness} needs --tempa-path: the absolute path of tempa on every managed machine`
+      `tempa lockdown ${harness} needs --tempa-path: the absolute path of tempa on every managed machine` + (harness === "claude-code" ? " (for the telemetry headers helper; none with --no-telemetry)" : "")
     );
   const asked = stringOption(args2, "out") ?? `tempa-${harness}-lockdown`;
   const out2 = resolve12(ctx.cwd, asked);
@@ -28962,6 +29446,8 @@ async function lockdown(ctx, args2) {
     throw new UsageError(
       `${out2} is where ${NAMES[harness]} reads managed settings; write the pack elsewhere and deploy it`
     );
+  if (harness === "claude-code") return lockdownClaudeCode(ctx, args2, tempaPath, out2);
+  if (tempaPath === void 0) throw new UsageError(`tempa lockdown ${harness} needs --tempa-path`);
   if (harness === "codex") return lockdownCodex(ctx, args2, tempaPath, out2);
   if (harness === "gemini") return lockdownGemini(ctx, args2, tempaPath, out2);
   if (harness === "antigravity") return lockdownAntigravity(ctx, args2, tempaPath, asked, out2);
@@ -29004,6 +29490,60 @@ function writePack(out2, files) {
     mkdirSync4(dirname6(path), { recursive: true });
     writeFileAtomic(path, file.content, { newMode: 420 });
   }
+}
+var UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function orgUuids(value) {
+  if (value === void 0) return [];
+  return value.split(",").map((item) => {
+    const uuid2 = item.trim();
+    if (!UUID.test(uuid2))
+      throw new UsageError(`--org-uuid takes organisation UUIDs from claude.ai's admin settings: ${item}`);
+    return uuid2;
+  });
+}
+function lockdownClaudeCode(ctx, args2, tempaPath, out2) {
+  if (args2.options["only-tempa-mcp"] !== void 0)
+    throw new UsageError(
+      "--only-tempa-mcp is not in Claude Code's pack: how allowedMcpServers matches a plugin's server is not documented; add allowManagedMcpServersOnly and allowedMcpServers yourself"
+    );
+  const windows = stringOption(args2, "tempa-path-windows");
+  if (windows !== void 0 && (!win32.isAbsolute(windows) || /["$`%]/.test(windows)))
+    throw new UsageError(
+      "--tempa-path-windows needs the absolute Windows path of tempa, without quotes, $, ` or %, for example C:\\Tools\\tempa.exe"
+    );
+  const endpoint = args2.options["no-telemetry"] ? void 0 : stringOption(args2, "otel-endpoint") ?? cachedDiscovery(ctx, resolveEndpoint(ctx).endpoint)?.document.otel_endpoint;
+  const files = claudeLockdownPack({
+    ...tempaPath ? { tempaPath } : {},
+    ...windows ? { tempaPathWindows: windows } : {},
+    ...endpoint ? { otelEndpoint: endpoint } : {},
+    marketplaceRepo: CLAUDE_CODE_PLUGIN_REPO,
+    marketplace: "devleaps",
+    plugin: "tempa",
+    managedHooksOnly: args2.options["allow-other-hooks"] !== true,
+    strictMarketplaces: args2.options["strict-marketplaces"] === true,
+    orgUuids: orgUuids(stringOption(args2, "org-uuid"))
+  });
+  writePack(out2, files);
+  const { darwin, linux, win32: windowsDir } = CLAUDE_MANAGED_DIRS;
+  ctx.io.stdout(`Wrote the Claude Code lock-down pack to ${out2}:`);
+  for (const file of files) ctx.io.stdout(`  ${file.path}`);
+  if (!endpoint && !args2.options["no-telemetry"])
+    ctx.io.stdout("  (no telemetry: log in first, or pass --otel-endpoint, unless --no-telemetry)");
+  ctx.io.stdout("Deploy one form; with more than one, Claude Code uses the MDM form and ignores the file:");
+  ctx.io.stdout(
+    `  MDM: mdm/${CLAUDE_MDM_DOMAIN}.plist (a configuration profile for the ${CLAUDE_MDM_DOMAIN} domain) or mdm/ClaudeCode.reg (the ${CLAUDE_REGISTRY_VALUE} value under ${CLAUDE_REGISTRY_KEY})`
+  );
+  ctx.io.stdout(
+    `  File: ${darwin}/managed-settings.json, ${linux}/managed-settings.json or ${windowsDir}\\managed-settings.json${files.some((f) => f.path.startsWith("windows/")) ? " (from windows/managed-settings.json)" : ""}`
+  );
+  if (tempaPath && endpoint)
+    ctx.io.stdout(
+      `And install tempa at ${tempaPath} on every machine; the telemetry headers helper calls it there.`
+    );
+  ctx.io.stdout(
+    `Tempa wrote nothing outside this folder. See ${docsLink("install", "locking-claude-code-down")}.`
+  );
+  return 0;
 }
 function lockdownCodex(ctx, args2, tempaPath, out2) {
   if (args2.options["otel-endpoint"] !== void 0 || args2.options["no-telemetry"] !== void 0)
@@ -41651,8 +42191,9 @@ var Upstream = class {
         // `refresh`: the server refused the last token; a per-user endpoint's is renewed.
         body: JSON.stringify(force ? { ...request, refresh: true } : request),
         timeoutMs: 1e4,
-        // The repo's login (tenant, control plane): the endpoint is in its profile.
-        ...loginForRemote(this.ctx, this.repo)
+        // The repo's login (tenant, control plane): the endpoint is in its profile. None
+        // when strict mode holds the repo back: that throws before anything is asked.
+        ...requireLoginForRemote(this.ctx, this.repo)
       }));
     } catch (err2) {
       if (err2 instanceof HttpError && err2.status === 428) {
@@ -42383,7 +42924,8 @@ var TENANT_REASON = {
   registered: "the repo is registered there",
   ambiguous: "registered in several of your tenants",
   default: "your default tenant: no tenant registered this repo",
-  chosen: "chosen with --tenant"
+  chosen: "chosen with --tenant",
+  unregistered: "strict mode: its top-level rules only"
 };
 function rendererFor(args2) {
   const id = stringOption(args2, "harness") ?? "claude-code";
@@ -42428,6 +42970,8 @@ async function sync(ctx, args2) {
     ctx.io.stdout(`Tenant ${result.tenant.tenant} (${TENANT_REASON[result.tenant.how]})`);
   }
   if (result.tenant?.endpoint) ctx.io.stdout(`Endpoint ${result.tenant.endpoint} (chosen with --endpoint)`);
+  const rootRule = rootRuleNotice(repo.repo ?? "This directory", result.tenant);
+  if (rootRule) ctx.io.stdout(rootRule);
   const ambiguous = ambiguityWarning(repo.repo ?? "This repo", result.tenant);
   if (ambiguous) ctx.io.stderr(`tempa: ${ambiguous}`);
   ctx.io.stdout(`Signed with ${profile.signature?.key_id}, valid until ${profile.expires_at}`);
@@ -42565,6 +43109,9 @@ Commands:
                                Operators: publish a library pack (TEMPA_OPERATOR_TOKEN)
   library publish --partner DIR [--endpoint URL] [--tenant ID] [--visibility partner_clients|private]
                                Partner admins: publish your partner tenant's pack for its clients (your login)
+  lockdown claude-code --tempa-path PATH [--out DIR] [--strict-marketplaces] [--org-uuid UUID,...]
+                               Admins: write Claude Code's lock-down pack (managed settings: the plugin
+                               force-enabled, managed hooks only, telemetry; plist and .reg forms) into DIR
   lockdown copilot --tempa-path PATH [--out DIR] [--strict-marketplaces] [--only-tempa-mcp]
                                Admins: write GitHub Copilot's lock-down pack (managed settings, policy
                                hooks, MDM forms) into DIR to deploy; touches no managed settings
@@ -42603,7 +43150,7 @@ var COMMANDS = {
   config: { run: config, valued: ["endpoint", "tenant", "title", "name", "days"] },
   lockdown: {
     run: lockdown,
-    valued: ["tempa-path", "tempa-path-windows", "otel-endpoint", "out", "allow-mcp"]
+    valued: ["tempa-path", "tempa-path-windows", "otel-endpoint", "out", "allow-mcp", "org-uuid"]
   }
 };
 async function run2(argv, ctx) {
@@ -42641,6 +43188,7 @@ ${USAGE5}`);
 }
 
 // src/main.ts
+var REFRESH_SETTLE_MS = 1e3;
 async function main(argv) {
   const exitWhenDone = argv[0] === "hook" || argv[0] === "mcp";
   let code2;
@@ -42652,6 +43200,7 @@ async function main(argv) {
     code2 = 2;
   }
   if (exitWhenDone) {
+    await settleRefreshes(REFRESH_SETTLE_MS);
     process.exit(code2);
   }
   process.exitCode = code2;
